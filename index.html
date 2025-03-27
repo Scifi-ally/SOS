@@ -18,14 +18,14 @@
     outline: none;
 }
 :root {
-    --clr: #222327;
-    --primary: #ffffff;
-    --secondary: #333333;
-    --accent: #555555;
-    --light: #030202;
-    --light-gray: #2d2d2d;
-    --mid-gray: #404040;
-    --dark-gray: #888888;
+    --clr: #1a1c1f; /* Darker base color */
+    --primary: #ffffff; /* Bright text for contrast */
+    --secondary: #252628; /* Darker secondary */
+    --accent: #ff5555; /* Deeper red accent */
+    --light: #0f1113; /* Darker light tone */
+    --light-gray: #212325; /* Darker light gray */
+    --mid-gray: #2e3033; /* Darker mid gray */
+    --dark-gray: #666666; /* Muted gray for subtlety */
     --font-main: 'Helvetica Neue', Arial, sans-serif;
 }
 body {
@@ -613,7 +613,7 @@ body {
     color: var(--primary);
     transition: transform 0.5s ease;
 }
-.contact blobs-avatar:hover {
+.contact-item:hover .contact-avatar {
     transform: rotate(360deg);
 }
 .contact-info {
@@ -1023,6 +1023,65 @@ input:checked + .feature-slider:before {
     opacity: 0.8;
 }
 
+.sos-panel {
+    position: fixed;
+    top: -300px; /* Start off-screen */
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    z-index: 500;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--primary);
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.sos-panel.active {
+    transform: translateY(300px); /* Slide down to visible position */
+}
+.sos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--mid-gray);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.sos-header h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #ff4444;
+}
+.sos-close {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+.sos-close:hover {
+    transform: scale(1.2) rotate(90deg);
+    color: #ff4444;
+}
+.sos-close:active {
+    transform: scale(0.95);
+}
+.sos-content p {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+.sos-content strong {
+    color: #ff4444;
+}
+.sos-content button {
+    width: 100%;
+    margin-top: 15px;
+}
+
 @media (max-width: 768px) {
     .profile-details { text-align: center; }
     .bottom-sheet { height: 60vh; }
@@ -1038,6 +1097,18 @@ input:checked + .feature-slider:before {
         <div class="loading-spinner"></div>
     </div>
     <div class="toast" id="toast"></div>
+    <div class="sos-panel" id="sos-panel">
+        <div class="sos-header">
+            <h3>Emergency SOS</h3>
+            <button class="sos-close" id="sos-close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sos-content">
+            <p><strong>From:</strong> <span id="sos-sender-name">Loading...</span></p>
+            <p><strong>Message:</strong> <span id="sos-message">Loading...</span></p>
+            <p><strong>Location:</strong> <span id="sos-location">Loading...</span></p>
+            <button class="btn btn-primary" id="sos-route-btn">Navigate to Sender</button>
+        </div>
+    </div>
     <form class="auth-form active" id="auth-form">
         <div class="flex-column"><label>Email</label></div>
         <div class="inputForm">
@@ -1284,26 +1355,41 @@ const profilePage = document.getElementById('profile-page');
 const navigation = document.getElementById('navigation');
 const loadingOverlay = document.getElementById('loading-overlay');
 const toast = document.getElementById('toast');
+const addContactForm = document.getElementById('add-contact-form');
+const contactKeyInput = document.getElementById('contact-key-input');
+const submitContactBtn = document.getElementById('submit-contact-btn');
+const cancelContactBtn = document.getElementById('cancel-contact-btn');
+const addContactBtn = document.getElementById('add-contact-btn');
+const contactList = document.getElementById('contact-list');
+const sosPanel = document.getElementById('sos-panel');
+const sosCloseBtn = document.getElementById('sos-close-btn');
+const sosRouteBtn = document.getElementById('sos-route-btn');
+const sosSenderName = document.getElementById('sos-sender-name');
+const sosMessage = document.getElementById('sos-message');
+const sosLocation = document.getElementById('sos-location');
 
 // Map Variables
 let map, placesService, autocompleteA, autocompleteB, currentPosition, directionsService, directionsRenderer, currentLocationMarker;
 let routeMarkers = [];
-let auth, db;
+let auth, db, sosListener;
 
 // Utility Functions
 const showLoading = () => loadingOverlay.style.display = 'flex';
 const hideLoading = () => loadingOverlay.style.display = 'none';
 const showToast = (message, type = 'info', button = null, callback = null) => {
+    if (!toast) return;
     toast.innerHTML = message + (button ? ` <button id="toast-btn">${button}</button>` : '');
     toast.className = `toast active ${type}`;
     setTimeout(() => toast.classList.remove('active'), 5000);
-    if (button && callback) document.getElementById('toast-btn').addEventListener('click', callback);
+    if (button && callback) document.getElementById('toast-btn')?.addEventListener('click', callback);
 };
 const showError = (elementId, message) => {
     const errorElement = document.getElementById(elementId);
-    errorElement.textContent = message;
-    errorElement.classList.add('active');
-    setTimeout(() => errorElement.classList.remove('active'), 5000);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('active');
+        setTimeout(() => errorElement.classList.remove('active'), 5000);
+    }
     showToast(message, 'error');
 };
 const generateEmergencyKey = () => 'SOAPP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -1319,16 +1405,22 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
 // Load Firebase SDK
 async function loadFirebase() {
-    if (!window.firebase) {
-        await Promise.all([
-            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'),
-            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js'),
-            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js')
-        ]);
-        firebase.initializeApp(firebaseConfig);
+    try {
+        if (!window.firebase) {
+            await Promise.all([
+                import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'),
+                import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js'),
+                import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js')
+            ]);
+            firebase.initializeApp(firebaseConfig);
+        }
+        auth = firebase.auth();
+        db = firebase.firestore();
+    } catch (error) {
+        console.error('Failed to load Firebase SDK:', error);
+        showToast('Failed to initialize Firebase', 'error');
+        throw error;
     }
-    auth = firebase.auth();
-    db = firebase.firestore();
 }
 
 // Load Google Maps API
@@ -1340,7 +1432,11 @@ async function loadGoogleMapsScript() {
         script.async = true;
         script.defer = true;
         script.onload = resolve;
-        script.onerror = reject;
+        script.onerror = () => {
+            console.error('Failed to load Google Maps script');
+            showToast('Failed to load Google Maps. Use http://localhost for local dev or check network.', 'error');
+            reject(new Error('Google Maps script load failed'));
+        };
         document.head.appendChild(script);
     });
 }
@@ -1348,6 +1444,7 @@ async function loadGoogleMapsScript() {
 // Show Main Interface
 const showMainInterface = () => {
     showLoading();
+    if (!authForm || !signupForm || !mapContainer || !navigation || !bottomSheet || !profilePage) return;
     authForm.classList.remove('active');
     signupForm.classList.remove('active');
     mapContainer.classList.add('active');
@@ -1358,7 +1455,7 @@ const showMainInterface = () => {
     requestAnimationFrame(() => {
         setupBottomSheet();
         setupNavigation();
-        setupProfileTabs();
+        setupSOSListener();
         hideLoading();
     });
 };
@@ -1367,12 +1464,13 @@ const showMainInterface = () => {
 const handleSignIn = async e => {
     e.preventDefault();
     showLoading();
-    await loadFirebase();
-    const email = document.getElementById('signin-email').value.trim();
-    const password = document.getElementById('signin-password').value.trim();
-    if (!validateEmail(email)) return showError('signin-error-message', 'Invalid email.'), hideLoading();
-    if (password.length < 6) return showError('signin-error-message', 'Password too short.'), hideLoading();
     try {
+        await loadFirebase();
+        const email = document.getElementById('signin-email')?.value.trim();
+        const password = document.getElementById('signin-password')?.value.trim();
+        if (!email || !password) throw new Error('Email or password missing');
+        if (!validateEmail(email)) throw new Error('Invalid email');
+        if (password.length < 6) throw new Error('Password must be at least 6 characters');
         await auth.signInWithEmailAndPassword(email, password);
         await loadGoogleMapsScript();
         showMainInterface();
@@ -1387,16 +1485,16 @@ const handleSignIn = async e => {
 const handleSignUp = async e => {
     e.preventDefault();
     showLoading();
-    await loadFirebase();
-    const fullName = document.getElementById('signup-fullname').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value.trim();
-    const phone = document.getElementById('signup-phone').value.trim();
-    if (!fullName) return showError('signup-error-message', 'Enter full name.'), hideLoading();
-    if (!validateEmail(email)) return showError('signup-error-message', 'Invalid email.'), hideLoading();
-    if (password.length < 6) return showError('signup-error-message', 'Password too short.'), hideLoading();
-    if (!validatePhone(phone)) return showError('signup-error-message', 'Invalid phone.'), hideLoading();
     try {
+        await loadFirebase();
+        const fullName = document.getElementById('signup-fullname')?.value.trim();
+        const email = document.getElementById('signup-email')?.value.trim();
+        const password = document.getElementById('signup-password')?.value.trim();
+        const phone = document.getElementById('signup-phone')?.value.trim();
+        if (!fullName || !email || !password) throw new Error('Required fields missing');
+        if (!validateEmail(email)) throw new Error('Invalid email');
+        if (password.length < 6) throw new Error('Password must be at least 6 characters');
+        if (!validatePhone(phone)) throw new Error('Invalid phone number');
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         await db.collection('users').doc(userCredential.user.uid).set({
             fullName, email, phone, emergencyKey: generateEmergencyKey(), emergencyContacts: [],
@@ -1413,17 +1511,17 @@ const handleSignUp = async e => {
 };
 
 // Event Listeners for Auth
-authForm.addEventListener('submit', handleSignIn);
-signupForm.addEventListener('submit', handleSignUp);
-document.getElementById('show-signup').addEventListener('click', () => {
+authForm?.addEventListener('submit', handleSignIn);
+signupForm?.addEventListener('submit', handleSignUp);
+document.getElementById('show-signup')?.addEventListener('click', () => {
     authForm.classList.remove('active');
     signupForm.classList.add('active');
 });
-document.getElementById('show-signin').addEventListener('click', () => {
+document.getElementById('show-signin')?.addEventListener('click', () => {
     signupForm.classList.remove('active');
     authForm.classList.add('active');
 });
-document.getElementById('back-to-signin').addEventListener('click', () => {
+document.getElementById('back-to-signin')?.addEventListener('click', () => {
     signupForm.classList.remove('active');
     authForm.classList.add('active');
 });
@@ -1432,37 +1530,12 @@ document.getElementById('back-to-signin').addEventListener('click', () => {
 function injectAutocompleteStyles() {
     const style = document.createElement('style');
     style.innerHTML = `
-        .pac-container {
-            background: black !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin-top: 5px !important;
-            z-index: 1000 !important;
-        }
-        .pac-item {
-            background: transparent !important;
-            color: #ffffff !important;
-            padding: 8px 12px !important;
-            font-family: 'Helvetica Neue', Arial, sans-serif !important;
-            font-size: 15px !important;
-            border: none !important;
-            cursor: pointer !important;
-            transition: color 0.3s ease !important;
-        }
-        .pac-item:hover {
-            color: #ff4444 !important; /* Hover effect with accent color */
-            background: transparent !important;
-        }
-        .pac-item-query {
-            color: #ffffff !important;
-        }
-        .pac-matched {
-            color: #ff4444 !important; /* Matched text in red */
-        }
-        .pac-icon {
-            display: none !important; /* Hide icons */
-        }
+        .pac-container { background: black !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin-top: 5px !important; z-index: 1000 !important; }
+        .pac-item { background: transparent !important; color: #ffffff !important; padding: 8px 12px !important; font-family: 'Helvetica Neue', Arial, sans-serif !important; font-size: 15px !important; border: none !important; cursor: pointer !important; transition: color 0.3s ease !important; }
+        .pac-item:hover { color: #ff4444 !important; background: transparent !important; }
+        .pac-item-query { color: #ffffff !important; }
+        .pac-matched { color: #ff4444 !important; }
+        .pac-icon { display: none !important; }
     `;
     document.head.appendChild(style);
 }
@@ -1484,10 +1557,8 @@ window.initMap = function () {
     placesService = new google.maps.places.PlacesService(map);
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({ map, suppressMarkers: false });
-    const pointA = document.getElementById('point-a');
-    const pointB = document.getElementById('point-b');
-    autocompleteA = new google.maps.places.Autocomplete(pointA, { types: ['geocode'] });
-    autocompleteB = new google.maps.places.Autocomplete(pointB, { types: ['geocode'] });
+    autocompleteA = new google.maps.places.Autocomplete(document.getElementById('point-a'), { types: ['geocode'] });
+    autocompleteB = new google.maps.places.Autocomplete(document.getElementById('point-b'), { types: ['geocode'] });
     autocompleteA.bindTo('bounds', map);
     autocompleteB.bindTo('bounds', map);
     autocompleteA.addListener('place_changed', () => {
@@ -1498,16 +1569,19 @@ window.initMap = function () {
         const place = autocompleteB.getPlace();
         if (place.geometry) map.panTo(place.geometry.location);
     });
-    injectAutocompleteStyles(); // Inject custom styles after map initialization
+    injectAutocompleteStyles();
     getCurrentLocation();
-    document.getElementById('zoom-in').addEventListener('click', () => map.setZoom(map.getZoom() + 1));
-    document.getElementById('zoom-out').addEventListener('click', () => map.getZoom() > 1 && map.setZoom(map.getZoom() - 1));
-    document.getElementById('center-map').addEventListener('click', () => currentPosition ? map.panTo(currentPosition) : getCurrentLocation());
+    document.getElementById('zoom-in')?.addEventListener('click', () => map.setZoom(map.getZoom() + 1));
+    document.getElementById('zoom-out')?.addEventListener('click', () => map.getZoom() > 1 && map.setZoom(map.getZoom() - 1));
+    document.getElementById('center-map')?.addEventListener('click', () => currentPosition ? map.panTo(currentPosition) : getCurrentLocation());
 };
 
 // Get Current Location
 function getCurrentLocation() {
-    if (!navigator.geolocation) return showToast('Geolocation not supported.', 'error');
+    if (!navigator.geolocation) {
+        showToast('Geolocation not supported.', 'error');
+        return;
+    }
     navigator.geolocation.getCurrentPosition(position => {
         currentPosition = { lat: position.coords.latitude, lng: position.coords.longitude };
         map.setCenter(currentPosition);
@@ -1517,7 +1591,7 @@ function getCurrentLocation() {
             icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
         });
         findNearbySafetyPoints(currentPosition);
-    }, () => {
+    }, error => {
         showToast('Enable location services.', 'error');
         map.setCenter({ lat: 37.7749, lng: -122.4194 });
     }, { timeout: 10000, enableHighAccuracy: true });
@@ -1545,6 +1619,7 @@ function findNearbySafetyPoints(location) {
 // Display Safe Points
 function displaySafePoints(places) {
     const safePointsList = document.getElementById('safe-points-list');
+    if (!safePointsList) return;
     safePointsList.innerHTML = '';
     places.forEach(place => {
         const item = document.createElement('div');
@@ -1579,6 +1654,7 @@ function clearRouteMarkers() {
 
 // Setup Bottom Sheet Interaction
 function setupBottomSheet() {
+    if (!bottomSheet) return;
     const customSheet = bottomSheet;
     const sheetHeight = customSheet.offsetHeight;
     const minimizedPosition = sheetHeight - 40;
@@ -1601,14 +1677,20 @@ function setupBottomSheet() {
         customSheet.style.transform = `translateY(${currentY}px)`;
         document.body.className = currentY === 0 ? 'expanded' : 'minimized';
     });
-    document.getElementById('get-route').addEventListener('click', () => {
-        const pointA = document.getElementById('point-a').value;
-        const pointB = document.getElementById('point-b').value;
-        if (!pointA || !pointB) return showToast('Enter both points.', 'error');
+    document.getElementById('get-route')?.addEventListener('click', () => {
+        const pointA = document.getElementById('point-a')?.value;
+        const pointB = document.getElementById('point-b')?.value;
+        if (!pointA || !pointB) {
+            showToast('Enter both points.', 'error');
+            return;
+        }
         calculateRoute(pointA, pointB);
     });
-    document.getElementById('set-current-location').addEventListener('click', () => {
-        if (!currentPosition) return showToast('Location unavailable.', 'error');
+    document.getElementById('set-current-location')?.addEventListener('click', () => {
+        if (!currentPosition) {
+            showToast('Location unavailable.', 'error');
+            return;
+        }
         document.getElementById('point-a').value = 'My Location';
         showToast('Start set to current location!', 'success');
     });
@@ -1620,121 +1702,255 @@ function calculateRoute(start, end) {
     directionsRenderer.setDirections(null);
     if (start === 'My Location' && currentPosition) {
         directionsService.route({ origin: currentPosition, destination: end, travelMode: 'WALKING' }, (response, status) => {
-            if (status === 'OK') {
-                directionsRenderer.setDirections(response);
-                map.fitBounds(response.routes[0].bounds);
-            } else showToast('Route calculation failed.', 'error');
+            if (status === 'OK') directionsRenderer.setDirections(response);
+            else showToast('Route calculation failed.', 'error');
         });
     } else {
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ address: start }, (resultsA, statusA) => {
-            if (statusA === 'OK') {
-                const startLocation = resultsA[0].geometry.location;
-                geocoder.geocode({ address: end }, (resultsB, statusB) => {
-                    if (statusB === 'OK') {
-                        const endLocation = resultsB[0].geometry.location;
-                        directionsService.route({ origin: startLocation, destination: endLocation, travelMode: 'WALKING' }, (response, status) => {
-                            if (status === 'OK') {
-                                directionsRenderer.setDirections(response);
-                                map.fitBounds(response.routes[0].bounds);
-                            } else showToast('Route calculation failed.', 'error');
-                        });
-                    } else showToast('Destination not found.', 'error');
-                });
-            } else showToast('Start point not found.', 'error');
+        directionsService.route({ origin: start, destination: end, travelMode: 'WALKING' }, (response, status) => {
+            if (status === 'OK') directionsRenderer.setDirections(response);
+            else showToast('Route calculation failed.', 'error');
         });
     }
 }
 
 // Setup Navigation
 function setupNavigation() {
-    document.querySelectorAll('.list').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.list').forEach(li => li.classList.remove('active'));
-            item.classList.add('active');
-            if (item.id === 'map-nav') {
-                mapContainer.classList.add('active');
-                bottomSheet.classList.add('active');
-                profilePage.classList.remove('active');
-            } else if (item.id === 'profile-nav') {
-                mapContainer.classList.remove('active');
-                bottomSheet.classList.remove('active');
-                profilePage.classList.add('active');
-                loadProfile();
+    const mapNav = document.getElementById('map-nav');
+    const profileNav = document.getElementById('profile-nav');
+    const indicator = document.querySelector('.indicator');
+    const navItems = document.querySelectorAll('.navigation ul li');
+
+    mapNav?.addEventListener('click', () => {
+        mapContainer.classList.add('active');
+        bottomSheet.classList.add('active');
+        profilePage.classList.remove('active');
+        navItems.forEach(item => item.classList.remove('active'));
+        mapNav.classList.add('active');
+    });
+
+    profileNav?.addEventListener('click', () => {
+        mapContainer.classList.remove('active');
+        bottomSheet.classList.remove('active');
+        profilePage.classList.add('active');
+        navItems.forEach(item => item.classList.remove('active'));
+        profileNav.classList.add('active');
+        loadProfile();
+    });
+
+    indicator?.addEventListener('click', sendSOS);
+
+    auth.onAuthStateChanged(user => {
+        if (user) loadProfile();
+    });
+}
+
+// Load Profile
+function loadProfile() {
+    const user = auth.currentUser;
+    if (!user) return;
+    showLoading();
+    db.collection('users').doc(user.uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('profile-name').textContent = data.fullName || 'User';
+            document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email}`;
+            document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not provided'}`;
+            document.getElementById('emergency-key').textContent = data.emergencyKey;
+            document.getElementById('full-name').value = data.fullName || '';
+            document.getElementById('email-display').value = data.email;
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('emergency-message').value = data.emergencyMessage || 'I need help!';
+            loadEmergencyContacts(data.emergencyContacts || []);
+        }
+    }).catch(error => {
+        showToast('Failed to load profile.', 'error');
+    }).finally(() => hideLoading());
+
+    document.getElementById('edit-profile')?.addEventListener('click', () => {
+        const editSection = document.getElementById('edit-section');
+        editSection.classList.add('active');
+        document.getElementById('full-name').removeAttribute('readonly');
+        document.getElementById('phone').removeAttribute('readonly');
+        document.getElementById('emergency-message').removeAttribute('readonly');
+        document.getElementById('save-changes').disabled = false;
+    });
+
+    document.getElementById('save-changes')?.addEventListener('click', () => {
+        const fullName = document.getElementById('full-name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const emergencyMessage = document.getElementById('emergency-message').value.trim();
+        if (!fullName) {
+            showToast('Full name is required.', 'error');
+            return;
+        }
+        showLoading();
+        db.collection('users').doc(user.uid).update({ fullName, phone, emergencyMessage })
+            .then(() => {
+                showToast('Profile updated!', 'success');
+                document.getElementById('profile-name').textContent = fullName;
+                document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${phone || 'Not provided'}`;
+                document.getElementById('full-name').setAttribute('readonly', true);
+                document.getElementById('phone').setAttribute('readonly', true);
+                document.getElementById('emergency-message').setAttribute('readonly', true);
+                document.getElementById('edit-section').classList.remove('active');
+                document.getElementById('save-changes').disabled = true;
+            })
+            .catch(error => showToast('Failed to update profile.', 'error'))
+            .finally(() => hideLoading());
+    });
+
+    document.getElementById('sign-out')?.addEventListener('click', () => {
+        auth.signOut().then(() => {
+            mapContainer.classList.remove('active');
+            bottomSheet.classList.remove('active');
+            profilePage.classList.remove('active');
+            navigation.classList.remove('active');
+            authForm.classList.add('active');
+            showToast('Signed out successfully!', 'success');
+        }).catch(error => showToast('Sign out failed.', 'error'));
+    });
+
+    document.querySelector('.key-copy')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('emergency-key').textContent)
+            .then(() => showToast('Key copied to clipboard!', 'success'))
+            .catch(() => showToast('Failed to copy key.', 'error'));
+    });
+}
+
+// Load Emergency Contacts
+function loadEmergencyContacts(contacts) {
+    contactList.innerHTML = '';
+    if (!contacts.length) {
+        contactList.innerHTML = '<p>No emergency contacts added yet.</p>';
+        return;
+    }
+    contacts.forEach(contactId => {
+        db.collection('users').doc(contactId).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                const item = document.createElement('div');
+                item.classList.add('contact-item');
+                item.innerHTML = `
+                    <div class="contact-avatar">${data.fullName[0]}</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${data.fullName}</div>
+                        <div>${data.phone || 'No phone'}</div>
+                    </div>`;
+                contactList.appendChild(item);
             }
         });
     });
-    document.querySelector('.indicator').addEventListener('click', async () => {
-        if (!confirm('Send SOS alert?')) return;
-        showLoading();
-        const user = auth.currentUser;
-        if (!user) return showToast('Please log in.', 'error'), hideLoading();
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            const contacts = userDoc.data().emergencyContacts || [];
-            if (!contacts.length) throw new Error('No contacts.');
-            const sosData = {
-                senderId: user.uid, senderName: userDoc.data().fullName, location: currentPosition,
-                message: document.getElementById('emergency-message')?.value || 'Help!',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            await Promise.all(contacts.map(contactId => db.collection('notifications').add(sosData)));
-            showToast('SOS sent!', 'success');
-        } catch (error) {
-            showToast(error.message, 'error');
-        } finally {
-            hideLoading();
+}
+
+// Add Emergency Contact
+addContactBtn?.addEventListener('click', () => addContactForm.classList.add('active'));
+cancelContactBtn?.addEventListener('click', () => addContactForm.classList.remove('active'));
+submitContactBtn?.addEventListener('click', async () => {
+    const key = contactKeyInput.value.trim();
+    if (!key) {
+        showError('add-contact-error', 'Enter a safety key.');
+        return;
+    }
+    showLoading();
+    try {
+        const querySnapshot = await db.collection('users').where('emergencyKey', '==', key).get();
+        if (querySnapshot.empty) {
+            showError('add-contact-error', 'Invalid safety key.');
+            return;
         }
+        const contactDoc = querySnapshot.docs[0];
+        const contactId = contactDoc.id;
+        const user = auth.currentUser;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const contacts = userDoc.data().emergencyContacts || [];
+        if (contacts.includes(contactId)) {
+            showError('add-contact-error', 'Contact already added.');
+            return;
+        }
+        contacts.push(contactId);
+        await db.collection('users').doc(user.uid).update({ emergencyContacts: contacts });
+        loadEmergencyContacts(contacts);
+        addContactForm.classList.remove('active');
+        contactKeyInput.value = '';
+        showToast('Contact added!', 'success');
+    } catch (error) {
+        showError('add-contact-error', 'Failed to add contact.');
+    } finally {
+        hideLoading();
+    }
+});
+
+// Send SOS
+function sendSOS() {
+    if (!currentPosition) {
+        showToast('Location unavailable. Enable location services.', 'error');
+        return;
+    }
+    showLoading();
+    const user = auth.currentUser;
+    db.collection('users').doc(user.uid).get().then(doc => {
+        const data = doc.data();
+        const sosData = {
+            senderId: user.uid,
+            senderName: data.fullName,
+            message: data.emergencyMessage || 'I need help!',
+            location: new firebase.firestore.GeoPoint(currentPosition.lat, currentPosition.lng),
+            recipients: data.emergencyContacts || [],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        db.collection('sos_alerts').add(sosData)
+            .then(() => showToast('SOS sent to your contacts!', 'success'))
+            .catch(error => showToast('Failed to send SOS.', 'error'))
+            .finally(() => hideLoading());
     });
 }
 
-// Load Profile Data
-async function loadProfile() {
+// Setup SOS Listener
+function setupSOSListener() {
     const user = auth.currentUser;
     if (!user) return;
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (userDoc.exists) {
-        const data = userDoc.data();
-        document.getElementById('profile-name').textContent = data.fullName;
-        document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email}`;
-        document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not set'}`;
-        document.getElementById('emergency-key').textContent = data.emergencyKey;
-        document.getElementById('full-name').value = data.fullName;
-        document.getElementById('email-display').value = data.email;
-        document.getElementById('phone').value = data.phone || '';
-    }
-}
-
-// Setup Profile Tabs
-function setupProfileTabs() {
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab).classList.add('active');
+    if (sosListener) sosListener();
+    sosListener = db.collection('sos_alerts')
+        .where('recipients', 'array-contains', user.uid)
+        .onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const data = change.doc.data();
+                    sosSenderName.textContent = data.senderName;
+                    sosMessage.textContent = data.message;
+                    sosLocation.textContent = `${data.location.latitude.toFixed(4)}, ${data.location.longitude.toFixed(4)}`;
+                    sosPanel.classList.add('active');
+                    showToast(`SOS from ${data.senderName}!`, 'error', 'View', () => sosPanel.scrollIntoView());
+                    sosRouteBtn.onclick = () => {
+                        directionsService.route({
+                            origin: currentPosition,
+                            destination: { lat: data.location.latitude, lng: data.location.longitude },
+                            travelMode: 'WALKING'
+                        }, (response, status) => {
+                            if (status === 'OK') {
+                                directionsRenderer.setDirections(response);
+                                map.panTo({ lat: data.location.latitude, lng: data.location.longitude });
+                                sosPanel.classList.remove('active');
+                            } else {
+                                showToast('Failed to calculate route.', 'error');
+                            }
+                        });
+                    };
+                }
+            });
         });
-    });
+    sosCloseBtn?.addEventListener('click', () => sosPanel.classList.remove('active'));
 }
 
-// Initial Setup
-async function initializeApp() {
-    showLoading();
-    await loadFirebase();
-    auth.onAuthStateChanged(async user => {
-        if (user) {
-            await loadGoogleMapsScript();
-            showMainInterface();
-        } else {
-            authForm.classList.add('active');
-        }
-        hideLoading();
+// Tab Navigation
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
     });
-}
-
-// Start the app
-initializeApp();
+});
     </script>
-
-</body>
+    </body>
 </html>
