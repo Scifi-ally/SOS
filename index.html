@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Women's Safety Map</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha512-UXFiA3uJ7adT0rHVdK5tQV8W8Qdwc+ZrNhFahzSZ5rG7aCWpZ3nS7RTRsOQJpCGrZmB2//W58R+7oXuV9HMJZQ==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.2.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.2.2/dist/ionicons/ionicons.js"></script>
     <script>
         window.initMap = function() {
             console.log("initMap placeholder called");
@@ -1313,7 +1313,7 @@
     </div>
 
     <script>
-const firebaseConfig = {
+        const firebaseConfig = {
     apiKey: "AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",
     authDomain: "soapp-80936.firebaseapp.com",
     projectId: "soapp-80936",
@@ -1666,7 +1666,7 @@ function getCurrentLocation() {
                 position: currentPosition,
                 map: map,
                 title: 'Your Location',
-                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
+                icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
             });
             findNearbySafetyPoints(currentPosition);
         },
@@ -1869,186 +1869,162 @@ async function loadProfile() {
             updateProfileUI(data);
             const lastVerified = document.getElementById('last-verified');
             if (lastVerified) lastVerified.textContent = `Verified: ${new Date().toLocaleString()}`;
-            if (!auth.currentUser) {
-                const editBtn = document.getElementById('edit-profile');
-                const addContactBtn = document.getElementById('add-contact-btn');
-                const signOutBtn = document.getElementById('sign-out');
-                if (editBtn) editBtn.disabled = true;
-                if (addContactBtn) addContactBtn.disabled = true;
-                if (signOutBtn) signOutBtn.textContent = 'Exit';
-            }
-        } else {
-            throw new Error('Profile data not found.');
         }
     } catch (error) {
-        showToast('Profile load error: ' + error.message, 'error');
-    }
-    hideLoading();
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab).classList.add('active');
-        });
-    });
-    const editSection = document.getElementById('edit-section');
-    const editBtn = document.getElementById('edit-profile');
-    const saveBtn = document.getElementById('save-changes');
-    const inputs = editSection?.querySelectorAll('input, textarea');
-    if (editBtn && saveBtn && editSection) {
-        editBtn.addEventListener('click', () => {
-            editSection.classList.add('active');
-            inputs.forEach(input => input.removeAttribute('readonly'));
-            saveBtn.disabled = false;
-            editBtn.disabled = true;
-        });
-        saveBtn.addEventListener('click', async () => {
-            const updatedData = {
-                fullName: document.getElementById('full-name')?.value.trim() || '',
-                phone: document.getElementById('phone')?.value.trim() || '',
-                emergencyMessage: document.getElementById('emergency-message')?.value.trim() || ''
-            };
-            if (!updatedData.fullName || (updatedData.phone && !validatePhone(updatedData.phone))) {
-                showToast('Invalid data.', 'error');
-                return;
-            }
-            showLoading();
-            try {
-                await db.collection('users').doc(user.uid).update(updatedData);
-                updateProfileUI({ ...user, ...updatedData });
-                editSection.classList.remove('active');
-                inputs.forEach(input => input.setAttribute('readonly', 'true'));
-                saveBtn.disabled = true;
-                editBtn.disabled = false;
-                showToast('Profile updated!', 'success');
-            } catch (error) {
-                showToast('Update failed: ' + error.message, 'error');
-            }
-            hideLoading();
-        });
-    }
-    const addContactBtn = document.getElementById('add-contact-btn');
-    const addContactForm = document.getElementById('add-contact-form');
-    const submitContactBtn = document.getElementById('submit-contact-btn');
-    const cancelContactBtn = document.getElementById('cancel-contact-btn');
-    if (addContactBtn && addContactForm) {
-        addContactBtn.addEventListener('click', () => addContactForm.classList.add('active'));
-        if (cancelContactBtn) cancelContactBtn.addEventListener('click', () => addContactForm.classList.remove('active'));
-        if (submitContactBtn) {
-            submitContactBtn.addEventListener('click', async () => {
-                const key = document.getElementById('contact-key-input')?.value.trim() || '';
-                if (!key.startsWith('SOAPP-')) {
-                    showError('add-contact-error', 'Invalid Safety Key format.');
-                    return;
-                }
-                showLoading();
-                try {
-                    const snapshot = await db.collection('users').where('emergencyKey', '==', key).get();
-                    if (snapshot.empty) throw new Error('No user found with this key.');
-                    const contactDoc = snapshot.docs[0];
-                    const contactId = contactDoc.id;
-                    const userDoc = await db.collection('users').doc(user.uid).get();
-                    const currentContacts = userDoc.data().emergencyContacts || [];
-                    if (currentContacts.includes(contactId)) throw new Error('Contact already added.');
-                    const updatedContacts = [...currentContacts, contactId];
-                    await db.collection('users').doc(user.uid).update({ emergencyContacts: updatedContacts });
-                    addContactForm.classList.remove('active');
-                    loadProfile();
-                    showToast('Contact added!', 'success');
-                } catch (error) {
-                    showError('add-contact-error', error.message);
-                }
-                hideLoading();
-            });
-        }
-    }
-    const signOutBtn = document.getElementById('sign-out');
-    if (signOutBtn) {
-        signOutBtn.addEventListener('click', async () => {
-            if (auth.currentUser) {
-                await auth.signOut();
-                showToast('Signed out.', 'success');
-            } else {
-                sessionStorage.removeItem('guestUser');
-                showToast('Exited guest mode.', 'success');
-            }
-            if (profilePage) profilePage.classList.remove('active');
-            if (mapContainer) mapContainer.classList.remove('active');
-            if (bottomSheet) bottomSheet.classList.remove('active');
-            if (navigation) navigation.classList.remove('active');
-            if (authForm) authForm.classList.add('active');
-        });
+        showToast('Failed to load profile: ' + error.message, 'error');
+    } finally {
+        hideLoading();
     }
 }
 
 function updateProfileUI(data) {
-    const nameEl = document.getElementById('profile-name');
-    const emailEl = document.getElementById('profile-email');
-    const phoneEl = document.getElementById('profile-phone');
-    const keyEl = document.getElementById('emergency-key');
-    const fullNameInput = document.getElementById('full-name');
-    const emailInput = document.getElementById('email-display');
-    const phoneInput = document.getElementById('phone');
-    const messageInput = document.getElementById('emergency-message');
-    const contactList = document.getElementById('contact-list');
-    if (nameEl) nameEl.textContent = data.fullName || 'User';
-    if (emailEl) emailEl.innerHTML = `<i class="fas fa-envelope"></i> ${data.email || 'N/A'}`;
-    if (phoneEl) phoneEl.innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not set'}`;
-    if (keyEl) keyEl.textContent = data.emergencyKey || 'N/A';
-    if (fullNameInput) fullNameInput.value = data.fullName || '';
-    if (emailInput) emailInput.value = data.email || '';
-    if (phoneInput) phoneInput.value = data.phone || '';
-    if (messageInput) messageInput.value = data.emergencyMessage || 'I need help!';
-    if (contactList && data.emergencyContacts) {
-        contactList.innerHTML = '';
-        Promise.all(data.emergencyContacts.map(async contactId => {
-            const contactDoc = await db.collection('users').doc(contactId).get();
-            if (contactDoc.exists) {
-                const contactData = contactDoc.data();
-                const contactItem = document.createElement('div');
-                contactItem.classList.add('contact-item');
-                contactItem.innerHTML = `
-                    <div class="contact-avatar">${contactData.fullName[0]}</div>
-                    <div class="contact-info">
-                        <div class="contact-name">${contactData.fullName}</div>
-                        <div class="place-address">${contactData.phone || 'No phone'}</div>
-                    </div>
-                `;
-                contactList.appendChild(contactItem);
-            }
-        }));
-    }
-    const copyBtn = document.querySelector('.key-copy');
-    if (copyBtn && keyEl) {
-        copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(keyEl.textContent);
-            showToast('Key copied to clipboard!', 'success');
-        });
-    }
+    document.getElementById('profile-name').textContent = data.fullName || 'User';
+    document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email || 'Not provided'}`;
+    document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not provided'}`;
+    document.getElementById('emergency-key').textContent = data.emergencyKey || 'Not generated';
+    document.getElementById('full-name').value = data.fullName || '';
+    document.getElementById('email-display').value = data.email || '';
+    document.getElementById('phone').value = data.phone || '';
 }
 
 function setupNotificationListener() {
     const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
     if (!user) return;
-    db.collection('notifications').doc(user.uid).onSnapshot(doc => {
-        if (doc.exists && doc.data().status === 'active') {
-            const { senderName, location, message } = doc.data();
-            showToast(`${senderName} sent an SOS: "${message}"`, 'error', 'View', () => {
-                map.panTo(location);
-                map.setZoom(16);
-                new google.maps.Marker({ position: location, map, icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' } });
-                db.collection('notifications').doc(user.uid).update({ status: 'viewed' });
-            });
+    db.collection('notifications').doc(user.uid).onSnapshot(snapshot => {
+        if (snapshot.exists) {
+            const data = snapshot.data();
+            if (data.status === 'active') {
+                showToast(`SOS from ${data.senderName}: ${data.message}`, 'error', 'View', () => {
+                    map.panTo(data.location);
+                    map.setZoom(16);
+                });
+            }
         }
     });
 }
 
-auth.onAuthStateChanged(user => {
-    if (user) loadGoogleMapsScript().then(showMainInterface);
-    else if (sessionStorage.getItem('guestUser')) loadGoogleMapsScript().then(showMainInterface);
-    else if (authForm) authForm.classList.add('active');
+// Initialize tabs
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
 });
+
+// Handle profile editing
+const editBtn = document.getElementById('edit-profile');
+const saveBtn = document.getElementById('save-changes');
+const editSection = document.getElementById('edit-section');
+if (editBtn && saveBtn && editSection) {
+    editBtn.addEventListener('click', () => {
+        editSection.classList.add('active');
+        document.querySelectorAll('#edit-section .form-control').forEach(input => {
+            input.removeAttribute('readonly');
+        });
+        saveBtn.disabled = false;
+    });
+    saveBtn.addEventListener('click', async () => {
+        showLoading();
+        const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+        const updatedData = {
+            fullName: document.getElementById('full-name').value.trim(),
+            email: document.getElementById('email-display').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            emergencyMessage: document.getElementById('emergency-message').value.trim()
+        };
+        try {
+            if (auth.currentUser) {
+                await db.collection('users').doc(user.uid).update(updatedData);
+                if (updatedData.email !== user.email) {
+                    await auth.currentUser.updateEmail(updatedData.email);
+                }
+            } else {
+                sessionStorage.setItem('guestUser', JSON.stringify({ ...user, ...updatedData }));
+            }
+            updateProfileUI(updatedData);
+            editSection.classList.remove('active');
+            document.querySelectorAll('#edit-section .form-control').forEach(input => {
+                input.setAttribute('readonly', true);
+            });
+            saveBtn.disabled = true;
+            showToast('Profile updated!', 'success');
+        } catch (error) {
+            showToast('Update failed: ' + error.message, 'error');
+        }
+        hideLoading();
+    });
+}
+
+// Handle sign out
+const signOutBtn = document.getElementById('sign-out');
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+        showLoading();
+        try {
+            await auth.signOut();
+            sessionStorage.removeItem('guestUser');
+            window.location.reload();
+        } catch (error) {
+            showToast('Sign out failed: ' + error.message, 'error');
+        }
+        hideLoading();
+    });
+}
+
+// Handle adding emergency contacts
+const addContactBtn = document.getElementById('add-contact-btn');
+const addContactForm = document.getElementById('add-contact-form');
+const submitContactBtn = document.getElementById('submit-contact-btn');
+const cancelContactBtn = document.getElementById('cancel-contact-btn');
+if (addContactBtn && addContactForm && submitContactBtn && cancelContactBtn) {
+    addContactBtn.addEventListener('click', () => addContactForm.classList.add('active'));
+    cancelContactBtn.addEventListener('click', () => addContactForm.classList.remove('active'));
+    submitContactBtn.addEventListener('click', async () => {
+        showLoading();
+        const contactKey = document.getElementById('contact-key-input').value.trim();
+        if (!contactKey.startsWith('SOAPP-')) {
+            showError('add-contact-error', 'Invalid safety key format.');
+            hideLoading();
+            return;
+        }
+        try {
+            const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+            const contactQuery = await db.collection('users').where('emergencyKey', '==', contactKey).get();
+            if (contactQuery.empty) {
+                showError('add-contact-error', 'No user found with this key.');
+                hideLoading();
+                return;
+            }
+            const contactDoc = contactQuery.docs[0];
+            const updatedContacts = [...(user.emergencyContacts || []), contactDoc.id];
+            if (auth.currentUser) {
+                await db.collection('users').doc(user.uid).update({ emergencyContacts: updatedContacts });
+            } else {
+                sessionStorage.setItem('guestUser', JSON.stringify({ ...user, emergencyContacts: updatedContacts }));
+            }
+            addContactForm.classList.remove('active');
+            document.getElementById('contact-key-input').value = '';
+            loadProfile(); // Refresh contacts list
+            showToast('Contact added!', 'success');
+        } catch (error) {
+            showError('add-contact-error', 'Failed to add contact: ' + error.message);
+        }
+        hideLoading();
+    });
+}
+
+// Copy emergency key to clipboard
+const copyBtn = document.querySelector('.key-copy');
+if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+        const key = document.getElementById('emergency-key').textContent;
+        navigator.clipboard.writeText(key).then(() => {
+            showToast('Key copied to clipboard!', 'success');
+        });
+    });
+}
     </script>
 </body>
 </html>
