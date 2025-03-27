@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha512-UXFiA3uJ7adT0rHVdK5tQV8W8Qdwc+ZrNhFahzSZ5rG7aCWpZ3nS7RTRsOQJpCGrZmB2//W58R+7oXuV9HMJZQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script> <!-- Removed integrity -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
     <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.2.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.2.2/dist/ionicons/ionicons.js"></script>
@@ -1093,7 +1093,6 @@
         <div id="signin-error-message" class="error-message"></div>
         <button class="button-submit" id="signin-btn" type="submit">Log In</button>
         <p class="p">New here? <span class="span" id="show-signup">Create Account</span></p>
-        <button class="btn btn-outline" id="guest-signin">Continue as Guest</button>
     </form>
 
     <form class="signup-form" id="signup-form">
@@ -1129,7 +1128,6 @@
         <div id="signup-error-message" class="error-message"></div>
         <div class="button-group">
             <button class="button-submit" id="signup-btn" type="submit">Sign Up</button>
-            <button class="btn btn-outline" id="guest-signup">Continue as Guest</button>
             <div class="link-group">
                 <p class="p">Have an account? <span class="span" id="show-signin">Log In</span></p>
                 <button class="btn btn-back" id="back-to-signin">Back</button>
@@ -1371,28 +1369,17 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
     return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
 };
 
-async function loadScriptWithRetry(url, retries = 3, delay = 2000) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.async = true;
-                script.defer = true;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-            return;
-        } catch (error) {
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-    }
-}
-
 async function loadGoogleMapsScript() {
-    await loadScriptWithRetry('https://maps.googleapis.com/maps/api/js?key=AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE&libraries=places,directions&callback=initMap');
+    return new Promise((resolve, reject) => {
+        if (window.google && window.google.maps) return resolve();
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE&libraries=places,directions&callback=initMap';
+        script.async = true;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
 }
 
 const showMainInterface = () => {
@@ -1516,28 +1503,6 @@ if (signupForm) {
         signupBtn.addEventListener('click', handleSignUp);
     }
 }
-
-const setupGuestMode = () => {
-    const guestUser = { 
-        uid: 'guest_' + Math.random().toString(36).substr(2, 9), 
-        fullName: 'Guest User', 
-        email: 'guest@example.com', 
-        phone: '', 
-        emergencyKey: generateEmergencyKey(), 
-        emergencyContacts: [] 
-    };
-    sessionStorage.setItem('guestUser', JSON.stringify(guestUser));
-    loadGoogleMapsScript().then(showMainInterface);
-    showToast('Welcome to Guest Mode!', 'info');
-};
-
-['guest-signin', 'guest-signup'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) {
-        btn.addEventListener('click', e => { e.preventDefault(); setupGuestMode(); });
-        btn.addEventListener('touchend', e => { e.preventDefault(); setupGuestMode(); }, { passive: false });
-    }
-});
 
 const showSignup = document.getElementById('show-signup');
 if (showSignup) {
@@ -1820,7 +1785,12 @@ function setupNavigation() {
         indicator.addEventListener('click', async () => {
             if (!confirm('Send SOS alert?')) return;
             showLoading();
-            const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('Please log in to send SOS.', 'error');
+                hideLoading();
+                return;
+            }
             if (!currentPosition) {
                 showToast('Location unavailable.', 'error');
                 hideLoading();
@@ -1828,7 +1798,7 @@ function setupNavigation() {
             }
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                const contacts = userDoc.exists ? userDoc.data().emergencyContacts || [] : user.emergencyContacts || [];
+                const contacts = userDoc.exists ? userDoc.data().emergencyContacts || [] : [];
                 const emergencyMessage = document.getElementById('emergency-message')?.value.trim() || 'I need help!';
                 if (!contacts.length) throw new Error('No emergency contacts.');
                 const sosData = { 
@@ -1851,18 +1821,15 @@ function setupNavigation() {
 
 async function loadProfile() {
     showLoading();
-    const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+    const user = auth.currentUser;
     if (!user) {
-        showToast('No user data available.', 'error');
+        showToast('Please log in to view profile.', 'error');
         hideLoading();
         return;
     }
     try {
-        let userData = user;
-        if (auth.currentUser) {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            userData = userDoc.exists ? userDoc.data() : user;
-        }
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? userDoc.data() : { fullName: user.displayName || 'User', email: user.email };
         document.getElementById('profile-name').textContent = userData.fullName || 'User';
         document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${userData.email || 'N/A'}`;
         document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${userData.phone || 'Not provided'}`;
@@ -1929,7 +1896,12 @@ function setupProfileInteractions() {
 
     saveBtn.addEventListener('click', async () => {
         showLoading();
-        const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+        const user = auth.currentUser;
+        if (!user) {
+            showToast('Please log in to update profile.', 'error');
+            hideLoading();
+            return;
+        }
         const updatedData = {
             fullName: document.getElementById('full-name').value.trim(),
             email: document.getElementById('email-display').value.trim(),
@@ -1942,12 +1914,8 @@ function setupProfileInteractions() {
             return;
         }
         try {
-            if (auth.currentUser) {
-                await db.collection('users').doc(user.uid).update(updatedData);
-                if (user.email !== updatedData.email) await auth.currentUser.updateEmail(updatedData.email);
-            } else {
-                sessionStorage.setItem('guestUser', JSON.stringify({ ...user, ...updatedData }));
-            }
+            await db.collection('users').doc(user.uid).update(updatedData);
+            if (user.email !== updatedData.email) await auth.currentUser.updateEmail(updatedData.email);
             inputs.forEach(input => input.setAttribute('readonly', true));
             editSection.classList.remove('active');
             saveBtn.disabled = true;
@@ -1964,7 +1932,6 @@ function setupProfileInteractions() {
             showLoading();
             try {
                 await auth.signOut();
-                sessionStorage.removeItem('guestUser');
                 window.location.reload();
             } catch (error) {
                 showToast('Sign out failed: ' + error.message, 'error');
@@ -1990,21 +1957,18 @@ function setupProfileInteractions() {
             return;
         }
         try {
-            const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+            const user = auth.currentUser;
+            if (!user) throw new Error('Please log in.');
             const contactQuery = await db.collection('users').where('emergencyKey', '==', contactKey).get();
             if (contactQuery.empty) throw new Error('No user found with this key.');
             const contactDoc = contactQuery.docs[0];
             const contactId = contactDoc.id;
             if (contactId === user.uid) throw new Error('You cannot add yourself.');
             const userDoc = await db.collection('users').doc(user.uid).get();
-            const currentContacts = userDoc.exists ? userDoc.data().emergencyContacts || [] : user.emergencyContacts || [];
+            const currentContacts = userDoc.exists ? userDoc.data().emergencyContacts || [] : [];
             if (currentContacts.includes(contactId)) throw new Error('Contact already added.');
             currentContacts.push(contactId);
-            if (auth.currentUser) {
-                await db.collection('users').doc(user.uid).update({ emergencyContacts: currentContacts });
-            } else {
-                sessionStorage.setItem('guestUser', JSON.stringify({ ...user, emergencyContacts: currentContacts }));
-            }
+            await db.collection('users').doc(user.uid).update({ emergencyContacts: currentContacts });
             addContactForm.classList.remove('active');
             document.getElementById('contact-key-input').value = '';
             loadProfile();
@@ -2025,18 +1989,17 @@ function setupProfileInteractions() {
 async function removeContact(contactId) {
     if (!confirm('Remove this contact?')) return;
     showLoading();
-    const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('Please log in.', 'error');
+        hideLoading();
+        return;
+    }
     try {
-        let currentContacts = [];
-        if (auth.currentUser) {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            currentContacts = userDoc.data().emergencyContacts || [];
-            currentContacts = currentContacts.filter(id => id !== contactId);
-            await db.collection('users').doc(user.uid).update({ emergencyContacts: currentContacts });
-        } else {
-            currentContacts = user.emergencyContacts.filter(id => id !== contactId);
-            sessionStorage.setItem('guestUser', JSON.stringify({ ...user, emergencyContacts: currentContacts }));
-        }
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        let currentContacts = userDoc.data().emergencyContacts || [];
+        currentContacts = currentContacts.filter(id => id !== contactId);
+        await db.collection('users').doc(user.uid).update({ emergencyContacts: currentContacts });
         loadProfile();
         showToast('Contact removed!', 'success');
     } catch (error) {
@@ -2046,7 +2009,7 @@ async function removeContact(contactId) {
 }
 
 function setupNotificationListener() {
-    const user = auth.currentUser || JSON.parse(sessionStorage.getItem('guestUser'));
+    const user = auth.currentUser;
     if (!user) return;
     db.collection('notifications').doc(user.uid).onSnapshot(snapshot => {
         const data = snapshot.data();
@@ -2063,8 +2026,6 @@ function setupNotificationListener() {
 
 auth.onAuthStateChanged(user => {
     if (user) {
-        loadGoogleMapsScript().then(showMainInterface);
-    } else if (sessionStorage.getItem('guestUser')) {
         loadGoogleMapsScript().then(showMainInterface);
     }
 });
