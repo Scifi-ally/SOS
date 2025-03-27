@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Women's Safety Map</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
     <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.2.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.2.2/dist/ionicons/ionicons.js"></script>
@@ -15,154 +11,187 @@
         * {margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif;text-decoration:none;text-align:center;-webkit-tap-highlight-color:transparent}
         :root {--clr:#222327;--primary:#ffffff;--secondary:#333333;--accent:#555555;--light:#030202;--light-gray:#2d2d2d;--mid-gray:#404040;--dark-gray:#888888;--font-main:'Helvetica Neue',Arial,sans-serif}
         body {overflow:hidden;position:relative;height:100vh;width:100vw;background:var(--clr);color:var(--primary);touch-action:manipulation}
-        .map-container {width:100%;height:100%;position:relative;overflow:hidden;background:#1a1a1a;opacity:0;transition:opacity 0.4s ease}
+        
+        /* Hide Scrollbars but Keep Functionality */
+        ::-webkit-scrollbar {width:0;height:0}
+        * {scrollbar-width:none;-ms-overflow-style:none}
+
+        .map-container {width:100%;height:100%;position:relative;overflow:hidden;background:#1a1a1a;opacity:0;transition:opacity 0.5s ease}
         .map-container.active {opacity:1}
         #map {width:100%;height:100%;touch-action:pan-x pan-y pinch-zoom}
-        .map-controls {position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:8px;z-index:10}
-        .map-control-btn {background:#1a1a1a;border:1px solid var(--primary);color:var(--primary);width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2em;transition:all 0.3s ease}
-        .map-control-btn:hover {background:var(--primary);color:#000;transform:scale(1.1)}
-        .bottom-sheet {position:fixed;bottom:60px;margin-bottom:10px;left:0;right:0;background:#1a1a1a;border-radius:10px 10px 0 0;box-shadow:0 -2px 15px rgba(0,0,0,0.7);transition:transform 0.3s ease-out;z-index:100;height:60vh;transform:translateY(calc(100% - 25px));display:none;overflow:hidden}
-        .bottom-sheet.active {display:block;transform:translateY(calc(100% - 25px))}
-        .bottom-sheet-header {position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-start;align-items:center;background:#1a1a1a;height:25px;padding-left:15px;z-index:102}
-        .bottom-sheet-handle {width:40px;height:5px;background:var(--primary);border-radius:5px;cursor:grab}
-        .bottom-sheet-content {position:relative;top:25px;padding:15px;overflow-y:auto;height:calc(100% - 25px);-webkit-overflow-scrolling:touch;z-index:101}
+        .map-controls {position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:10px;z-index:10}
+        .map-control-btn {background:#1a1a1a;border:1px solid var(--primary);color:var(--primary);width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3em;transition:transform 0.3s ease,background 0.3s ease,box-shadow 0.3s ease;touch-action:manipulation}
+        .map-control-btn:hover {background:var(--primary);color:#000;transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+        .map-control-btn:active {transform:scale(0.9);opacity:0.8}
+
+        .bottom-sheet {position:fixed;bottom:60px;left:0;right:0;background:#1a1a1a;border-radius:20px 20px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,0.8);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);z-index:100;height:60vh;transform:translateY(calc(100% - 25px));display:none;overflow:hidden}
+        .bottom-sheet.active {display:block}
+        .bottom-sheet-header {position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-start;align-items:center;background:#1a1a1a;height:25px;padding:5px;z-index:102}
+        .bottom-sheet-handle {width:50px;height:6px;background:var(--primary);border-radius:10px;cursor:grab;transition:width 0.3s ease}
+        .bottom-sheet:hover .bottom-sheet-handle {width:60px}
+        .bottom-sheet-content {position:relative;top:25px;padding:20px;overflow-y:auto;height:calc(100% - 25px);-webkit-overflow-scrolling:touch;z-index:101}
         .minimized .bottom-sheet.active {transform:translateY(calc(100% - 25px))}
         .expanded .bottom-sheet.active {transform:translateY(0)}
-        .route-container {margin-bottom:20px;display:flex;flex-direction:column;gap:10px}
-        .route-input-group {display:flex;flex-direction:column;gap:5px}
-        .route-input {width:100%;padding:12px 15px;border:none;border-radius:8px;background:var(--light-gray);color:var(--primary);font-size:14px;outline:none;transition:background 0.2s}
-        .route-input:focus {background:#383838}
-        .route-btn {background:var(--primary);color:#000;padding:10px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:transform 0.3s ease,background 0.3s ease}
-        .route-btn:hover {transform:scale(1.05);background:#e0e0e0}
-        .safe-points-container {margin-top:20px}
-        .safe-point-list {display:flex;flex-direction:column;gap:8px}
-        .safe-point-item {display:flex;align-items:center;padding:8px 0;color:var(--primary);cursor:pointer;transition:transform 0.3s ease;opacity:0;transform:translateY(20px);animation:slideUp 0.5s ease forwards}
+
+        .route-container {margin-bottom:25px;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(20px);animation:fadeUp 0.5s ease forwards}
+        @keyframes fadeUp {to {opacity:1;transform:translateY(0)}}
+        .route-input-group {display:flex;flex-direction:column;gap:8px}
+        .route-input {width:100%;padding:14px 16px;border:none;border-radius:10px;background:var(--light-gray);color:var(--primary);font-size:15px;outline:none;transition:background 0.3s ease,transform 0.2s ease;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+        .route-input:focus {background:#383838;transform:scale(1.02)}
+        .route-btn {background:linear-gradient(135deg,#ffffff,#e0e0e0);color:#000;padding:12px;border:none;border-radius:10px;font-size:15px;cursor:pointer;transition:transform 0.3s ease,background 0.3s ease,box-shadow 0.3s ease;touch-action:manipulation}
+        .route-btn:hover {transform:scale(1.05);background:linear-gradient(135deg,#e0e0e0,#cccccc);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+        .route-btn:active {transform:scale(0.95);opacity:0.8}
+
+        .safe-points-container {margin-top:25px;opacity:0;animation:fadeUp 0.6s ease forwards 0.2s}
+        .safe-point-list {display:flex;flex-direction:column;gap:10px}
+        .safe-point-item {display:flex;align-items:center;padding:10px;border-radius:8px;background:var(--light-gray);color:var(--primary);cursor:pointer;transition:transform 0.3s ease,background 0.3s ease,box-shadow 0.3s ease;opacity:0;transform:translateY(20px);animation:slideUp 0.5s ease forwards}
         @keyframes slideUp {to {opacity:1;transform:translateY(0)}}
         .safe-point-item:nth-child(1) {animation-delay:0.1s}
         .safe-point-item:nth-child(2) {animation-delay:0.2s}
         .safe-point-item:nth-child(3) {animation-delay:0.3s}
-        .safe-point-item:hover {transform:scale(1.02)}
+        .safe-point-item:hover {transform:scale(1.03);background:#383838;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+        .safe-point-item:active {transform:scale(0.97);opacity:0.8}
         .safe-point-info {flex:1;text-align:left}
-        .safe-point-name {font-weight:500;font-size:14px}
-        .safe-point-distance {font-size:12px;color:#ff4444}
-        .safe-point-icon {font-size:1.2em;margin-right:10px;color:var(--primary)}
-        .navigation {position:fixed;width:100%;height:60px;background:#1a1a1a;display:none;align-items:center;border-radius:10px 10px 0 0;bottom:0;z-index:200}
+        .safe-point-name {font-weight:500;font-size:15px}
+        .safe-point-distance {font-size:13px;color:#ff4444}
+        .safe-point-icon {font-size:1.4em;margin-right:12px;color:var(--primary);transition:transform 0.3s ease}
+        .safe-point-item:hover .safe-point-icon {transform:rotate(360deg)}
+
+        .navigation {position:fixed;width:100%;height:70px;background:#1a1a1a;display:none;align-items:center;border-radius:20px 20px 0 0;bottom:0;z-index:200;box-shadow:0 -2px 15px rgba(0,0,0,0.7);transition:transform 0.4s ease}
         .navigation.active {display:flex}
-        .navigation ul {display:flex;width:100%;justify-content:space-around;padding:0 15px}
-        .navigation ul li {position:relative;list-style:none;width:60px;height:60px;z-index:1;cursor:pointer;transition:transform 0.3s ease}
-        .navigation ul li:hover {transform:scale(1.1)}
+        .navigation ul {display:flex;width:100%;justify-content:space-around;padding:0 20px}
+        .navigation ul li {position:relative;list-style:none;width:70px;height:70px;z-index:1;cursor:pointer;transition:transform 0.3s ease}
+        .navigation ul li:hover {transform:scale(1.15)}
+        .navigation ul li:active {transform:scale(0.9);opacity:0.8}
         .navigation ul li a {position:relative;display:flex;justify-content:center;align-items:center;flex-direction:column;width:100%;text-align:center;font-weight:500}
-        .navigation ul li a .icon {position:relative;display:block;line-height:60px;font-size:1.4em;text-align:center;color:#888888;transition:transform 0.3s ease, color 0.3s ease}
-        .navigation ul li.active a .icon {transform:translateY(-5px);color:var(--primary)}
-        .navigation ul li a .text {position:absolute;color:#888888;font-weight:400;font-size:0.7em;letter-spacing:0.05em;opacity:0;transform:translateY(15px);transition:opacity 0.3s ease,transform 0.3s ease;display:none}
+        .navigation ul li a .icon {position:relative;display:block;line-height:70px;font-size:1.6em;text-align:center;color:#888888;transition:transform 0.3s ease,color 0.3s ease}
+        .navigation ul li.active a .icon {transform:translateY(-8px);color:var(--primary)}
+        .navigation ul li a .text {position:absolute;color:#888888;font-weight:400;font-size:0.8em;letter-spacing:0.05em;opacity:0;transform:translateY(15px);transition:opacity 0.3s ease,transform 0.3s ease;display:none}
         .navigation ul li.active a .text {opacity:0;transform:translateY(10px)}
-        .indicator {display:flex;justify-content:center;align-items:center;position:absolute;top:-50%;width:70px;height:70px;background:#ff4444;border-radius:50%;border:5px solid var(--clr);left:calc(50% - 35px);cursor:pointer;transition:transform 0.3s ease,background-color 0.3s ease;color:#fff;font-weight:600;font-size:1.2em}
-        .indicator:hover {transform:scale(1.1);background-color:#ff6666}
-        .profile-page {display:none;position:absolute;top:0;left:0;width:100%;height:100%;background-color:var(--clr);color:var(--primary);overflow-y:auto;z-index:150;padding-bottom:100px;opacity:0;transition:opacity 0.4s ease}
+        .indicator {display:flex;justify-content:center;align-items:center;position:absolute;top:-50%;width:75px;height:75px;background:#ff4444;border-radius:50%;border:6px solid var(--clr);left:calc(50% - 37.5px);cursor:pointer;transition:transform 0.3s ease,background-color 0.3s ease,box-shadow 0.3s ease;color:#fff;font-weight:600;font-size:1.3em;touch-action:manipulation}
+        .indicator:hover {transform:scale(1.15);background-color:#ff6666;box-shadow:0 6px 18px rgba(255,68,68,0.5)}
+        .indicator:active {transform:scale(0.9);opacity:0.8}
+
+        .profile-page {display:none;position:absolute;top:0;left:0;width:100%;height:100%;background-color:var(--clr);color:var(--primary);overflow-y:auto;z-index:150;padding-bottom:100px;opacity:0;transition:opacity 0.5s ease}
         .profile-page.active {display:block;opacity:1}
-        .profile-container {max-width:1200px;margin:0 auto;padding:25px}
-        .card {background-color:var(--light-gray);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.5);padding:20px;margin-bottom:20px;transition:transform 0.3s ease}
-        .card:hover {transform:translateY(-3px)}
-        .profile-details {margin-bottom:25px;text-align:left}
-        .profile-details h1 {font-size:1.4rem;margin-bottom:8px;font-weight:500}
-        .profile-details p {color:var(--dark-gray);font-size:0.85rem;display:flex;align-items:center;margin-bottom:6px}
-        .profile-details p i {margin-right:6px;width:16px;text-align:center}
-        .safety-status {display:flex;align-items:center;padding:10px 14px;background-color:rgba(255,255,255,0.05);border-radius:4px;border-left:3px solid var(--primary);margin-top:10px;transition:background-color 0.3s ease}
-        .safety-status:hover {background-color:rgba(255,255,255,0.1)}
-        .status-icon {font-size:1.4rem;margin-right:10px;color:var(--primary);transition:transform 0.3s ease}
+        .profile-container {max-width:1200px;margin:0 auto;padding:30px}
+        .card {background-color:var(--light-gray);border-radius:15px;box-shadow:0 4px 15px rgba(0,0,0,0.5);padding:25px;margin-bottom:25px;transition:transform 0.3s ease,box-shadow 0.3s ease}
+        .card:hover {transform:translateY(-5px);box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+        .profile-details {margin-bottom:30px;text-align:left;opacity:0;animation:fadeUp 0.5s ease forwards}
+        .profile-details h1 {font-size:1.5rem;margin-bottom:10px;font-weight:500}
+        .profile-details p {color:var(--dark-gray);font-size:0.9rem;display:flex;align-items:center;margin-bottom:8px;transition:color 0.3s ease}
+        .profile-details p:hover {color:var(--primary)}
+        .profile-details p i {margin-right:8px;width:18px;text-align:center;transition:transform 0.3s ease}
+        .profile-details p:hover i {transform:scale(1.2)}
+        .safety-status {display:flex;align-items:center;padding:12px 16px;background-color:rgba(255,255,255,0.05);border-radius:6px;border-left:4px solid var(--primary);margin-top:12px;transition:background-color 0.3s ease,transform 0.3s ease}
+        .safety-status:hover {background-color:rgba(255,255,255,0.15);transform:scale(1.02)}
+        .status-icon {font-size:1.5rem;margin-right:12px;color:var(--primary);transition:transform 0.5s ease}
         .safety-status:hover .status-icon {transform:rotate(360deg)}
-        .tabs {display:flex;border-bottom:1px solid var(--mid-gray);margin-bottom:20px;gap:10px;overflow-x:auto}
-        .tab {padding:10px 18px;cursor:pointer;font-weight:500;color:var(--dark-gray);transition:all 0.3s ease;position:relative;font-size:0.9rem}
-        .tab:hover {color:var(--primary);transform:translateY(-2px)}
+
+        .tabs {display:flex;border-bottom:1px solid var(--mid-gray);margin-bottom:25px;gap:12px;overflow-x:auto}
+        .tab {padding:12px 20px;cursor:pointer;font-weight:500;color:var(--dark-gray);transition:all 0.3s ease;position:relative;font-size:0.95rem;touch-action:manipulation}
+        .tab:hover {color:var(--primary);transform:translateY(-3px)}
+        .tab:active {transform:scale(0.95);opacity:0.8}
         .tab.active {color:var(--primary)}
-        .tab.active::after {content:'';position:absolute;bottom:-1px;left:0;width:100%;height:2px;background-color:var(--primary);animation:slideIn 0.3s ease forwards}
+        .tab.active::after {content:'';position:absolute;bottom:-1px;left:0;width:100%;height:3px;background-color:var(--primary);animation:slideIn 0.4s ease forwards}
         @keyframes slideIn {from {width:0} to {width:100%}}
-        .tab-content {display:none;opacity:0;transform:translateY(20px);transition:opacity 0.3s ease,transform 0.3s ease}
+        .tab-content {display:none;opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease}
         .tab-content.active {display:block;opacity:1;transform:translateY(0)}
         .card-body {color:var(--primary)}
-        .section-title {font-size:1.1rem;font-weight:500;margin-bottom:12px;color:var(--primary)}
-        .key-container {background-color:rgba(255,255,255,0.05);border:1px solid var(--mid-gray);border-radius:4px;padding:12px;margin:15px 0;position:relative;transition:transform 0.3s ease}
-        .key-container:hover {transform:translateY(-3px)}
-        .key-value {font-family:monospace;font-size:1rem;letter-spacing:1px;color:var(--primary);word-break:break-all;margin-bottom:8px}
-        .key-copy {position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:var(--dark-gray);transition:color 0.3s ease,transform 0.2s ease}
-        .key-copy:hover {color:var(--primary);transform:scale(1.2)}
-        .key-info {color:var(--dark-gray);font-size:0.8rem;margin-top:6px}
-        .contact-list {margin:15px 0}
-        .contact-item {display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--mid-gray);opacity:0;transform:translateY(20px);animation:slideUp 0.5s ease forwards}
+        .section-title {font-size:1.2rem;font-weight:500;margin-bottom:15px;color:var(--primary);opacity:0;animation:fadeUp 0.5s ease forwards}
+
+        .key-container {background-color:rgba(255,255,255,0.05);border:1px solid var(--mid-gray);border-radius:6px;padding:15px;margin:20px 0;position:relative;transition:transform 0.3s ease,box-shadow 0.3s ease}
+        .key-container:hover {transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+        .key-value {font-family:monospace;font-size:1.1rem;letter-spacing:1px;color:var(--primary);word-break:break-all;margin-bottom:10px}
+        .key-copy {position:absolute;top:15px;right:15px;background:none;border:none;cursor:pointer;color:var(--dark-gray);transition:color 0.3s ease,transform 0.3s ease;touch-action:manipulation}
+        .key-copy:hover {color:var(--primary);transform:scale(1.3) rotate(360deg)}
+        .key-copy:active {transform:scale(0.95);opacity:0.8}
+        .key-info {color:var(--dark-gray);font-size:0.85rem;margin-top:8px}
+
+        .contact-list {margin:20px 0}
+        .contact-item {display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--mid-gray);opacity:0;transform:translateY(20px);animation:slideUp 0.5s ease forwards}
         .contact-item:nth-child(1) {animation-delay:0.1s}
         .contact-item:nth-child(2) {animation-delay:0.2s}
         .contact-item:nth-child(3) {animation-delay:0.3s}
         .contact-item:last-child {border-bottom:none}
-        .contact-avatar {width:36px;height:36px;border-radius:50%;background-color:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;margin-right:10px;color:var(--primary);transition:transform 0.3s ease}
+        .contact-avatar {width:40px;height:40px;border-radius:50%;background-color:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;margin-right:12px;color:var(--primary);transition:transform 0.5s ease}
         .contact-avatar:hover {transform:rotate(360deg)}
         .contact-info {flex:1;text-align:left}
-        .contact-name {font-weight:500;margin-bottom:2px}
-        .safety-feature {margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid var(--mid-gray)}
+        .contact-name {font-weight:500;margin-bottom:3px}
+
+        .safety-feature {margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--mid-gray)}
         .safety-feature:last-child {border-bottom:none;margin-bottom:0;padding-bottom:0}
-        .feature-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-        .feature-title {font-weight:500;display:flex;align-items:center;gap:6px}
-        .feature-icon {color:var(--primary);transition:transform 0.3s ease}
+        .feature-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .feature-title {font-weight:500;display:flex;align-items:center;gap:8px}
+        .feature-icon {color:var(--primary);transition:transform 0.5s ease}
         .feature-header:hover .feature-icon {transform:rotate(360deg)}
-        .feature-switch {position:relative;display:inline-block;width:48px;height:24px}
+        .feature-switch {position:relative;display:inline-block;width:50px;height:26px}
         .feature-switch input {opacity:0;width:0;height:0}
-        .feature-slider {position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--mid-gray);transition:background-color 0.3s ease;border-radius:24px}
-        .feature-slider:before {position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:white;transition:transform 0.3s ease;border-radius:50%}
+        .feature-slider {position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--mid-gray);transition:background-color 0.3s ease;border-radius:26px}
+        .feature-slider:before {position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background-color:white;transition:transform 0.3s ease;border-radius:50%}
         input:checked + .feature-slider {background-color:var(--primary)}
         input:checked + .feature-slider:before {transform:translateX(24px) scale(1.1)}
-        .feature-description {font-size:0.8rem;color:var(--dark-gray);margin-top:4px}
-        .auth-form, .signup-form {display:none;flex-direction:column;gap:15px;background-color:var(--clr);padding:25px;width:420px;max-width:90%;border-radius:8px;font-family:var(--font-main);color:var(--primary);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;box-shadow:0 8px 25px rgba(0,0,0,0.5);max-height:90vh;overflow-y:auto;opacity:0;transition:opacity 0.3s ease;-webkit-overflow-scrolling:touch}
+        .feature-description {font-size:0.85rem;color:var(--dark-gray);margin-top:6px}
+
+        .auth-form, .signup-form {display:none;flex-direction:column;gap:18px;background-color:var(--clr);padding:25px;width:90%;border-radius:12px;font-family:var(--font-main);color:var(--primary);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;box-shadow:0 10px 30px rgba(0,0,0,0.6);max-height:90vh;overflow-y:auto;opacity:0;transition:opacity 0.4s ease}
         .auth-form.active, .signup-form.active {display:flex;opacity:1}
-        .auth-form .flex-column, .signup-form .flex-column {display:flex;flex-direction:column;align-items:flex-start;width:100%;margin-bottom:10px}
-        .auth-form .flex-column > label, .signup-form .flex-column > label {font-weight:600;margin-bottom:6px;font-size:0.9rem}
-        .auth-form .inputForm, .signup-form .inputForm {border:1.5px solid var(--mid-gray);border-radius:6px;height:60px;display:flex;align-items:center;padding-left:10px;transition:0.2s ease-in-out;background-color:var(--light-gray);width:100%;overflow:hidden}
-        .auth-form .input, .signup-form .input {margin-left:8px;border-radius:6px;border:none;width:calc(100% - 28px);height:100%;background-color:var(--light-gray);color:var(--primary);font-size:1.2rem;padding:0 10px}
-        .auth-form .input:focus, .signup-form .input:focus {outline:none}
-        .auth-form .inputForm:focus-within, .signup-form .inputForm:focus-within {border:1.5px solid var(--primary)}
+        .auth-form .flex-column, .signup-form .flex-column {display:flex;flex-direction:column;align-items:flex-start;width:100%;margin-bottom:12px;opacity:0;animation:fadeUp 0.5s ease forwards}
+        .auth-form .flex-column:nth-child(1), .signup-form .flex-column:nth-child(1) {animation-delay:0.1s}
+        .auth-form .flex-column:nth-child(2), .signup-form .flex-column:nth-child(2) {animation-delay:0.2s}
+        .auth-form .flex-column:nth-child(3), .signup-form .flex-column:nth-child(3) {animation-delay:0.3s}
+        .auth-form .flex-column > label, .signup-form .flex-column > label {font-weight:600;margin-bottom:8px;font-size:0.95rem}
+        .auth-form .inputForm, .signup-form .inputForm {border:2px solid var(--mid-gray);border-radius:8px;height:65px;display:flex;align-items:center;padding-left:12px;transition:0.3s ease-in-out;background-color:var(--light-gray);width:100%;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+        .auth-form .input, .signup-form .input {margin-left:10px;border-radius:8px;border:none;width:calc(100% - 32px);height:100%;background-color:var(--light-gray);color:var(--primary);font-size:1.3rem;padding:0 12px;transition:transform 0.3s ease}
+        .auth-form .input:focus, .signup-form .input:focus {outline:none;transform:scale(1.01)}
+        .auth-form .inputForm:focus-within, .signup-form .inputForm:focus-within {border:2px solid var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
         .auth-form ::placeholder, .signup-form ::placeholder {color:var(--dark-gray)}
-        .auth-form .flex-row, .signup-form .flex-row {display:flex;flex-direction:row;align-items:center;gap:8px;justify-content:space-between;width:100%}
-        .auth-form .span, .signup-form .span {font-size:13px;margin-left:4px;color:var(--primary);font-weight:500;cursor:pointer;transition:transform 0.2s ease}
-        .auth-form .span:hover, .signup-form .span:hover {transform:scale(1.1)}
-        .auth-form .p, .signup-form .p {text-align:center;font-size:13px;margin:8px 0}
-        .signup-form .button-group {display:flex;flex-direction:column;gap:12px;width:100%;margin-top:15px}
-        .signup-form .link-group {display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:10px;flex-wrap:wrap;gap:8px}
-        .btn, .button-submit {background:linear-gradient(135deg,#ffffff,#e0e0e0);color:var(--clr);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.2);font-size:0.95rem;font-weight:600;height:45px;padding:0 20px;border:none;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease;display:flex;align-items:center;justify-content:center;width:100%;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-        .btn:hover, .button-submit:hover {transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.3)}
+        .auth-form .flex-row, .signup-form .flex-row {display:flex;flex-direction:row;align-items:center;gap:10px;justify-content:space-between;width:100%;opacity:0;animation:fadeUp 0.5s ease forwards 0.4s}
+        .auth-form .span, .signup-form .span {font-size:14px;margin-left:5px;color:var(--primary);font-weight:500;cursor:pointer;transition:transform 0.3s ease,color 0.3s ease}
+        .auth-form .span:hover, .signup-form .span:hover {transform:scale(1.1);color:#e0e0e0}
+        .auth-form .span:active, .signup-form .span:active {transform:scale(0.95);opacity:0.8}
+        .auth-form .p, .signup-form .p {text-align:center;font-size:14px;margin:10px 0;opacity:0;animation:fadeUp 0.5s ease forwards 0.5s}
+        .signup-form .button-group {display:flex;flex-direction:column;gap:15px;width:100%;margin-top:20px}
+        .signup-form .link-group {display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:12px;flex-wrap:wrap;gap:10px}
+        .btn, .button-submit {background:linear-gradient(135deg,#ffffff,#e0e0e0);color:var(--clr);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);font-size:1rem;font-weight:600;height:50px;padding:0 25px;border:none;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+        .btn:hover, .button-submit:hover {transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.3)}
+        .btn:active, .button-submit:active {transform:scale(0.95);opacity:0.8}
         .btn-primary {background:linear-gradient(135deg,#ffffff,#e0e0e0);color:var(--clr)}
         .btn-primary:hover {background:linear-gradient(135deg,#e0e0e0,#cccccc)}
         .btn-outline {background:transparent;border:2px solid var(--primary);color:var(--primary);box-shadow:none}
         .btn-outline:hover {background:rgba(255,255,255,0.1);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
         .btn-back {background:linear-gradient(135deg,#ff6b6b,#ff8787);color:#fff}
         .btn-back:hover {background:linear-gradient(135deg,#ff8787,#ff6b6b)}
-        .auth-form .error-message, .signup-form .error-message {color:#ff4444;font-size:12px;text-align:center;margin-top:6px;opacity:0;transition:opacity 0.3s ease}
+        .auth-form .error-message, .signup-form .error-message {color:#ff4444;font-size:13px;text-align:center;margin-top:8px;opacity:0;transition:opacity 0.3s ease}
         .auth-form .error-message.active, .signup-form .error-message.active {opacity:1}
-        .form-group {margin-bottom:15px}
-        .form-label {display:block;margin-bottom:5px;font-weight:500;font-size:0.85rem}
-        .form-control {width:100%;padding:8px 10px;border:1px solid var(--mid-gray);border-radius:4px;font-family:var(--font-main);font-size:0.9rem;transition:border-color 0.2s;background-color:var(--light-gray);color:var(--primary)}
-        .form-control:focus {outline:none;border-color:var(--primary)}
-        .action-row {display:flex;justify-content:flex-end;gap:8px;margin-top:15px}
-        .grid-2 {display:grid;grid-template-columns:1fr 1fr;gap:15px}
-        .edit-section {max-height:0;overflow:hidden;transition:max-height 0.5s ease-in-out,opacity 0.3s ease;opacity:0}
-        .edit-section.active {max-height:500px;opacity:1}
-        .add-contact-form {display:none;flex-direction:column;gap:15px;background:#1a1a1a;padding:20px;border-radius:8px;box-shadow:0 0 20px rgba(0,0,0,0.7);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;width:90%;max-width:380px;opacity:0;transition:opacity 0.3s ease}
+        .form-group {margin-bottom:18px}
+        .form-label {display:block;margin-bottom:6px;font-weight:500;font-size:0.9rem}
+        .form-control {width:100%;padding:10px 12px;border:1px solid var(--mid-gray);border-radius:6px;font-family:var(--font-main);font-size:0.95rem;transition:border-color 0.3s ease,transform 0.3s ease;background-color:var(--light-gray);color:var(--primary)}
+        .form-control:focus {outline:none;border-color:var(--primary);transform:scale(1.02)}
+        .action-row {display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+        .grid-2 {display:grid;grid-template-columns:1fr;gap:18px}
+        .edit-section {max-height:0;overflow:hidden;transition:max-height 0.6s ease-in-out,opacity 0.4s ease;opacity:0}
+        .edit-section.active {max-height:600px;opacity:1}
+        .add-contact-form {display:none;flex-direction:column;gap:18px;background:#1a1a1a;padding:25px;border-radius:12px;box-shadow:0 0 25px rgba(0,0,0,0.8);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;width:90%;max-width:400px;opacity:0;transition:opacity 0.4s ease}
         .add-contact-form.active {display:flex;opacity:1}
-        .loading-overlay {position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:1000;display:none}
-        .loading-spinner {border:4px solid #f3f3f3;border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite}
+
+        .loading-overlay {position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1000;display:none}
+        .loading-spinner {border:5px solid #f3f3f3;border-top:5px solid var(--primary);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite}
         @keyframes spin {0% {transform:rotate(0deg)} 100% {transform:rotate(360deg)}}
-        .toast {position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.5);z-index:1000;opacity:0;transition:opacity 0.3s ease;display:flex;align-items:center;gap:10px}
+        .toast {position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 25px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);z-index:1000;opacity:0;transition:opacity 0.4s ease;display:flex;align-items:center;gap:12px}
         .toast.active {opacity:1}
         .toast.error {background:#ff4444}
         .toast.success {background:#4CAF50}
-        .toast button {background:#fff;color:#333;border:none;padding:5px 10px;border-radius:3px;cursor:pointer}
+        .toast button {background:#fff;color:#333;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;touch-action:manipulation;transition:transform 0.3s ease}
+        .toast button:hover {transform:scale(1.1)}
+        .toast button:active {transform:scale(0.95);opacity:0.8}
+
         @media (max-width: 768px) {
-            .grid-2 {grid-template-columns:1fr}
             .profile-details {text-align:center}
-            .auth-form, .signup-form {width:90%;padding:20px}
-            .signup-form .link-group {flex-direction:column;gap:8px}
             .bottom-sheet {height:60vh}
-            .bottom-sheet-header {position:absolute;top:0;height:55px}
+            .bottom-sheet-header {height:25px}
             .bottom-sheet-content {top:25px}
-            .navigation ul li {width:50px}
-            .indicator {transform:scale(1.3);width:60px;height:60px;left:calc(50% - 30px)}
+            .navigation ul li {width:60px}
+            .indicator {width:70px;height:70px;left:calc(50% - 35px)}
         }
     </style>
 </head>
@@ -394,50 +423,555 @@
         </ul>
         <div class="indicator">SOS</div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script>
-        const firebaseConfig = {apiKey:"AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",authDomain:"soapp-80936.firebaseapp.com",projectId:"soapp-80936",storageBucket:"soapp-80936.firebasestorage.app",messagingSenderId:"152328551150",appId:"1:152328551150:web:211ab46d98e41560d1d1ff",measurementId:"G-2ZVT8KSKHR"};
+    const firebaseConfig = {
+    apiKey: "AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",
+    authDomain: "soapp-80936.firebaseapp.com",
+    projectId: "soapp-80936",
+    storageBucket: "soapp-80936.firebasestorage.app",
+    messagingSenderId: "152328551150",
+    appId: "1:152328551150:web:211ab46d98e41560d1d1ff",
+    measurementId: "G-2ZVT8KSKHR"
+};
+let auth, db;
+const authForm = document.getElementById('auth-form');
+const signupForm = document.getElementById('signup-form');
+const mapContainer = document.getElementById('map-container');
+const bottomSheet = document.getElementById('bottom-sheet');
+const profilePage = document.getElementById('profile-page');
+const navigation = document.getElementById('navigation');
+const loadingOverlay = document.getElementById('loading-overlay');
+const toast = document.getElementById('toast');
+let map, placesService, autocompleteA, autocompleteB, currentPosition, directionsService, directionsRenderer, currentLocationMarker;
+
+const showLoading = () => loadingOverlay && (loadingOverlay.style.display = 'flex');
+const hideLoading = () => loadingOverlay && (loadingOverlay.style.display = 'none');
+const showToast = (message, type = 'info', button = null, callback = null) => {
+    if (!toast) return;
+    toast.innerHTML = message + (button ? ` <button id="toast-btn">${button}</button>` : '');
+    toast.className = `toast active ${type}`;
+    setTimeout(() => toast.classList.remove('active'), 5000);
+    if (button && callback) document.getElementById('toast-btn')?.addEventListener('click', callback);
+};
+const showError = (elementId, message) => {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('active');
+        setTimeout(() => errorElement.classList.remove('active'), 5000);
+    }
+    showToast(message, 'error');
+};
+const generateEmergencyKey = () => 'SOAPP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+const validateEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validatePhone = phone => phone === '' || /^\+?[\d\s-]{8,15}$/.test(phone);
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
+};
+
+async function loadFirebase() {
+    if (!window.firebase) {
+        await Promise.all([
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'),
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js'),
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js')
+        ]);
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const authForm = document.getElementById('auth-form');
-        const signupForm = document.getElementById('signup-form');
-        const mapContainer = document.getElementById('map-container');
-        const bottomSheet = document.getElementById('bottom-sheet');
-        const profilePage = document.getElementById('profile-page');
-        const navigation = document.getElementById('navigation');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const toast = document.getElementById('toast');
-        let map, placesService, autocompleteA, autocompleteB, currentPosition, directionsService, directionsRenderer, currentLocationMarker;
-        const showLoading = () => {if(loadingOverlay)loadingOverlay.style.display='flex'};
-        const hideLoading = () => {if(loadingOverlay)loadingOverlay.style.display='none'};
-        const showToast = (message,type='info',button=null,callback=null) => {if(!toast)return;toast.innerHTML=message+(button?` <button id="toast-btn">${button}</button>`:'');toast.className=`toast active ${type}`;setTimeout(() => toast.classList.remove('active'),5000);if(button&&callback){const toastBtn=document.getElementById('toast-btn');if(toastBtn)toastBtn.addEventListener('click',callback)}};
-        const showError = (elementId,message) => {const errorElement=document.getElementById(elementId);if(errorElement){errorElement.textContent=message;errorElement.classList.add('active');setTimeout(() => errorElement.classList.remove('active'),5000)}showToast(message,'error')};
-        const generateEmergencyKey = () => 'SOAPP-'+Math.random().toString(36).substr(2,9).toUpperCase();
-        const validateEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        const validatePhone = phone => phone===''||/^\+?[\d\s-]{8,15}$/.test(phone);
-        const calculateDistance = (lat1,lon1,lat2,lon2) => {const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);return(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1)};
-        async function loadGoogleMapsScript(){return new Promise((resolve,reject)=>{if(window.google&&window.google.maps)return resolve();const script=document.createElement('script');script.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE&libraries=places,directions&callback=initMap';script.async=true;script.defer=true;script.onload=resolve;script.onerror=reject;document.head.appendChild(script)})}
-        const showMainInterface = () => {showLoading();if(authForm)authForm.classList.remove('active');if(signupForm)signupForm.classList.remove('active');if(mapContainer)mapContainer.classList.add('active');if(navigation)navigation.classList.add('active');if(bottomSheet){bottomSheet.classList.add('active');bottomSheet.style.transform='translateY(calc(100% - 25px))'}if(profilePage)profilePage.classList.remove('active');requestAnimationFrame(()=>{setupBottomSheet();setupNavigation();setupNotificationListener();hideLoading()})};
-        const handleSignIn = async e => {e.preventDefault();showLoading();const emailInput=document.getElementById('signin-email');const passwordInput=document.getElementById('signin-password');const email=emailInput?.value.trim()||'';const password=passwordInput?.value.trim()||'';if(!validateEmail(email)){showError('signin-error-message','Please enter a valid email.');hideLoading();return}if(password.length<6){showError('signin-error-message','Password must be at least 6 characters.');hideLoading();return}try{const userCredential=await auth.signInWithEmailAndPassword(email,password);await loadGoogleMapsScript();showMainInterface();showToast('Logged in successfully!','success')}catch(error){let errorMessage='Login failed. Please try again.';switch(error.code){case'auth/user-not-found':errorMessage='No account found with this email.';break;case'auth/wrong-password':errorMessage='Incorrect password.';break;case'auth/network-request-failed':errorMessage='Network error. Check your connection.';break;case'auth/too-many-requests':errorMessage='Too many attempts. Try again later.';break}showError('signin-error-message',errorMessage)}finally{hideLoading()}};
-        const handleSignUp = async e => {e.preventDefault();showLoading();const fullName=document.getElementById('signup-fullname')?.value.trim()||'';const email=document.getElementById('signup-email')?.value.trim()||'';const password=document.getElementById('signup-password')?.value.trim()||'';const phone=document.getElementById('signup-phone')?.value.trim()||'';if(!fullName){showError('signup-error-message','Please enter your full name.');hideLoading();return}if(!validateEmail(email)){showError('signup-error-message','Please enter a valid email.');hideLoading();return}if(password.length<6){showError('signup-error-message','Password must be at least 6 characters.');hideLoading();return}if(phone&&!validatePhone(phone)){showError('signup-error-message','Please enter a valid phone number.');hideLoading();return}try{const userCredential=await auth.createUserWithEmailAndPassword(email,password);await db.collection('users').doc(userCredential.user.uid).set({fullName,email,phone,emergencyKey:generateEmergencyKey(),emergencyContacts:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});await loadGoogleMapsScript();showMainInterface();showToast('Account created!','success')}catch(error){let errorMessage='Sign-up failed. Please try again.';if(error.code==='auth/email-already-in-use')errorMessage='Email already in use.';showError('signup-error-message',errorMessage)}finally{hideLoading()}};
-        if(authForm){authForm.addEventListener('submit',handleSignIn);const signInBtn=document.getElementById('signin-btn');if(signInBtn){signInBtn.addEventListener('touchend',handleSignIn,{passive:false});signInBtn.addEventListener('click',handleSignIn)}}
-        if(signupForm){signupForm.addEventListener('submit',handleSignUp);const signupBtn=document.getElementById('signup-btn');if(signupBtn){signupBtn.addEventListener('touchend',handleSignUp,{passive:false});signupBtn.addEventListener('click',handleSignUp)}}
-        const showSignup=document.getElementById('show-signup');if(showSignup){showSignup.addEventListener('click',()=>{if(authForm)authForm.classList.remove('active');if(signupForm)signupForm.classList.add('active')});showSignup.addEventListener('touchend',()=>{if(authForm)authForm.classList.remove('active');if(signupForm)signupForm.classList.add('active')},{passive:false})}
-        const showSignin=document.getElementById('show-signin');if(showSignin){showSignin.addEventListener('click',()=>{if(signupForm)signupForm.classList.remove('active');if(authForm)authForm.classList.add('active')});showSignin.addEventListener('touchend',()=>{if(signupForm)signupForm.classList.remove('active');if(authForm)authForm.classList.add('active')},{passive:false})}
-        const backToSignin=document.getElementById('back-to-signin');if(backToSignin){backToSignin.addEventListener('click',()=>{if(signupForm)signupForm.classList.remove('active');if(authForm)authForm.classList.add('active')});backToSignin.addEventListener('touchend',()=>{if(signupForm)signupForm.classList.remove('active');if(authForm)authForm.classList.add('active')},{passive:false})}
-        const forgotPassword=document.getElementById('forgot-password');if(forgotPassword){const handleForgotPassword=async e=>{e.preventDefault();const email=document.getElementById('signin-email')?.value.trim()||'';if(!validateEmail(email)){showError('signin-error-message','Invalid email.');return}showLoading();try{await auth.sendPasswordResetEmail(email);showToast('Password reset email sent!','success')}catch(error){showError('signin-error-message',error.message)}hideLoading()};forgotPassword.addEventListener('click',handleForgotPassword);forgotPassword.addEventListener('touchend',handleForgotPassword,{passive:false})}
-        window.initMap=function(){const blackAndWhiteStyle=[{elementType:"geometry",stylers:[{color:"#212121"}]},{elementType:"labels.icon",stylers:[{visibility:"off"}]},{elementType:"labels.text.fill",stylers:[{color:"#757575"}]},{elementType:"labels.text.stroke",stylers:[{color:"#212121"}]},{featureType:"road",elementType:"geometry.fill",stylers:[{color:"#2c2c2c"}]},{featureType:"water",elementType:"geometry",stylers:[{color:"#000000"}]}];const mapElement=document.getElementById('map');if(!mapElement)return;map=new google.maps.Map(mapElement,{center:{lat:37.7749,lng:-122.4194},zoom:14,styles:blackAndWhiteStyle,disableDefaultUI:true,gestureHandling:'greedy',mapTypeControl:false,streetViewControl:false,fullscreenControl:false});placesService=new google.maps.places.PlacesService(map);directionsService=new google.maps.DirectionsService();directionsRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:false});const pointA=document.getElementById('point-a');const pointB=document.getElementById('point-b');if(pointA&&pointB){autocompleteA=new google.maps.places.Autocomplete(pointA);autocompleteB=new google.maps.places.Autocomplete(pointB);autocompleteA.bindTo('bounds',map);autocompleteB.bindTo('bounds',map);autocompleteA.addListener('place_changed',()=>{const place=autocompleteA.getPlace();if(place.geometry)map.panTo(place.geometry.location)});autocompleteB.addListener('place_changed',()=>{const place=autocompleteB.getPlace();if(place.geometry)map.panTo(place.geometry.location)})}getCurrentLocation();['zoom-in','zoom-out','center-map'].forEach(id=>{const btn=document.getElementById(id);if(btn){btn.addEventListener('click',()=>{if(id==='zoom-in')map.setZoom(map.getZoom()+1);else if(id==='zoom-out'&&map.getZoom()>1)map.setZoom(map.getZoom()-1);else if(currentPosition)map.panTo(currentPosition);else getCurrentLocation()})}})};
-        function getCurrentLocation(){if(!navigator.geolocation)return showToast('Geolocation not supported.','error');navigator.geolocation.getCurrentPosition(position=>{currentPosition={lat:position.coords.latitude,lng:position.coords.longitude};map.setCenter(currentPosition);if(currentLocationMarker)currentLocationMarker.setMap(null);currentLocationMarker=new google.maps.Marker({position:currentPosition,map:map,title:'Your Location',icon:{url:'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'}});findNearbySafetyPoints(currentPosition)},error=>{showToast('Please enable location services.','error','Turn On',()=>{getCurrentLocation()});map.setCenter({lat:37.7749,lng:-122.4194})},{timeout:10000,enableHighAccuracy:true})}
-        function findNearbySafetyPoints(location){const safetyTypes=['police','hospital'];let allResults=[];safetyTypes.forEach(type=>{placesService.nearbySearch({location,radius:5000,type},(results,status)=>{if(status===google.maps.places.PlacesServiceStatus.OK){results.forEach(place=>{place.type=type;place.distance=calculateDistance(location.lat,location.lng,place.geometry.location.lat(),place.geometry.location.lng());allResults.push(place)});allResults.sort((a,b)=>a.distance-b.distance);displaySafePoints(allResults)}else{showToast('Failed to fetch nearby safety points.','error')}})})}
-        function displaySafePoints(places){const safePointsList=document.getElementById('safe-points-list');if(!safePointsList)return;safePointsList.innerHTML='';if(!places.length){safePointsList.innerHTML='<p>No safe points found.</p>'}else{places.forEach(place=>{const safePointItem=document.createElement('div');safePointItem.classList.add('safe-point-item');safePointItem.innerHTML=`<i class="fas ${place.type==='police'?'fa-shield-alt':'fa-hospital'} safe-point-icon"></i><div class="safe-point-info"><div class="safe-point-name">${place.name}</div><div class="safe-point-distance">${place.distance} km away</div></div>`;safePointItem.addEventListener('click',()=>{map.panTo(place.geometry.location);map.setZoom(16);directionsRenderer.setDirections(null);if(currentPosition){directionsService.route({origin:currentPosition,destination:place.geometry.location,travelMode:'WALKING'},(response,status)=>{if(status==='OK')directionsRenderer.setDirections(response);else showToast('Route calculation failed.','error')})}});safePointsList.appendChild(safePointItem)})}}
-        function setupBottomSheet(){const customSheet=document.getElementById('bottom-sheet');if(!customSheet)return;customSheet.classList.add('active');const sheetHeight=customSheet.offsetHeight;const minimizedPosition=sheetHeight-25;let startY=minimizedPosition;let currentY=startY;const snapPositions=[0,minimizedPosition];customSheet.style.transform=`translateY(${currentY}px)`;const mc=new Hammer.Manager(customSheet);mc.add(new Hammer.Pan({threshold:0,pointers:0,direction:Hammer.DIRECTION_VERTICAL}));mc.on('panstart',e=>{startY=currentY;customSheet.style.transition='none'});mc.on('panmove',e=>{let newY=startY+e.deltaY;newY=Math.max(0,Math.min(newY,minimizedPosition));currentY=newY;customSheet.style.transform=`translateY(${currentY}px)`});mc.on('panend',e=>{customSheet.style.transition='transform 0.3s ease-out';const closestSnap=snapPositions.reduce((prev,curr)=>Math.abs(curr-currentY)<Math.abs(prev-currentY)?curr:prev);currentY=closestSnap;customSheet.style.transform=`translateY(${currentY}px)`;document.body.className=currentY===0?'expanded':'minimized'});mc.add(new Hammer.Tap());mc.on('tap',e=>{if(!customSheet.contains(e.target))return;if(document.body.classList.contains('minimized')){currentY=0;customSheet.style.transform=`translateY(${currentY}px)`;document.body.classList.remove('minimized');document.body.classList.add('expanded')}});document.addEventListener('click',e=>{if(!customSheet.contains(e.target)&&mapContainer?.contains(e.target)&&!document.body.classList.contains('minimized')){currentY=minimizedPosition;customSheet.style.transform=`translateY(${currentY}px)`;document.body.classList.add('minimized');document.body.classList.remove('expanded')}});const getRouteBtn=document.getElementById('get-route');if(getRouteBtn){getRouteBtn.addEventListener('click',()=>{const pointA=document.getElementById('point-a').value;const pointB=document.getElementById('point-b').value;if(!pointA||!pointB){showToast('Please enter both start and destination.','error');return}calculateRoute(pointA,pointB)})}}
-        function calculateRoute(start,end){const geocoder=new google.maps.Geocoder();geocoder.geocode({address:start},(resultsA,statusA)=>{if(statusA===google.maps.GeocoderStatus.OK){const startLocation=resultsA[0].geometry.location;geocoder.geocode({address:end},(resultsB,statusB)=>{if(statusB===google.maps.GeocoderStatus.OK){const endLocation=resultsB[0].geometry.location;directionsService.route({origin:startLocation,destination:endLocation,travelMode:'WALKING'},(response,status)=>{if(status==='OK'){directionsRenderer.setDirections(response);map.fitBounds(response.routes[0].bounds)}else{showToast('Route calculation failed.','error')}})}else{showToast('Destination not found.','error')}})}else{showToast('Start point not found','error')}})}
-        function setupNavigation(){const navItems={'map-nav':()=>{if(mapContainer)mapContainer.classList.add('active');if(bottomSheet)bottomSheet.classList.add('active');if(profilePage)profilePage.classList.remove('active')},'profile-nav':()=>{if(mapContainer)mapContainer.classList.remove('active');if(customSheet)bottomSheet.classList.remove('active');if(profilePage)profilePage.classList.add('active');loadProfile()}};document.querySelectorAll('.list').forEach(item=>{item.addEventListener('click',()=>{document.querySelectorAll('.list').forEach(li=>li.classList.remove('active'));item.classList.add('active');navItems[item.id]()})});const indicator=document.querySelector('.indicator');if(indicator){indicator.addEventListener('click',async()=>{if(!confirm('Send SOS alert?'))return;showLoading();const user=auth.currentUser;if(!user){showToast('Please log in to send SOS.','error');hideLoading();return}if(!currentPosition){showToast('Location unavailable.','error');hideLoading();return}try{const userDoc=await db.collection('users').doc(user.uid).get();const contacts=userDoc.exists?userDoc.data().emergencyContacts||[]:[];const emergencyMessage=document.getElementById('emergency-message')?.value.trim()||'I need help!';if(!contacts.length)throw new Error('No emergency contacts.');const sosData={senderId:user.uid,senderName:user.fullName,location:currentPosition,message:emergencyMessage,timestamp:firebase.firestore.FieldValue.serverTimestamp(),status:'active'};await Promise.all(contacts.map(contactId=>db.collection('notifications').doc(contactId).set(sosData)));showToast('SOS sent!','success')}catch(error){showToast('SOS failed: '+error.message,'error')}hideLoading()})}}
-        async function loadProfile(){showLoading();const user=auth.currentUser;if(!user){showToast('Please log in to view profile.','error');hideLoading();return}try{const userDoc=await db.collection('users').doc(user.uid).get();const userData=userDoc.exists?userDoc.data():{fullName:user.displayName||'User',email:user.email};document.getElementById('profile-name').textContent=userData.fullName||'User';document.getElementById('profile-email').innerHTML=`<i class="fas fa-envelope"></i> ${userData.email||'N/A'}`;document.getElementById('profile-phone').innerHTML=`<i class="fas fa-phone"></i> ${userData.phone||'Not provided'}`;document.getElementById('emergency-key').textContent=userData.emergencyKey||'N/A';document.getElementById('full-name').value=userData.fullName||'';document.getElementById('email-display').value=userData.email||'';document.getElementById('phone').value=userData.phone||'';document.getElementById('emergency-message').value=userData.emergencyMessage||'I need help!';document.getElementById('safety-status').textContent='Status: Safe';document.getElementById('last-verified').textContent=`Verified: ${new Date().toLocaleString()}`;const contactList=document.getElementById('contact-list');contactList.innerHTML='';const contacts=userData.emergencyContacts||[];if(contacts.length){await Promise.all(contacts.map(async contactId=>{const contactDoc=await db.collection('users').doc(contactId).get();if(contactDoc.exists){const contactData=contactDoc.data();const contactItem=document.createElement('div');contactItem.classList.add('contact-item');contactItem.innerHTML=`<div class="contact-avatar">${contactData.fullName[0]}</div><div class="contact-info"><div class="contact-name">${contactData.fullName}</div><div class="place-address">${contactData.email}</div></div><button class="btn btn-outline" onclick="removeContact('${contactId}')">Remove</button>`;contactList.appendChild(contactItem)}}))}else{contactList.innerHTML='<p>No emergency contacts added.</p>'}}catch(error){showToast('Failed to load profile: '+error.message,'error')}setupProfileInteractions();hideLoading()}
-        function setupProfileInteractions(){const tabs=document.querySelectorAll('.tab');tabs.forEach(tab=>{tab.addEventListener('click',()=>{tabs.forEach(t=>t.classList.remove('active'));tab.classList.add('active');document.querySelectorAll('.tab-content').forEach(content=>content.classList.remove('active'));document.getElementById(tab.dataset.tab).classList.add('active')})});const editBtn=document.getElementById('edit-profile');const saveBtn=document.getElementById('save-changes');const signOutBtn=document.getElementById('sign-out');const editSection=document.getElementById('edit-section');const inputs=editSection.querySelectorAll('input,textarea');editBtn.addEventListener('click',()=>{editSection.classList.add('active');inputs.forEach(input=>input.removeAttribute('readonly'));saveBtn.disabled=false});saveBtn.addEventListener('click',async()=>{showLoading();const user=auth.currentUser;if(!user){showToast('Please log in to update profile.','error');hideLoading();return}const updatedData={fullName:document.getElementById('full-name').value.trim(),email:document.getElementById('email-display').value.trim(),phone:document.getElementById('phone').value.trim(),emergencyMessage:document.getElementById('emergency-message').value.trim()};if(!validatePhone(updatedData.phone)){showToast('Invalid phone number.','error');hideLoading();return}try{await db.collection('users').doc(user.uid).update(updatedData);if(user.email!==updatedData.email)await auth.currentUser.updateEmail(updatedData.email);inputs.forEach(input=>input.setAttribute('readonly',true));editSection.classList.remove('active');saveBtn.disabled=true;loadProfile();showToast('Profile updated!','success')}catch(error){showToast('Update failed: '+error.message,'error')}hideLoading()});signOutBtn.addEventListener('click',async()=>{if(confirm('Are you sure you want to sign out?')){showLoading();try{await auth.signOut();window.location.reload()}catch(error){showToast('Sign out failed: '+error.message,'error')}hideLoading()}});const addContactBtn=document.getElementById('add-contact-btn');const addContactForm=document.getElementById('add-contact-form');const submitContactBtn=document.getElementById('submit-contact-btn');const cancelContactBtn=document.getElementById('cancel-contact-btn');addContactBtn.addEventListener('click',()=>addContactForm.classList.add('active'));cancelContactBtn.addEventListener('click',()=>addContactForm.classList.remove('active'));submitContactBtn.addEventListener('click',async()=>{showLoading();const contactKey=document.getElementById('contact-key-input').value.trim();if(!contactKey.startsWith('SOAPP-')){showError('add-contact-error','Invalid safety key format.');hideLoading();return}try{const user=auth.currentUser;if(!user)throw new Error('Please log in.');const contactQuery=await db.collection('users').where('emergencyKey','==',contactKey).get();if(contactQuery.empty)throw new Error('No user found with this key.');const contactDoc=contactQuery.docs[0];const contactId=contactDoc.id;if(contactId===user.uid)throw new Error('You cannot add yourself.');const userDoc=await db.collection('users').doc(user.uid).get();const currentContacts=userDoc.exists?userDoc.data().emergencyContacts||[]:[];if(currentContacts.includes(contactId))throw new Error('Contact already added.');currentContacts.push(contactId);await db.collection('users').doc(user.uid).update({emergencyContacts:currentContacts});addContactForm.classList.remove('active');document.getElementById('contact-key-input').value='';loadProfile();showToast('Contact added!','success')}catch(error){showError('add-contact-error',error.message)}hideLoading()});const copyBtn=document.querySelector('.key-copy');copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(document.getElementById('emergency-key').textContent);showToast('Key copied to clipboard!','success')})}
-        async function removeContact(contactId){if(!confirm('Remove this contact?'))return;showLoading();const user=auth.currentUser;if(!user){showToast('Please log in.','error');hideLoading();return}try{const userDoc=await db.collection('users').doc(user.uid).get();let currentContacts=userDoc.data().emergencyContacts||[];currentContacts=currentContacts.filter(id=>id!==contactId);await db.collection('users').doc(user.uid).update({emergencyContacts:currentContacts});loadProfile();showToast('Contact removed!','success')}catch(error){showToast('Failed to remove contact: '+error.message,'error')}hideLoading()}
-        function setupNotificationListener(){const user=auth.currentUser;if(!user)return;db.collection('notifications').doc(user.uid).onSnapshot(snapshot=>{const data=snapshot.data();if(data&&data.status==='active'){showToast(`SOS from ${data.senderName}: ${data.message}`,'error','View',()=>{map.panTo(data.location);map.setZoom(16);new google.maps.Marker({position:data.location,map,title:`${data.senderName}'s Location`});db.collection('notifications').doc(user.uid).update({status:'viewed'})})}})}
-        auth.onAuthStateChanged(user=>{if(user){loadGoogleMapsScript().then(showMainInterface)}});
+    }
+    auth = firebase.auth();
+    db = firebase.firestore();
+}
+
+async function loadGoogleMapsScript() {
+    if (window.google && window.google.maps) return;
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE&libraries=places,directions&callback=initMap';
+        script.async = true;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+const showMainInterface = () => {
+    showLoading();
+    authForm?.classList.remove('active');
+    signupForm?.classList.remove('active');
+    mapContainer?.classList.add('active');
+    navigation?.classList.add('active');
+    bottomSheet?.classList.add('active');
+    bottomSheet.style.transform = 'translateY(calc(100% - 25px))';
+    profilePage?.classList.remove('active');
+    requestAnimationFrame(() => {
+        setupBottomSheet();
+        setupNavigation();
+        setupNotificationListener();
+        hideLoading();
+    });
+};
+
+const handleSignIn = async e => {
+    e.preventDefault();
+    showLoading();
+    await loadFirebase();
+    const email = document.getElementById('signin-email')?.value.trim() || '';
+    const password = document.getElementById('signin-password')?.value.trim() || '';
+    if (!validateEmail(email)) return showError('signin-error-message', 'Please enter a valid email.'), hideLoading();
+    if (password.length < 6) return showError('signin-error-message', 'Password must be at least 6 characters.'), hideLoading();
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        await loadGoogleMapsScript();
+        showMainInterface();
+        showToast('Logged in successfully!', 'success');
+    } catch (error) {
+        let errorMessage = 'Login failed. Please try again.';
+        switch (error.code) {
+            case 'auth/user-not-found': errorMessage = 'No account found with this email.'; break;
+            case 'auth/wrong-password': errorMessage = 'Incorrect password.'; break;
+            case 'auth/network-request-failed': errorMessage = 'Network error. Check your connection.'; break;
+            case 'auth/too-many-requests': errorMessage = 'Too many attempts. Try again later.'; break;
+        }
+        showError('signin-error-message', errorMessage);
+    } finally {
+        hideLoading();
+    }
+};
+
+const handleSignUp = async e => {
+    e.preventDefault();
+    showLoading();
+    await loadFirebase();
+    const fullName = document.getElementById('signup-fullname')?.value.trim() || '';
+    const email = document.getElementById('signup-email')?.value.trim() || '';
+    const password = document.getElementById('signup-password')?.value.trim() || '';
+    const phone = document.getElementById('signup-phone')?.value.trim() || '';
+    if (!fullName) return showError('signup-error-message', 'Please enter your full name.'), hideLoading();
+    if (!validateEmail(email)) return showError('signup-error-message', 'Please enter a valid email.'), hideLoading();
+    if (password.length < 6) return showError('signup-error-message', 'Password must be at least 6 characters.'), hideLoading();
+    if (phone && !validatePhone(phone)) return showError('signup-error-message', 'Please enter a valid phone number.'), hideLoading();
+    try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        await db.collection('users').doc(userCredential.user.uid).set({
+            fullName, email, phone, emergencyKey: generateEmergencyKey(), emergencyContacts: [],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await loadGoogleMapsScript();
+        showMainInterface();
+        showToast('Account created!', 'success');
+    } catch (error) {
+        showError('signup-error-message', error.code === 'auth/email-already-in-use' ? 'Email already in use.' : 'Sign-up failed. Please try again.');
+    } finally {
+        hideLoading();
+    }
+};
+
+authForm?.addEventListener('submit', handleSignIn);
+document.getElementById('signin-btn')?.addEventListener('touchend', handleSignIn, { passive: false });
+signupForm?.addEventListener('submit', handleSignUp);
+document.getElementById('signup-btn')?.addEventListener('touchend', handleSignUp, { passive: false });
+document.getElementById('show-signup')?.addEventListener('click', () => { authForm?.classList.remove('active'); signupForm?.classList.add('active'); });
+document.getElementById('show-signin')?.addEventListener('click', () => { signupForm?.classList.remove('active'); authForm?.classList.add('active'); });
+document.getElementById('back-to-signin')?.addEventListener('click', () => { signupForm?.classList.remove('active'); authForm?.classList.add('active'); });
+document.getElementById('forgot-password')?.addEventListener('click', async e => {
+    e.preventDefault();
+    await loadFirebase();
+    const email = document.getElementById('signin-email')?.value.trim() || '';
+    if (!validateEmail(email)) return showError('signin-error-message', 'Invalid email.');
+    showLoading();
+    try {
+        await auth.sendPasswordResetEmail(email);
+        showToast('Password reset email sent!', 'success');
+    } catch (error) {
+        showError('signin-error-message', error.message);
+    }
+    hideLoading();
+});
+
+window.initMap = function () {
+    const blackAndWhiteStyle = [
+        { elementType: "geometry", stylers: [{ color: "#212121" }] },
+        { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+        { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#2c2c2c" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] }
+    ];
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 37.7749, lng: -122.4194 }, zoom: 14, styles: blackAndWhiteStyle,
+        disableDefaultUI: true, gestureHandling: 'greedy', mapTypeControl: false, streetViewControl: false, fullscreenControl: false
+    });
+    placesService = new google.maps.places.PlacesService(map);
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({ map, suppressMarkers: false });
+    const pointA = document.getElementById('point-a'), pointB = document.getElementById('point-b');
+    if (pointA && pointB) {
+        autocompleteA = new google.maps.places.Autocomplete(pointA);
+        autocompleteB = new google.maps.places.Autocomplete(pointB);
+        autocompleteA.bindTo('bounds', map);
+        autocompleteB.bindTo('bounds', map);
+        autocompleteA.addListener('place_changed', () => { const place = autocompleteA.getPlace(); if (place.geometry) map.panTo(place.geometry.location); });
+        autocompleteB.addListener('place_changed', () => { const place = autocompleteB.getPlace(); if (place.geometry) map.panTo(place.geometry.location); });
+    }
+    getCurrentLocation();
+    ['zoom-in', 'zoom-out', 'center-map'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', () => {
+            if (id === 'zoom-in') map.setZoom(map.getZoom() + 1);
+            else if (id === 'zoom-out' && map.getZoom() > 1) map.setZoom(map.getZoom() - 1);
+            else if (currentPosition) map.panTo(currentPosition);
+            else getCurrentLocation();
+        });
+    });
+};
+
+function getCurrentLocation() {
+    if (!navigator.geolocation) return showToast('Geolocation not supported.', 'error');
+    navigator.geolocation.getCurrentPosition(position => {
+        currentPosition = { lat: position.coords.latitude, lng: position.coords.longitude };
+        map.setCenter(currentPosition);
+        if (currentLocationMarker) currentLocationMarker.setMap(null);
+        currentLocationMarker = new google.maps.Marker({
+            position: currentPosition, map, title: 'Your Location',
+            icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
+        });
+        findNearbySafetyPoints(currentPosition);
+    }, error => {
+        showToast('Please enable location services.', 'error', 'Turn On', () => getCurrentLocation());
+        map.setCenter({ lat: 37.7749, lng: -122.4194 });
+    }, { timeout: 10000, enableHighAccuracy: true });
+}
+
+function findNearbySafetyPoints(location) {
+    const safetyTypes = ['police', 'hospital'];
+    let allResults = [];
+    safetyTypes.forEach(type => {
+        placesService.nearbySearch({ location, radius: 5000, type }, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                results.forEach(place => {
+                    place.type = type;
+                    place.distance = calculateDistance(location.lat, location.lng, place.geometry.location.lat(), place.geometry.location.lng());
+                    allResults.push(place);
+                });
+                allResults.sort((a, b) => a.distance - b.distance);
+                displaySafePoints(allResults);
+            } else {
+                showToast('Failed to fetch nearby safety points.', 'error');
+            }
+        });
+    });
+}
+
+function displaySafePoints(places) {
+    const safePointsList = document.getElementById('safe-points-list');
+    if (!safePointsList) return;
+    safePointsList.innerHTML = '';
+    places.forEach((place, index) => {
+        const id = `${place.place_id}-${index}`;
+        const safePointItem = document.createElement('div');
+        safePointItem.dataset.id = id;
+        safePointItem.classList.add('safe-point-item');
+        safePointItem.innerHTML = `<i class="fas ${place.type === 'police' ? 'fa-shield-alt' : 'fa-hospital'} safe-point-icon"></i><div class="safe-point-info"><div class="safe-point-name">${place.name}</div><div class="safe-point-distance">${place.distance} km away</div></div>`;
+        safePointItem.addEventListener('click', () => {
+            map.panTo(place.geometry.location);
+            map.setZoom(16);
+            directionsRenderer.setDirections(null);
+            if (currentPosition) {
+                directionsService.route({ origin: currentPosition, destination: place.geometry.location, travelMode: 'WALKING' }, (response, status) => {
+                    if (status === 'OK') directionsRenderer.setDirections(response);
+                    else showToast('Route calculation failed.', 'error');
+                });
+            }
+        });
+        safePointsList.appendChild(safePointItem);
+    });
+    if (!places.length) safePointsList.innerHTML = '<p>No safe points found.</p>';
+}
+
+function setupBottomSheet() {
+    const customSheet = bottomSheet;
+    if (!customSheet) return;
+    customSheet.classList.add('active');
+    const sheetHeight = customSheet.offsetHeight;
+    const minimizedPosition = sheetHeight - 25;
+    let startY = minimizedPosition, currentY = startY;
+    const snapPositions = [0, minimizedPosition];
+    customSheet.style.transform = `translateY(${currentY}px)`;
+    const mc = new Hammer.Manager(customSheet);
+    mc.add(new Hammer.Pan({ threshold: 0, pointers: 0, direction: Hammer.DIRECTION_VERTICAL }));
+    mc.on('panstart', e => { startY = currentY; customSheet.style.transition = 'none'; });
+    mc.on('panmove', e => {
+        let newY = startY + e.deltaY;
+        newY = Math.max(0, Math.min(newY, minimizedPosition));
+        currentY = newY;
+        customSheet.style.transform = `translateY(${currentY}px)`;
+    });
+    mc.on('panend', e => {
+        customSheet.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+        const closestSnap = snapPositions.reduce((prev, curr) => Math.abs(curr - currentY) < Math.abs(prev - currentY) ? curr : prev);
+        currentY = closestSnap;
+        customSheet.style.transform = `translateY(${currentY}px)`;
+        document.body.className = currentY === 0 ? 'expanded' : 'minimized';
+    });
+    mc.add(new Hammer.Tap());
+    mc.on('tap', e => {
+        if (!customSheet.contains(e.target) || !document.body.classList.contains('minimized')) return;
+        currentY = 0;
+        customSheet.style.transform = `translateY(${currentY}px)`;
+        document.body.classList.remove('minimized');
+        document.body.classList.add('expanded');
+    });
+    document.addEventListener('click', e => {
+        if (!customSheet.contains(e.target) && mapContainer?.contains(e.target) && !document.body.classList.contains('minimized')) {
+            currentY = minimizedPosition;
+            customSheet.style.transform = `translateY(${currentY}px)`;
+            document.body.classList.add('minimized');
+            document.body.classList.remove('expanded');
+        }
+    });
+    document.getElementById('get-route')?.addEventListener('click', () => {
+        const pointA = document.getElementById('point-a').value, pointB = document.getElementById('point-b').value;
+        if (!pointA || !pointB) return showToast('Please enter both start and destination.', 'error');
+        calculateRoute(pointA, pointB);
+    });
+}
+
+function calculateRoute(start, end) {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: start }, (resultsA, statusA) => {
+        if (statusA === google.maps.GeocoderStatus.OK) {
+            const startLocation = resultsA[0].geometry.location;
+            geocoder.geocode({ address: end }, (resultsB, statusB) => {
+                if (statusB === google.maps.GeocoderStatus.OK) {
+                    const endLocation = resultsB[0].geometry.location;
+                    directionsService.route({ origin: startLocation, destination: endLocation, travelMode: 'WALKING' }, (response, status) => {
+                        if (status === 'OK') { directionsRenderer.setDirections(response); map.fitBounds(response.routes[0].bounds); }
+                        else showToast('Route calculation failed.', 'error');
+                    });
+                } else showToast('Destination not found.', 'error');
+            });
+        } else showToast('Start point not found', 'error');
+    });
+}
+
+function setupNavigation() {
+    const navItems = {
+        'map-nav': () => { mapContainer?.classList.add('active'); bottomSheet?.classList.add('active'); profilePage?.classList.remove('active'); },
+        'profile-nav': () => { mapContainer?.classList.remove('active'); bottomSheet?.classList.remove('active'); profilePage?.classList.add('active'); loadProfile(); }
+    };
+    document.querySelectorAll('.list').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.list').forEach(li => li.classList.remove('active'));
+            item.classList.add('active');
+            navItems[item.id]();
+        });
+    });
+    document.querySelector('.indicator')?.addEventListener('click', async () => {
+        if (!confirm('Send SOS alert?')) return;
+        showLoading();
+        const user = auth.currentUser;
+        if (!user) return showToast('Please log in to send SOS.', 'error'), hideLoading();
+        if (!currentPosition) return showToast('Location unavailable.', 'error'), hideLoading();
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const contacts = userDoc.exists ? userDoc.data().emergencyContacts || [] : [];
+            const emergencyMessage = document.getElementById('emergency-message')?.value.trim() || 'I need help!';
+            if (!contacts.length) throw new Error('No emergency contacts.');
+            const sosData = { senderId: user.uid, senderName: userDoc.data().fullName, location: currentPosition, message: emergencyMessage, timestamp: firebase.firestore.FieldValue.serverTimestamp(), status: 'active' };
+            await Promise.all(contacts.map(contactId => db.collection('notifications').doc(contactId).set(sosData)));
+            showToast('SOS sent!', 'success');
+        } catch (error) {
+            showToast('SOS failed: ' + error.message, 'error');
+        }
+        hideLoading();
+    });
+}
+
+async function loadProfile() {
+    showLoading();
+    const user = auth.currentUser;
+    if (!user) return showToast('Please log in to view profile.', 'error'), hideLoading();
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? userDoc.data() : { fullName: user.displayName || 'User', email: user.email };
+        document.getElementById('profile-name').textContent = userData.fullName || 'User';
+        document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${userData.email || 'N/A'}`;
+        document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${userData.phone || 'Not provided'}`;
+        document.getElementById('emergency-key').textContent = userData.emergencyKey || 'N/A';
+        document.getElementById('full-name').value = userData.fullName || '';
+        document.getElementById('email-display').value = userData.email || '';
+        document.getElementById('phone').value = userData.phone || '';
+        document.getElementById('emergency-message').value = userData.emergencyMessage || 'I need help!';
+        document.getElementById('safety-status').textContent = 'Status: Safe';
+        document.getElementById('last-verified').textContent = `Verified: ${new Date().toLocaleString()}`;
+        const contactList = document.getElementById('contact-list');
+        contactList.innerHTML = '';
+        const contacts = userData.emergencyContacts || [];
+        if (contacts.length) {
+            await Promise.all(contacts.map(async contactId => {
+                const contactDoc = await db.collection('users').doc(contactId).get();
+                if (contactDoc.exists) {
+                    const contactData = contactDoc.data();
+                    const contactItem = document.createElement('div');
+                    contactItem.classList.add('contact-item');
+                    contactItem.innerHTML = `<div class="contact-avatar">${contactData.fullName[0]}</div><div class="contact-info"><div class="contact-name">${contactData.fullName}</div><div class="place-address">${contactData.email}</div></div><button class="btn btn-outline" onclick="removeContact('${contactId}')">Remove</button>`;
+                    contactList.appendChild(contactItem);
+                }
+            }));
+        } else contactList.innerHTML = '<p>No emergency contacts added.</p>';
+    } catch (error) {
+        showToast('Failed to load profile: ' + error.message, 'error');
+    }
+    setupProfileInteractions();
+    hideLoading();
+}
+
+function setupProfileInteractions() {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
+    const editBtn = document.getElementById('edit-profile'), saveBtn = document.getElementById('save-changes'), signOutBtn = document.getElementById('sign-out');
+    const editSection = document.getElementById('edit-section'), inputs = editSection.querySelectorAll('input,textarea');
+    editBtn.addEventListener('click', () => {
+        editSection.classList.add('active');
+        inputs.forEach(input => input.removeAttribute('readonly'));
+        saveBtn.disabled = false;
+    });
+    saveBtn.addEventListener('click', async () => {
+        showLoading();
+        const user = auth.currentUser;
+        if (!user) return showToast('Please log in to update profile.', 'error'), hideLoading();
+        const updatedData = {
+            fullName: document.getElementById('full-name').value.trim(),
+            email: document.getElementById('email-display').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            emergencyMessage: document.getElementById('emergency-message').value.trim()
+        };
+        if (!validateEmail(updatedData.email)) return showToast('Invalid email format.', 'error'), hideLoading();
+        if (updatedData.phone && !validatePhone(updatedData.phone)) return showToast('Invalid phone format.', 'error'), hideLoading();
+        try {
+            if (updatedData.email !== user.email) await user.updateEmail(updatedData.email);
+            await db.collection('users').doc(user.uid).update(updatedData);
+            inputs.forEach(input => input.setAttribute('readonly', true));
+            editSection.classList.remove('active');
+            saveBtn.disabled = true;
+            loadProfile();
+            showToast('Profile updated!', 'success');
+        } catch (error) {
+            showToast('Update failed: ' + error.message, 'error');
+        }
+        hideLoading();
+    });
+    signOutBtn.addEventListener('click', async () => {
+        showLoading();
+        try {
+            await auth.signOut();
+            authForm?.classList.add('active');
+            mapContainer?.classList.remove('active');
+            navigation?.classList.remove('active');
+            bottomSheet?.classList.remove('active');
+            profilePage?.classList.remove('active');
+            showToast('Logged out successfully!', 'success');
+        } catch (error) {
+            showToast('Logout failed: ' + error.message, 'error');
+        }
+        hideLoading();
+    });
+    document.getElementById('key-copy')?.addEventListener('click', () => {
+        const key = document.getElementById('emergency-key').textContent;
+        navigator.clipboard.writeText(key).then(() => showToast('Key copied!', 'success')).catch(() => showToast('Copy failed.', 'error'));
+    });
+    document.getElementById('add-contact-btn')?.addEventListener('click', () => document.getElementById('add-contact-form')?.classList.add('active'));
+    document.getElementById('cancel-contact-btn')?.addEventListener('click', () => document.getElementById('add-contact-form')?.classList.remove('active'));
+    document.getElementById('submit-contact-btn')?.addEventListener('click', async () => {
+        showLoading();
+        const contactKey = document.getElementById('contact-key-input')?.value.trim();
+        if (!contactKey || !contactKey.startsWith('SOAPP-')) return showError('add-contact-error', 'Invalid safety key format.'), hideLoading();
+        try {
+            const snapshot = await db.collection('users').where('emergencyKey', '==', contactKey).get();
+            if (snapshot.empty) throw new Error('No user found with this key.');
+            const contactDoc = snapshot.docs[0];
+            const contactId = contactDoc.id;
+            const user = auth.currentUser;
+            if (contactId === user.uid) throw new Error('You cannot add yourself.');
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const contacts = userDoc.data().emergencyContacts || [];
+            if (contacts.includes(contactId)) throw new Error('Contact already added.');
+            contacts.push(contactId);
+            await db.collection('users').doc(user.uid).update({ emergencyContacts: contacts });
+            document.getElementById('add-contact-form')?.classList.remove('active');
+            document.getElementById('contact-key-input').value = '';
+            loadProfile();
+            showToast('Contact added!', 'success');
+        } catch (error) {
+            showError('add-contact-error', error.message);
+        }
+        hideLoading();
+    });
+}
+
+async function removeContact(contactId) {
+    if (!confirm('Remove this contact?')) return;
+    showLoading();
+    const user = auth.currentUser;
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const contacts = userDoc.data().emergencyContacts || [];
+        const updatedContacts = contacts.filter(id => id !== contactId);
+        await db.collection('users').doc(user.uid).update({ emergencyContacts: updatedContacts });
+        loadProfile();
+        showToast('Contact removed!', 'success');
+    } catch (error) {
+        showToast('Failed to remove contact: ' + error.message, 'error');
+    }
+    hideLoading();
+}
+
+function setupNotificationListener() {
+    const user = auth.currentUser;
+    if (!user) return;
+    db.collection('notifications').doc(user.uid).onSnapshot(snapshot => {
+        if (!snapshot.exists) return;
+        const data = snapshot.data();
+        if (data.status !== 'active') return;
+        const message = `${data.senderName} sent an SOS: ${data.message} at ${new Date(data.timestamp.toDate()).toLocaleTimeString()}`;
+        showToast(message, 'error', 'Locate', () => {
+            mapContainer?.classList.add('active');
+            bottomSheet?.classList.add('active');
+            profilePage?.classList.remove('active');
+            document.querySelectorAll('.list').forEach(li => li.classList.remove('active'));
+            document.getElementById('map-nav').classList.add('active');
+            map.panTo(data.location);
+            map.setZoom(16);
+            new google.maps.Marker({ position: data.location, map, title: 'SOS Location', icon: { url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' } });
+            db.collection('notifications').doc(user.uid).update({ status: 'viewed' });
+        });
+    });
+}
+
+// Initial setup
+auth?.onAuthStateChanged(user => {
+    if (user) {
+        loadGoogleMapsScript().then(() => showMainInterface()).catch(() => showToast('Failed to load map.', 'error'));
+    } else {
+        authForm?.classList.add('active');
+        signupForm?.classList.remove('active');
+        mapContainer?.classList.remove('active');
+        navigation?.classList.remove('active');
+        bottomSheet?.classList.remove('active');
+        profilePage?.classList.remove('active');
+    }
+});
     </script>
 </body>
 </html>
