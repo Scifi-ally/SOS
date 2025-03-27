@@ -96,45 +96,49 @@
         }
 
         .bottom-sheet {
-            position: fixed;
-            bottom: 60px;
-            left: 0;
-            right: 0;
-            background: #1a1a1a;
-            border-radius: 10px 10px 0 0;
-            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.7);
-            transition: transform 0.3s ease-out;
-            z-index: 100;
-            height: calc(100vh - 60px);
-            transform: translateY(100%);
-            display: none;
-        }
+    position: fixed;
+    bottom: 60px; /* Aligns just above the 60px navigation bar */
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.7);
+    transition: transform 0.3s ease-out;
+    z-index: 100;
+    height: calc(100vh - 60px); /* Full height minus navbar */
+    transform: translateY(calc(100% - 15px)); /* Only handle visible (5px handle + 10px margin) */
+    display: none;
+}
 
-        .bottom-sheet.active {
-            display: block;
-            transform: translateY(calc(100% - 50px));
-        }
+.bottom-sheet.active {
+    display: block;
+    transform: translateY(calc(100% - 15px)); /* Initial state: only handle visible */
+}
 
-        .bottom-sheet-header {
-            position: sticky;
-            top: 0;
-            display: flex;
-            justify-content: start;
-            margin-left: 3rem;
-            align-items: center;
-            background: #1a1a1a;
-            height: 50px;
-            z-index: 101;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+.bottom-sheet-header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: center; /* Center the handle */
+    align-items: center;
+    background: #1a1a1a;
+    height: 15px; /* Reduced height to just fit the handle */
+    z-index: 101;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-        .bottom-sheet-handle {
-            width: 40px;
-            height: 5px;
-            background: #ffffff;
-            border-radius: 5px;
-            cursor: grab;
-        }
+.bottom-sheet-handle {
+    width: 40px;
+    height: 5px;
+    background: #ffffff;
+    border-radius: 5px;
+    cursor: grab;
+    margin: 5px auto; /* Centered with slight padding */
+}
+
+.minimized .bottom-sheet.active {
+    transform: translateY(calc(100% - 15px)); /* Only handle visible */
+}
 
         .bottom-sheet-content {
             padding: 15px;
@@ -1390,7 +1394,7 @@ const showMainInterface = () => {
     if (navigation) navigation.classList.add('active');
     if (bottomSheet) {
         bottomSheet.classList.add('active');
-        bottomSheet.style.transform = 'translateY(calc(100% - 50px))';
+        bottomSheet.style.transform = 'translateY(calc(100% - 15px))'; // Only handle visible
     }
     if (profilePage) profilePage.classList.remove('active');
     requestAnimationFrame(() => {
@@ -1704,10 +1708,15 @@ function setupBottomSheet() {
     if (!customSheet) return;
     customSheet.classList.add('active');
     const sheetHeight = customSheet.offsetHeight;
-    const minimizedPosition = sheetHeight - 50;
+    const minimizedPosition = sheetHeight - 15; // Only handle visible (5px handle + 10px margin)
     let startY = minimizedPosition;
     let currentY = startY;
-    const snapPositions = [0, sheetHeight * 0.25, sheetHeight * 0.60, minimizedPosition];
+    const snapPositions = [
+        0,                          // Fully expanded
+        sheetHeight * 0.25,         // Quarter expanded
+        sheetHeight * 0.60,         // Semi-expanded
+        minimizedPosition           // Minimized (only handle visible)
+    ];
     customSheet.style.transform = `translateY(${currentY}px)`;
     const mc = new Hammer.Manager(customSheet);
     mc.add(new Hammer.Pan({ threshold: 0, pointers: 0, direction: Hammer.DIRECTION_VERTICAL }));
