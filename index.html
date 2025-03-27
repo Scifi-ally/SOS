@@ -97,7 +97,8 @@
 
         .bottom-sheet {
     position: fixed;
-    bottom: 60px; /* Aligns just above the 60px navigation bar */
+    bottom: 60px; /* Aligns above the 60px navbar */
+    margin-bottom: 10px; /* Adds space to avoid collision with navbar */
     left: 0;
     right: 0;
     background: #1a1a1a;
@@ -105,26 +106,27 @@
     box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.7);
     transition: transform 0.3s ease-out;
     z-index: 100;
-    height: calc(100vh - 60px); /* Full height minus navbar */
-    transform: translateY(calc(100% - 15px)); /* Only handle visible (5px handle + 10px margin) */
+    height: calc(100vh - 70px); /* Adjusted for navbar (60px) + margin (10px) */
+    transform: translateY(calc(100% - 25px)); /* Only handle (15px) + padding visible */
     display: none;
 }
 
 .bottom-sheet.active {
     display: block;
-    transform: translateY(calc(100% - 15px)); /* Initial state: only handle visible */
+    transform: translateY(calc(100% - 25px)); /* Initial state: only handle visible */
 }
 
 .bottom-sheet-header {
     position: sticky;
     top: 0;
     display: flex;
-    justify-content: center; /* Center the handle */
+    justify-content: flex-start; /* Align handle to the left */
     align-items: center;
     background: #1a1a1a;
-    height: 15px; /* Reduced height to just fit the handle */
+    height: 25px; /* Handle height + padding */
     z-index: 101;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding-left: 15px; /* Adds left padding for spacing from edge */
 }
 
 .bottom-sheet-handle {
@@ -133,19 +135,31 @@
     background: #ffffff;
     border-radius: 5px;
     cursor: grab;
-    margin: 5px auto; /* Centered with slight padding */
+    margin: 10px 0 0 0; /* Top margin only, no centering */
+}
+
+.bottom-sheet-content {
+    padding: 15px;
+    overflow-y: auto;
+    height: calc(100% - 25px); /* Adjusted for header height */
+    -webkit-overflow-scrolling: touch;
 }
 
 .minimized .bottom-sheet.active {
-    transform: translateY(calc(100% - 15px)); /* Only handle visible */
+    transform: translateY(calc(100% - 25px)); /* Only handle visible */
 }
 
-        .bottom-sheet-content {
-            padding: 15px;
-            overflow-y: auto;
-            height: calc(100% - 50px);
-            -webkit-overflow-scrolling: touch;
-        }
+.expanded .bottom-sheet.active {
+    transform: translateY(0);
+}
+
+.quarter-expanded .bottom-sheet.active {
+    transform: translateY(25%);
+}
+
+.semi-expanded .bottom-sheet.active {
+    transform: translateY(60%);
+}
 
         .search-container {
             margin-bottom: 20px;
@@ -1394,7 +1408,7 @@ const showMainInterface = () => {
     if (navigation) navigation.classList.add('active');
     if (bottomSheet) {
         bottomSheet.classList.add('active');
-        bottomSheet.style.transform = 'translateY(calc(100% - 15px))'; // Only handle visible
+        bottomSheet.style.transform = 'translateY(calc(100% - 25px))'; // Only handle visible
     }
     if (profilePage) profilePage.classList.remove('active');
     requestAnimationFrame(() => {
@@ -1708,7 +1722,7 @@ function setupBottomSheet() {
     if (!customSheet) return;
     customSheet.classList.add('active');
     const sheetHeight = customSheet.offsetHeight;
-    const minimizedPosition = sheetHeight - 15; // Only handle visible (5px handle + 10px margin)
+    const minimizedPosition = sheetHeight - 25; // Only handle visible (5px handle + 10px top margin + 10px bottom margin)
     let startY = minimizedPosition;
     let currentY = startY;
     const snapPositions = [
