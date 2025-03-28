@@ -1335,7 +1335,7 @@ input:checked + .feature-slider:before {
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script>
-        // Firebase Configuration
+    // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",
     authDomain: "soapp-80936.firebaseapp.com",
@@ -1396,10 +1396,11 @@ const generateEmergencyKey = () => 'SOAPP-' + Math.random().toString(36).substr(
 const validateEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhone = phone => phone === '' || /^\+?[\d\s-]{8,15}$/.test(phone);
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
+    const R = 6371; // Earth's radius in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
 };
 
@@ -1469,13 +1470,14 @@ const handleSignIn = async e => {
         const email = document.getElementById('signin-email')?.value.trim();
         const password = document.getElementById('signin-password')?.value.trim();
         if (!email || !password) throw new Error('Email or password missing');
-        if (!validateEmail(email)) throw new Error('Invalid email');
+        if (!validateEmail(email)) throw new Error('Invalid email format');
         if (password.length < 6) throw new Error('Password must be at least 6 characters');
         await auth.signInWithEmailAndPassword(email, password);
         await loadGoogleMapsScript();
         showMainInterface();
         showToast('Logged in successfully!', 'success');
     } catch (error) {
+        console.error('Sign-in error:', error);
         showError('signin-error-message', error.message);
     } finally {
         hideLoading();
@@ -1492,18 +1494,23 @@ const handleSignUp = async e => {
         const password = document.getElementById('signup-password')?.value.trim();
         const phone = document.getElementById('signup-phone')?.value.trim();
         if (!fullName || !email || !password) throw new Error('Required fields missing');
-        if (!validateEmail(email)) throw new Error('Invalid email');
+        if (!validateEmail(email)) throw new Error('Invalid email format');
         if (password.length < 6) throw new Error('Password must be at least 6 characters');
-        if (!validatePhone(phone)) throw new Error('Invalid phone number');
+        if (!validatePhone(phone)) throw new Error('Invalid phone number format');
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         await db.collection('users').doc(userCredential.user.uid).set({
-            fullName, email, phone, emergencyKey: generateEmergencyKey(), emergencyContacts: [],
+            fullName,
+            email,
+            phone,
+            emergencyKey: generateEmergencyKey(),
+            emergencyContacts: [],
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         await loadGoogleMapsScript();
         showMainInterface();
-        showToast('Account created!', 'success');
+        showToast('Account created successfully!', 'success');
     } catch (error) {
+        console.error('Sign-up error:', error);
         showError('signup-error-message', error.message);
     } finally {
         hideLoading();
@@ -1551,8 +1558,11 @@ window.initMap = function () {
         { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] }
     ];
     map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 37.7749, lng: -122.4194 }, zoom: 14, styles: blackAndWhiteStyle,
-        disableDefaultUI: true, gestureHandling: 'greedy'
+        center: { lat: 37.7749, lng: -122.4194 },
+        zoom: 14,
+        styles: blackAndWhiteStyle,
+        disableDefaultUI: true,
+        gestureHandling: 'greedy'
     });
     placesService = new google.maps.places.PlacesService(map);
     directionsService = new google.maps.DirectionsService();
@@ -1579,7 +1589,7 @@ window.initMap = function () {
 // Get Current Location
 function getCurrentLocation() {
     if (!navigator.geolocation) {
-        showToast('Geolocation not supported.', 'error');
+        showToast('Geolocation not supported by your browser.', 'error');
         return;
     }
     navigator.geolocation.getCurrentPosition(position => {
@@ -1587,12 +1597,14 @@ function getCurrentLocation() {
         map.setCenter(currentPosition);
         if (currentLocationMarker) currentLocationMarker.setMap(null);
         currentLocationMarker = new google.maps.Marker({
-            position: currentPosition, map, title: 'Your Location',
+            position: currentPosition,
+            map,
+            title: 'Your Location',
             icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
         });
         findNearbySafetyPoints(currentPosition);
     }, error => {
-        showToast('Enable location services.', 'error');
+        showToast('Please enable location services.', 'error');
         map.setCenter({ lat: 37.7749, lng: -122.4194 });
     }, { timeout: 10000, enableHighAccuracy: true });
 }
@@ -1636,7 +1648,11 @@ function displaySafePoints(places) {
             clearRouteMarkers();
             directionsRenderer.setDirections(null);
             if (currentPosition) {
-                directionsService.route({ origin: currentPosition, destination: place.geometry.location, travelMode: 'WALKING' }, (response, status) => {
+                directionsService.route({
+                    origin: currentPosition,
+                    destination: place.geometry.location,
+                    travelMode: 'WALKING'
+                }, (response, status) => {
                     if (status === 'OK') directionsRenderer.setDirections(response);
                     else showToast('Route calculation failed.', 'error');
                 });
@@ -1681,7 +1697,7 @@ function setupBottomSheet() {
         const pointA = document.getElementById('point-a')?.value;
         const pointB = document.getElementById('point-b')?.value;
         if (!pointA || !pointB) {
-            showToast('Enter both points.', 'error');
+            showToast('Please enter both start and destination points.', 'error');
             return;
         }
         calculateRoute(pointA, pointB);
@@ -1701,12 +1717,20 @@ function calculateRoute(start, end) {
     clearRouteMarkers();
     directionsRenderer.setDirections(null);
     if (start === 'My Location' && currentPosition) {
-        directionsService.route({ origin: currentPosition, destination: end, travelMode: 'WALKING' }, (response, status) => {
+        directionsService.route({
+            origin: currentPosition,
+            destination: end,
+            travelMode: 'WALKING'
+        }, (response, status) => {
             if (status === 'OK') directionsRenderer.setDirections(response);
             else showToast('Route calculation failed.', 'error');
         });
     } else {
-        directionsService.route({ origin: start, destination: end, travelMode: 'WALKING' }, (response, status) => {
+        directionsService.route({
+            origin: start,
+            destination: end,
+            travelMode: 'WALKING'
+        }, (response, status) => {
             if (status === 'OK') directionsRenderer.setDirections(response);
             else showToast('Route calculation failed.', 'error');
         });
@@ -1752,22 +1776,26 @@ function loadProfile() {
     const user = auth.currentUser;
     if (!user) return;
     showLoading();
-    db.collection('users').doc(user.uid).get().then(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            document.getElementById('profile-name').textContent = data.fullName || 'User';
-            document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email}`;
-            document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not provided'}`;
-            document.getElementById('emergency-key').textContent = data.emergencyKey;
-            document.getElementById('full-name').value = data.fullName || '';
-            document.getElementById('email-display').value = data.email;
-            document.getElementById('phone').value = data.phone || '';
-            document.getElementById('emergency-message').value = data.emergencyMessage || 'I need help!';
-            loadEmergencyContacts(data.emergencyContacts || []);
-        }
-    }).catch(error => {
-        showToast('Failed to load profile.', 'error');
-    }).finally(() => hideLoading());
+    db.collection('users').doc(user.uid).get()
+        .then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('profile-name').textContent = data.fullName || 'User';
+                document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email}`;
+                document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not provided'}`;
+                document.getElementById('emergency-key').textContent = data.emergencyKey;
+                document.getElementById('full-name').value = data.fullName || '';
+                document.getElementById('email-display').value = data.email;
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('emergency-message').value = data.emergencyMessage || 'I need help!';
+                loadEmergencyContacts(data.emergencyContacts || []);
+            }
+        })
+        .catch(error => {
+            console.error('Profile load error:', error);
+            showToast('Failed to load profile.', 'error');
+        })
+        .finally(() => hideLoading());
 
     const editBtn = document.getElementById('edit-profile');
     const saveBtn = document.getElementById('save-changes');
@@ -1790,20 +1818,23 @@ function loadProfile() {
             return;
         }
         if (!validatePhone(phone)) {
-            showToast('Invalid phone number.', 'error');
+            showToast('Invalid phone number format.', 'error');
             return;
         }
         showLoading();
         try {
             await db.collection('users').doc(user.uid).update({
-                fullName, phone, emergencyMessage,
+                fullName,
+                phone,
+                emergencyMessage,
                 lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
             });
             loadProfile();
             editSection.classList.remove('active');
             saveBtn.disabled = true;
-            showToast('Profile updated!', 'success');
+            showToast('Profile updated successfully!', 'success');
         } catch (error) {
+            console.error('Profile update error:', error);
             showToast('Failed to update profile.', 'error');
         } finally {
             hideLoading();
@@ -1816,6 +1847,7 @@ function loadProfile() {
             await auth.signOut();
             window.location.reload();
         } catch (error) {
+            console.error('Sign-out error:', error);
             showToast('Sign out failed.', 'error');
         } finally {
             hideLoading();
@@ -1854,13 +1886,12 @@ function loadEmergencyContacts(contacts) {
                         <button class="btn btn-outline remove-contact" data-id="${contactId}">Remove</button>
                     `;
                     contactList.appendChild(item);
-                    
                     item.querySelector('.remove-contact').addEventListener('click', () => removeContact(contactId));
                 }
             })
             .catch(error => {
                 console.error('Error loading contact:', error);
-                showToast('Failed to load contact', 'error');
+                showToast('Failed to load contact.', 'error');
             });
     });
 }
@@ -1873,18 +1904,16 @@ async function removeContact(contactId) {
         const userDocRef = db.collection('users').doc(user.uid);
         const userDoc = await userDocRef.get();
         const contacts = userDoc.data().emergencyContacts || [];
-        
         const updatedContacts = contacts.filter(id => id !== contactId);
         await userDocRef.update({
             emergencyContacts: updatedContacts,
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
         loadEmergencyContacts(updatedContacts);
         showToast('Contact removed successfully!', 'success');
     } catch (error) {
-        showToast('Failed to remove contact', 'error');
         console.error('Remove contact error:', error);
+        showToast('Failed to remove contact.', 'error');
     } finally {
         hideLoading();
     }
@@ -1900,7 +1929,7 @@ cancelContactBtn?.addEventListener('click', () => {
 submitContactBtn?.addEventListener('click', async () => {
     const key = contactKeyInput.value.trim();
     if (!key || !key.match(/^SOAPP-[A-Z0-9]{9}$/)) {
-        showError('add-contact-error', 'Please enter a valid safety key (format: SOAPP-XXXXXXXXX)');
+        showError('add-contact-error', 'Please enter a valid safety key (e.g., SOAPP-XXXXXXXXX)');
         return;
     }
 
@@ -1935,6 +1964,7 @@ submitContactBtn?.addEventListener('click', async () => {
         }
 
         contacts.push(contactId);
+        console.log('Updating user:', user.uid, 'with contacts:', contacts);
         await userDocRef.update({
             emergencyContacts: contacts,
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
@@ -1945,8 +1975,8 @@ submitContactBtn?.addEventListener('click', async () => {
         contactKeyInput.value = '';
         showToast('Emergency contact added successfully!', 'success');
     } catch (error) {
-        showError('add-contact-error', error.message);
         console.error('Add contact error:', error);
+        showError('add-contact-error', error.message);
     } finally {
         hideLoading();
     }
@@ -1955,7 +1985,7 @@ submitContactBtn?.addEventListener('click', async () => {
 // Send SOS
 async function sendSOS() {
     if (!currentPosition) {
-        showToast('Location unavailable.', 'error');
+        showToast('Location unavailable. Enable location services.', 'error');
         return;
     }
     showLoading();
@@ -1971,13 +2001,17 @@ async function sendSOS() {
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
         const contacts = userData.emergencyContacts || [];
+        if (contacts.length === 0) {
+            showToast('No emergency contacts added yet.', 'error');
+            return;
+        }
         await Promise.all(contacts.map(contactId =>
             db.collection('users').doc(contactId).collection('sosAlerts').add(sosData)
         ));
         showToast('SOS sent to your emergency contacts!', 'success');
     } catch (error) {
+        console.error('SOS send error:', error);
         showToast('Failed to send SOS.', 'error');
-        console.error('SOS error:', error);
     } finally {
         hideLoading();
     }
@@ -2017,6 +2051,9 @@ function setupSOSListener() {
                     };
                 }
             });
+        }, error => {
+            console.error('SOS listener error:', error);
+            showToast('Failed to listen for SOS alerts.', 'error');
         });
     sosCloseBtn?.addEventListener('click', () => sosPanel.classList.remove('active'));
 }
@@ -2040,6 +2077,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadGoogleMapsScript().then(() => {
                     showMainInterface();
                     loadProfile();
+                }).catch(error => {
+                    console.error('Google Maps load error:', error);
+                    showToast('Failed to load map.', 'error');
                 });
             } else {
                 authForm.classList.add('active');
@@ -2049,7 +2089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Initialization error:', error);
         showToast('App initialization failed.', 'error');
     }
-});
+}); 
     </script>
     </body>
 </html>
