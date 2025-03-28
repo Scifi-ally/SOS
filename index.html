@@ -1718,151 +1718,231 @@ function setupNavigation() {
     const mapNav = document.getElementById('map-nav');
     const profileNav = document.getElementById('profile-nav');
     const indicator = document.querySelector('.indicator');
-    if (!mapNav || !profileNav || !indicator) return;
+    const navItems = document.querySelectorAll('.navigation ul li');
 
-    const setActiveNav = (activeItem, inactiveItem) => {
-        activeItem.classList.add('active');
-        inactiveItem.classList.remove('active');
-    };
-
-    mapNav.addEventListener('click', e => {
-        e.preventDefault();
-        setActiveNav(mapNav, profileNav);
+    mapNav?.addEventListener('click', () => {
         mapContainer.classList.add('active');
-        profilePage.classList.remove('active');
         bottomSheet.classList.add('active');
-        indicator.style.left = 'calc(25% - 37.5px)';
+        profilePage.classList.remove('active');
+        navItems.forEach(item => item.classList.remove('active'));
+        mapNav.classList.add('active');
     });
 
-    profileNav.addEventListener('click', e => {
-        e.preventDefault();
-        setActiveNav(profileNav, mapNav);
+    profileNav?.addEventListener('click', () => {
         mapContainer.classList.remove('active');
-        profilePage.classList.add('active');
         bottomSheet.classList.remove('active');
-        indicator.style.left = 'calc(75% - 37.5px)';
+        profilePage.classList.add('active');
+        navItems.forEach(item => item.classList.remove('active'));
+        profileNav.classList.add('active');
         loadProfile();
     });
 
-    indicator.addEventListener('click', () => triggerSOS());
+    indicator?.addEventListener('click', sendSOS);
+
+    auth.onAuthStateChanged(user => {
+        if (user) loadProfile();
+    });
 }
 
-// Load Profile Data
-async function loadProfile() {
+// Load Profile
+function loadProfile() {
+    const user = auth.currentUser;
+    if (!user) return;
     showLoading();
-    try {
-        await loadFirebase();
-        const user = auth.currentUser;
-        if (!user) throw new Error('Not signed in');
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (!userDoc.exists) throw new Error('User data not found');
-
-        const data = userDoc.data();
-        document.getElementById('profile-name').textContent = data.fullName || 'User';
-        document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email || 'N/A'}`;
-        document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not provided'}`;
-        document.getElementById('emergency-key').textContent = data.emergencyKey || 'N/A';
-        document.getElementById('full-name').value = data.fullName || '';
-        document.getElementById('email-display').value = data.email || '';
-        document.getElementById('phone').value = data.phone || '';
-        document.getElementById('emergency-message').value = data.emergencyMessage || 'I need help! Please assist me at my location.';
-        document.getElementById('last-verified').textContent = `Verified: ${new Date().toLocaleString()}`;
-        await loadEmergencyContacts(data.emergencyContacts || []);
-    } catch (error) {
-        console.error('Error loading profile:', error);
-        showToast('Failed to load profile', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Load Emergency Contacts
-async function loadEmergencyContacts(contactIds) {
-    if (!contactList) return;
-    contactList.innerHTML = '';
-    if (!contactIds.length) {
-        contactList.innerHTML = '<p>No emergency contacts added yet.</p>';
-        return;
-    }
-    try {
-        await loadFirebase();
-        for (const contactId of contactIds) {
-            const contactDoc = await db.collection('users').doc(contactId).get();
-            if (contactDoc.exists) {
-                const contactData = contactDoc.data();
-                const contactItem = document.createElement('div');
-                contactItem.classList.add('contact-item');
-                contactItem.innerHTML = `
-                    <div class="contact-avatar">${contactData.fullName[0]}</div>
-                    <div class="contact-info">
-                        <div class="contact-name">${contactData.fullName}</div>
-                        <div class="contact-email">${contactData.email}</div>
-                    </div>`;
-                contactList.appendChild(contactItem);
-            }
+    db.collection('users').doc(user.uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('profile-name').textContent = data.fullName || 'User';
+            document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${data.email}`;
+            document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${data.phone || 'Not provided'}`;
+            document.getElementById('emergency-key').textContent = data.emergencyKey;
+            document.getElementById('full-name').value = data.fullName || '';
+            document.getElementById('email-display').value = data.email;
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('emergency-message').value = data.emergencyMessage || 'I need help!';
+            loadEmergencyContacts(data.emergencyContacts || []);
         }
-    } catch (error) {
-        console.error('Error loading contacts:', error);
-        showToast('Failed to load contacts', 'error');
-    }
-}
+    }).catch(error => {
+        showToast('Failed to load profile.', 'error');
+    }).finally(() => hideLoading());
 
-// Profile Event Listeners
-document.getElementById('sign-out')?.addEventListener('click', async () => {
-    try {
-        await auth.signOut();
-        authForm.classList.add('active');
-        mapContainer.classList.remove('active');
-        navigation.classList.remove('active');
-        bottomSheet.classList.remove('active');
-        profilePage.classList.remove('active');
-        if (sosListener) sosListener();
-        showToast('Signed out successfully', 'success');
-    } catch (error) {
-        showToast('Sign out failed', 'error');
-    }
-});
+    document.getElementById('edit-profile')?.addEventListener('click', () => {
+        const editSection = document.getElementById('edit-section');
+        editSection.classList.add('active');
+        document.getElementById('full-name').removeAttribute('readonly');
+        document.getElementById('phone').removeAttribute('readonly');
+        document.getElementById('emergency-message').removeAttribute('readonly');
+        document.getElementById('save-changes').disabled = false;
+    });
 
-document.getElementById('edit-profile')?.addEventListener('click', () => {
-    const editSection = document.getElementById('edit-section');
-    const inputs = editSection.querySelectorAll('.form-control');
-    const saveBtn = document.getElementById('save-changes');
-    editSection.classList.add('active');
-    inputs.forEach(input => input.removeAttribute('readonly'));
-    saveBtn.disabled = false;
-});
-
-document.getElementById('save-changes')?.addEventListener('click', async () => {
-    showLoading();
-    try {
-        await loadFirebase();
-        const user = auth.currentUser;
+    document.getElementById('save-changes')?.addEventListener('click', () => {
         const fullName = document.getElementById('full-name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const emergencyMessage = document.getElementById('emergency-message').value.trim();
-        if (!fullName) throw new Error('Full name is required');
-        if (!validatePhone(phone)) throw new Error('Invalid phone number');
-        await db.collection('users').doc(user.uid).update({ fullName, phone, emergencyMessage });
-        const editSection = document.getElementById('edit-section');
-        const inputs = editSection.querySelectorAll('.form-control');
-        const saveBtn = document.getElementById('save-changes');
-        editSection.classList.remove('active');
-        inputs.forEach(input => input.setAttribute('readonly', true));
-        saveBtn.disabled = true;
-        await loadProfile();
-        showToast('Profile updated!', 'success');
+        if (!fullName) {
+            showToast('Full name is required.', 'error');
+            return;
+        }
+        showLoading();
+        db.collection('users').doc(user.uid).update({ fullName, phone, emergencyMessage })
+            .then(() => {
+                showToast('Profile updated!', 'success');
+                document.getElementById('profile-name').textContent = fullName;
+                document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${phone || 'Not provided'}`;
+                document.getElementById('full-name').setAttribute('readonly', true);
+                document.getElementById('phone').setAttribute('readonly', true);
+                document.getElementById('emergency-message').setAttribute('readonly', true);
+                document.getElementById('edit-section').classList.remove('active');
+                document.getElementById('save-changes').disabled = true;
+            })
+            .catch(error => showToast('Failed to update profile.', 'error'))
+            .finally(() => hideLoading());
+    });
+
+    document.getElementById('sign-out')?.addEventListener('click', () => {
+        auth.signOut().then(() => {
+            mapContainer.classList.remove('active');
+            bottomSheet.classList.remove('active');
+            profilePage.classList.remove('active');
+            navigation.classList.remove('active');
+            authForm.classList.add('active');
+            showToast('Signed out successfully!', 'success');
+        }).catch(error => showToast('Sign out failed.', 'error'));
+    });
+
+    document.querySelector('.key-copy')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('emergency-key').textContent)
+            .then(() => showToast('Key copied to clipboard!', 'success'))
+            .catch(() => showToast('Failed to copy key.', 'error'));
+    });
+}
+
+// Load Emergency Contacts
+function loadEmergencyContacts(contacts) {
+    contactList.innerHTML = '';
+    if (!contacts.length) {
+        contactList.innerHTML = '<p>No emergency contacts added yet.</p>';
+        return;
+    }
+    contacts.forEach(contactId => {
+        db.collection('users').doc(contactId).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                const item = document.createElement('div');
+                item.classList.add('contact-item');
+                item.innerHTML = `
+                    <div class="contact-avatar">${data.fullName[0]}</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${data.fullName}</div>
+                        <div>${data.phone || 'No phone'}</div>
+                    </div>`;
+                contactList.appendChild(item);
+            }
+        });
+    });
+}
+
+// Add Emergency Contact
+addContactBtn?.addEventListener('click', () => addContactForm.classList.add('active'));
+cancelContactBtn?.addEventListener('click', () => addContactForm.classList.remove('active'));
+submitContactBtn?.addEventListener('click', async () => {
+    const key = contactKeyInput.value.trim();
+    if (!key) {
+        showError('add-contact-error', 'Enter a safety key.');
+        return;
+    }
+    showLoading();
+    try {
+        const querySnapshot = await db.collection('users').where('emergencyKey', '==', key).get();
+        if (querySnapshot.empty) {
+            showError('add-contact-error', 'Invalid safety key.');
+            return;
+        }
+        const contactDoc = querySnapshot.docs[0];
+        const contactId = contactDoc.id;
+        const user = auth.currentUser;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const contacts = userDoc.data().emergencyContacts || [];
+        if (contacts.includes(contactId)) {
+            showError('add-contact-error', 'Contact already added.');
+            return;
+        }
+        contacts.push(contactId);
+        await db.collection('users').doc(user.uid).update({ emergencyContacts: contacts });
+        loadEmergencyContacts(contacts);
+        addContactForm.classList.remove('active');
+        contactKeyInput.value = '';
+        showToast('Contact added!', 'success');
     } catch (error) {
-        showToast(error.message, 'error');
+        showError('add-contact-error', 'Failed to add contact.');
     } finally {
         hideLoading();
     }
 });
 
-document.querySelector('.key-copy')?.addEventListener('click', () => {
-    const key = document.getElementById('emergency-key').textContent;
-    navigator.clipboard.writeText(key).then(() => showToast('Key copied!', 'success'));
-});
+// Send SOS
+function sendSOS() {
+    if (!currentPosition) {
+        showToast('Location unavailable. Enable location services.', 'error');
+        return;
+    }
+    showLoading();
+    const user = auth.currentUser;
+    db.collection('users').doc(user.uid).get().then(doc => {
+        const data = doc.data();
+        const sosData = {
+            senderId: user.uid,
+            senderName: data.fullName,
+            message: data.emergencyMessage || 'I need help!',
+            location: new firebase.firestore.GeoPoint(currentPosition.lat, currentPosition.lng),
+            recipients: data.emergencyContacts || [],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        db.collection('sos_alerts').add(sosData)
+            .then(() => showToast('SOS sent to your contacts!', 'success'))
+            .catch(error => showToast('Failed to send SOS.', 'error'))
+            .finally(() => hideLoading());
+    });
+}
 
+// Setup SOS Listener
+function setupSOSListener() {
+    const user = auth.currentUser;
+    if (!user) return;
+    if (sosListener) sosListener();
+    sosListener = db.collection('sos_alerts')
+        .where('recipients', 'array-contains', user.uid)
+        .onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const data = change.doc.data();
+                    sosSenderName.textContent = data.senderName;
+                    sosMessage.textContent = data.message;
+                    sosLocation.textContent = `${data.location.latitude.toFixed(4)}, ${data.location.longitude.toFixed(4)}`;
+                    sosPanel.classList.add('active');
+                    showToast(`SOS from ${data.senderName}!`, 'error', 'View', () => sosPanel.scrollIntoView());
+                    sosRouteBtn.onclick = () => {
+                        directionsService.route({
+                            origin: currentPosition,
+                            destination: { lat: data.location.latitude, lng: data.location.longitude },
+                            travelMode: 'WALKING'
+                        }, (response, status) => {
+                            if (status === 'OK') {
+                                directionsRenderer.setDirections(response);
+                                map.panTo({ lat: data.location.latitude, lng: data.location.longitude });
+                                sosPanel.classList.remove('active');
+                            } else {
+                                showToast('Failed to calculate route.', 'error');
+                            }
+                        });
+                    };
+                }
+            });
+        });
+    sosCloseBtn?.addEventListener('click', () => sosPanel.classList.remove('active'));
+}
+
+// Tab Navigation
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1871,148 +1951,6 @@ document.querySelectorAll('.tab').forEach(tab => {
         document.getElementById(tab.dataset.tab).classList.add('active');
     });
 });
-
-addContactBtn?.addEventListener('click', () => addContactForm.classList.add('active'));
-cancelContactBtn?.addEventListener('click', () => {
-    addContactForm.classList.remove('active');
-    contactKeyInput.value = '';
-    document.getElementById('add-contact-error').textContent = '';
-});
-
-submitContactBtn?.addEventListener('click', async () => {
-    const key = contactKeyInput.value.trim();
-    if (!key) {
-        showError('add-contact-error', 'Please enter a safety key.');
-        return;
-    }
-    if (!key.startsWith('SOAPP-')) {
-        showError('add-contact-error', 'Invalid key format. Must start with "SOAPP-".');
-        return;
-    }
-
-    showLoading();
-    try {
-        await loadFirebase();
-        const user = auth.currentUser;
-        if (!user) throw new Error('You must be signed in.');
-
-        const querySnapshot = await db.collection('users').where('emergencyKey', '==', key).get();
-        if (querySnapshot.empty) {
-            throw new Error('No user found with this safety key.');
-        }
-
-        const contactDoc = querySnapshot.docs[0];
-        const contactId = contactDoc.id;
-
-        if (contactId === user.uid) {
-            throw new Error('You cannot add yourself as a contact.');
-        }
-
-        const userDocRef = db.collection('users').doc(user.uid);
-        const userDoc = await userDocRef.get();
-        if (!userDoc.exists) throw new Error('User data not found');
-
-        const userData = userDoc.data();
-        const contacts = userData.emergencyContacts || [];
-
-        if (contacts.includes(contactId)) {
-            throw new Error('This contact is already added.');
-        }
-
-        contacts.push(contactId);
-        await userDocRef.update({ emergencyContacts: contacts });
-
-        await loadEmergencyContacts(contacts);
-        addContactForm.classList.remove('active');
-        contactKeyInput.value = '';
-        showToast('Contact added successfully!', 'success');
-    } catch (error) {
-        console.error('Error adding contact:', error);
-        showError('add-contact-error', error.message || 'Failed to add contact.');
-    } finally {
-        hideLoading();
-    }
-});
-
-// Trigger SOS
-async function triggerSOS() {
-    showLoading();
-    try {
-        await loadFirebase();
-        const user = auth.currentUser;
-        if (!user) throw new Error('Not signed in');
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        const userData = userDoc.data();
-        if (!currentPosition) throw new Error('Location unavailable');
-
-        const sosData = {
-            senderId: user.uid,
-            senderName: userData.fullName,
-            message: userData.emergencyMessage || 'I need help! Please assist me at my location.',
-            location: new firebase.firestore.GeoPoint(currentPosition.lat, currentPosition.lng),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'active'
-        };
-
-        const sosRef = await db.collection('sos_alerts').add(sosData);
-        showToast('SOS sent to your contacts!', 'success');
-    } catch (error) {
-        console.error('SOS Error:', error);
-        showToast(error.message, 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Setup SOS Listener
-function setupSOSListener() {
-    if (sosListener) sosListener();
-    loadFirebase().then(() => {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        sosListener = db.collection('sos_alerts')
-            .where('status', '==', 'active')
-            .onSnapshot(async snapshot => {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                const userData = userDoc.data();
-                const contacts = userData.emergencyContacts || [];
-
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const sosData = change.doc.data();
-                        if (contacts.includes(sosData.senderId)) {
-                            sosPanel.classList.add('active');
-                            sosSenderName.textContent = sosData.senderName;
-                            sosMessage.textContent = sosData.message;
-                            sosLocation.textContent = `Lat: ${sosData.location.latitude.toFixed(4)}, Lng: ${sosData.location.longitude.toFixed(4)}`;
-                            sosRouteBtn.onclick = () => {
-                                map.panTo({ lat: sosData.location.latitude, lng: sosData.location.longitude });
-                                calculateRoute(currentPosition, { lat: sosData.location.latitude, lng: sosData.location.longitude });
-                                sosPanel.classList.remove('active');
-                            };
-                        }
-                    }
-                });
-            }, error => {
-                console.error('SOS Listener Error:', error);
-                showToast('Failed to monitor SOS alerts', 'error');
-            });
-    });
-}
-
-sosCloseBtn?.addEventListener('click', () => sosPanel.classList.remove('active'));
-
-// Initial Check
-loadFirebase().then(() => {
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            loadGoogleMapsScript().then(() => showMainInterface());
-        } else {
-            authForm.classList.add('active');
-        }
-    });
-});
-       </script>
-</body>
+    </script>
+    </body>
 </html>
