@@ -1322,7 +1322,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script type="module">
-        // Firebase Configuration
+       // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",
     authDomain: "soapp-80936.firebaseapp.com",
@@ -1417,7 +1417,7 @@ async function loadGoogleMapsScript() {
     try {
         const { Loader } = await import('@googlemaps/js-api-loader');
         const loader = new Loader({
-            apiKey: 'AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE',
+            apiKey: 'AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE', // Your provided Google Maps API key
             version: 'weekly',
             libraries: ['places']
         });
@@ -1972,6 +1972,7 @@ async function sendSOS() {
     }
 }
 
+// Setup SOS Listener
 function setupSOSListener() {
     // Ensure prerequisites are met
     if (!auth?.currentUser || !db) {
@@ -2079,6 +2080,23 @@ function setupSOSListener() {
             hideLoading();
         });
 }
+
+sosCloseBtn?.addEventListener('click', () => sosPanel.classList.remove('active'));
+
+// Check Auth State
+auth.onAuthStateChanged(async user => {
+    if (user) {
+        await loadGoogleMapsScript();
+        initMap();
+        showMainInterface();
+    } else {
+        authForm.classList.add('active');
+        mapContainer.classList.remove('active');
+        navigation.classList.remove('active');
+        bottomSheet.classList.remove('active');
+        profilePage.classList.remove('active');
+    }
+});
     </script>
     </body>
 </html>
