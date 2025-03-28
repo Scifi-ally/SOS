@@ -9,6 +9,7 @@
     <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.2.2/dist/ionicons/ionicons.js"></script>
     <script src="https://unpkg.com/@googlemaps/js-api-loader@1.16.2/dist/index.min.js"></script>
     <style>
+        /* [Your existing CSS remains unchanged] */
         * {
             margin: 0;
             padding: 0;
@@ -193,7 +194,7 @@
             transform: scale(1.02);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-        .route-btn, .current-location-btn {
+        .route-btn, .currentVcurrent-location-btn {
             background: linear-gradient(135deg, #ffffff, #e0e0e0);
             color: #000;
             padding: 12px;
@@ -704,7 +705,7 @@
             transform: translate(-50%, -50%);
             z-index: 300;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            max-height: 90vh;
+            maxn-height: 90vh;
             overflow-y: auto;
             opacity: 0;
             transition: opacity 0.4s ease;
@@ -1322,20 +1323,20 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script type="module">
-       // Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",
-    authDomain: "soapp-80936.firebaseapp.com",
-    projectId: "soapp-80936",
-    storageBucket: "soapp-80936.firebasestorage.app",
-    messagingSenderId: "152328551150",
-    appId: "1:152328551150:web:211ab46d98e41560d1d1ff",
-    measurementId: "G-2ZVT8KSKHR"
+        // Firebase Configuration (replace with your actual config)
+        const firebaseConfig = {
+  apiKey: "AIzaSyDxmmnQMTfoTBGarz65NdHm1t3NyxWM-rE",
+  authDomain: "soapp-80936.firebaseapp.com",
+  projectId: "soapp-80936",
+  storageBucket: "soapp-80936.firebasestorage.app",
+  messagingSenderId: "152328551150",
+  appId: "1:152328551150:web:211ab46d98e41560d1d1ff",
+  measurementId: "G-2ZVT8KSKHR"
 };
 
-// Initialize Firebase once at startup
+// Initialize Firebase
 let auth, db;
-(async function initializeFirebase() {
+async function initializeFirebase() {
     try {
         if (!window.firebase) {
             await Promise.all([
@@ -1347,11 +1348,12 @@ let auth, db;
         }
         auth = firebase.auth();
         db = firebase.firestore();
+        setupAuthStateListener();
     } catch (error) {
         console.error('Failed to initialize Firebase:', error);
         showToast('Failed to initialize Firebase', 'error');
     }
-})();
+}
 
 // DOM Elements
 const authForm = document.getElementById('auth-form');
@@ -1362,23 +1364,10 @@ const profilePage = document.getElementById('profile-page');
 const navigation = document.getElementById('navigation');
 const loadingOverlay = document.getElementById('loading-overlay');
 const toast = document.getElementById('toast');
-const addContactForm = document.getElementById('add-contact-form');
-const contactKeyInput = document.getElementById('contact-key-input');
-const submitContactBtn = document.getElementById('submit-contact-btn');
-const cancelContactBtn = document.getElementById('cancel-contact-btn');
-const addContactBtn = document.getElementById('add-contact-btn');
-const contactList = document.getElementById('contact-list');
-const sosPanel = document.getElementById('sos-panel');
-const sosCloseBtn = document.getElementById('sos-close-btn');
-const sosRouteBtn = document.getElementById('sos-route-btn');
-const sosSenderName = document.getElementById('sos-sender-name');
-const sosMessage = document.getElementById('sos-message');
-const sosLocation = document.getElementById('sos-location');
 
 // Map Variables
 let map, placesService, autocompleteA, autocompleteB, currentPosition, directionsService, directionsRenderer, currentLocationMarker;
 let routeMarkers = [];
-let sosListener;
 
 // Utility Functions
 const showLoading = () => loadingOverlay.style.display = 'flex';
@@ -1399,54 +1388,54 @@ const showError = (elementId, message) => {
     }
     showToast(message, 'error');
 };
-const generateEmergencyKey = () => 'SOAPP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-const validateEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const validatePhone = phone => phone === '' || /^\+?[\d\s-]{8,15}$/.test(phone);
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
-};
 
-// Load Google Maps API with @googlemaps/js-api-loader
+// Load Google Maps API using the pre-loaded Loader
 async function loadGoogleMapsScript() {
-    if (window.google && window.google.maps) return Promise.resolve();
+    if (window.google && window.google.maps) {
+        console.log('Google Maps API already loaded');
+        return;
+    }
     try {
-        const { Loader } = await import('@googlemaps/js-api-loader');
-        const loader = new Loader({
-            apiKey: 'AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE', // Your provided Google Maps API key
+        const loader = new google.maps.plugins.loader.Loader({
+            apiKey: 'AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE',
             version: 'weekly',
             libraries: ['places']
         });
+        console.log('Loading Google Maps API...');
         await loader.load();
-        return Promise.resolve();
+        console.log('Google Maps API loaded successfully');
     } catch (error) {
         console.error('Failed to load Google Maps API:', error);
-        showToast('Failed to load Google Maps. Check network or use http://localhost for local dev.', 'error');
+        showToast('Failed to load Google Maps. Check your API key or network.', 'error');
         throw error;
     }
 }
 
 // Show Main Interface
-const showMainInterface = () => {
+const showMainInterface = async () => {
     showLoading();
-    if (!authForm || !signupForm || !mapContainer || !navigation || !bottomSheet || !profilePage) return;
-    authForm.classList.remove('active');
-    signupForm.classList.remove('active');
-    mapContainer.classList.add('active');
-    navigation.classList.add('active');
-    bottomSheet.classList.add('active');
-    bottomSheet.style.transform = 'translateY(calc(100% - 40px))';
-    profilePage.classList.remove('active');
-    requestAnimationFrame(() => {
+    try {
+        authForm.classList.remove('active');
+        signupForm.classList.remove('active');
+        mapContainer.classList.add('active');
+        navigation.classList.add('active');
+        bottomSheet.classList.add('active');
+        bottomSheet.style.transform = 'translateY(calc(100% - 40px))';
+        profilePage.classList.remove('active');
+
+        await loadGoogleMapsScript();
+        if (!window.google || !window.google.maps) {
+            throw new Error('Google Maps API not available after loading');
+        }
+        initMap();
         setupBottomSheet();
         setupNavigation();
-        setupSOSListener();
         hideLoading();
-    });
+    } catch (error) {
+        console.error('Error in showMainInterface:', error);
+        showToast('Failed to initialize map interface', 'error');
+        hideLoading();
+    }
 };
 
 // Authentication Handlers
@@ -1454,16 +1443,11 @@ const handleSignIn = async e => {
     e.preventDefault();
     showLoading();
     try {
-        if (!auth || !db) throw new Error('Firebase not initialized');
-        const email = document.getElementById('signin-email')?.value.trim();
-        const password = document.getElementById('signin-password')?.value.trim();
+        const email = document.getElementById('signin-email').value.trim();
+        const password = document.getElementById('signin-password').value.trim();
         if (!email || !password) throw new Error('Email or password missing');
-        if (!validateEmail(email)) throw new Error('Invalid email format');
-        if (password.length < 6) throw new Error('Password must be at least 6 characters');
         await auth.signInWithEmailAndPassword(email, password);
-        await loadGoogleMapsScript();
-        initMap();
-        showMainInterface();
+        await showMainInterface();
         showToast('Logged in successfully!', 'success');
     } catch (error) {
         console.error('Sign-in error:', error);
@@ -1477,27 +1461,21 @@ const handleSignUp = async e => {
     e.preventDefault();
     showLoading();
     try {
-        if (!auth || !db) throw new Error('Firebase not initialized');
-        const fullName = document.getElementById('signup-fullname')?.value.trim();
-        const email = document.getElementById('signup-email')?.value.trim();
-        const password = document.getElementById('signup-password')?.value.trim();
-        const phone = document.getElementById('signup-phone')?.value.trim();
+        const fullName = document.getElementById('signup-fullname').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value.trim();
+        const phone = document.getElementById('signup-phone').value.trim();
         if (!fullName || !email || !password) throw new Error('Required fields missing');
-        if (!validateEmail(email)) throw new Error('Invalid email format');
-        if (password.length < 6) throw new Error('Password must be at least 6 characters');
-        if (!validatePhone(phone)) throw new Error('Invalid phone number format');
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         await db.collection('users').doc(userCredential.user.uid).set({
             fullName,
             email,
             phone,
-            emergencyKey: generateEmergencyKey(),
+            emergencyKey: 'SOAPP-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
             emergencyContacts: [],
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        await loadGoogleMapsScript();
-        initMap();
-        showMainInterface();
+        await showMainInterface();
         showToast('Account created successfully!', 'success');
     } catch (error) {
         console.error('Sign-up error:', error);
@@ -1507,35 +1485,21 @@ const handleSignUp = async e => {
     }
 };
 
-// Event Listeners for Auth
-authForm?.addEventListener('submit', handleSignIn);
-signupForm?.addEventListener('submit', handleSignUp);
-document.getElementById('show-signup')?.addEventListener('click', () => {
+// Auth Event Listeners
+authForm.addEventListener('submit', handleSignIn);
+signupForm.addEventListener('submit', handleSignUp);
+document.getElementById('show-signup').addEventListener('click', () => {
     authForm.classList.remove('active');
     signupForm.classList.add('active');
 });
-document.getElementById('show-signin')?.addEventListener('click', () => {
+document.getElementById('show-signin').addEventListener('click', () => {
     signupForm.classList.remove('active');
     authForm.classList.add('active');
 });
-document.getElementById('back-to-signin')?.addEventListener('click', () => {
+document.getElementById('back-to-signin').addEventListener('click', () => {
     signupForm.classList.remove('active');
     authForm.classList.add('active');
 });
-
-// Inject Custom Autocomplete Styles
-function injectAutocompleteStyles() {
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .pac-container { background: black !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin-top: 5px !important; z-index: 1000 !important; }
-        .pac-item { background: transparent !important; color: #ffffff !important; padding: 8px 12px !important; font-family: 'Helvetica Neue', Arial, sans-serif !important; font-size: 15px !important; border: none !important; cursor: pointer !important; transition: color 0.3s ease !important; }
-        .pac-item:hover { color: #ff4444 !important; background: transparent !important; }
-        .pac-item-query { color: #ffffff !important; }
-        .pac-matched { color: #ff4444 !important; }
-        .pac-icon { display: none !important; }
-    `;
-    document.head.appendChild(style);
-}
 
 // Initialize Google Maps
 function initMap() {
@@ -1561,19 +1525,12 @@ function initMap() {
     autocompleteB = new google.maps.places.Autocomplete(document.getElementById('point-b'), { types: ['geocode'] });
     autocompleteA.bindTo('bounds', map);
     autocompleteB.bindTo('bounds', map);
-    autocompleteA.addListener('place_changed', () => {
-        const place = autocompleteA.getPlace();
-        if (place.geometry) map.panTo(place.geometry.location);
-    });
-    autocompleteB.addListener('place_changed', () => {
-        const place = autocompleteB.getPlace();
-        if (place.geometry) map.panTo(place.geometry.location);
-    });
-    injectAutocompleteStyles();
     getCurrentLocation();
-    document.getElementById('zoom-in')?.addEventListener('click', () => map.setZoom(map.getZoom() + 1));
-    document.getElementById('zoom-out')?.addEventListener('click', () => map.getZoom() > 1 && map.setZoom(map.getZoom() - 1));
-    document.getElementById('center-map')?.addEventListener('click', () => currentPosition ? map.panTo(currentPosition) : getCurrentLocation());
+    document.getElementById('zoom-in').addEventListener('click', () => map.setZoom(map.getZoom() + 1));
+    document.getElementById('zoom-out').addEventListener('click', () => map.getZoom() > 1 && map.setZoom(map.getZoom() - 1));
+    document.getElementById('center-map').addEventListener('click', () => currentPosition ? map.panTo(currentPosition) : getCurrentLocation());
+    document.getElementById('set-current-location').addEventListener('click', setCurrentLocation);
+    document.getElementById('get-route').addEventListener('click', getRoute);
 }
 
 // Get Current Location
@@ -1592,511 +1549,113 @@ function getCurrentLocation() {
             title: 'Your Location',
             icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
         });
-        findNearbySafetyPoints(currentPosition);
     }, error => {
         showToast('Please enable location services.', 'error');
         map.setCenter({ lat: 37.7749, lng: -122.4194 });
     }, { timeout: 10000, enableHighAccuracy: true });
 }
 
-// Find Nearby Safety Points
-function findNearbySafetyPoints(location) {
-    const safetyTypes = ['police', 'hospital'];
-    let allResults = [];
-    safetyTypes.forEach(type => {
-        placesService.nearbySearch({ location, radius: 5000, type }, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                results.forEach(place => {
-                    place.type = type;
-                    place.distance = calculateDistance(location.lat, location.lng, place.geometry.location.lat(), place.geometry.location.lng());
-                    allResults.push(place);
-                });
-                allResults.sort((a, b) => a.distance - b.distance);
-                displaySafePoints(allResults.slice(0, 5));
-            }
-        });
-    });
-}
-
-// Display Safe Points
-function displaySafePoints(places) {
-    const safePointsList = document.getElementById('safe-points-list');
-    if (!safePointsList) return;
-    safePointsList.innerHTML = '';
-    places.forEach(place => {
-        const item = document.createElement('div');
-        item.classList.add('safe-point-item');
-        item.innerHTML = `
-            <i class="fas ${place.type === 'police' ? 'fa-shield-alt' : 'fa-hospital'} safe-point-icon"></i>
-            <div class="safe-point-info">
-                <div class="safe-point-name">${place.name}</div>
-                <div class="safe-point-distance">${place.distance} km away</div>
-            </div>`;
-        item.addEventListener('click', () => {
-            map.panTo(place.geometry.location);
-            map.setZoom(16);
-            clearRouteMarkers();
-            directionsRenderer.setDirections(null);
-            if (currentPosition) {
-                directionsService.route({
-                    origin: currentPosition,
-                    destination: place.geometry.location,
-                    travelMode: 'WALKING'
-                }, (response, status) => {
-                    if (status === 'OK') directionsRenderer.setDirections(response);
-                    else showToast('Route calculation failed.', 'error');
-                });
-            }
-        });
-        safePointsList.appendChild(item);
-    });
-}
-
-// Clear Route Markers
-function clearRouteMarkers() {
-    routeMarkers.forEach(marker => marker.setMap(null));
-    routeMarkers = [];
-}
-
-// Setup Bottom Sheet Interaction
-function setupBottomSheet() {
-    if (!bottomSheet) return;
-    const hammer = new Hammer(bottomSheet);
-    hammer.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
-    let startY, deltaY;
-
-    hammer.on('panstart', e => {
-        startY = e.center.y;
-        bottomSheet.style.transition = 'none';
-    });
-
-    hammer.on('panmove', e => {
-        deltaY = e.center.y - startY;
-        const translateY = Math.max(0, Math.min(window.innerHeight * 0.6, deltaY));
-        bottomSheet.style.transform = `translateY(${translateY}px)`;
-    });
-
-    hammer.on('panend', () => {
-        bottomSheet.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
-        if (deltaY > 100) {
-            bottomSheet.style.transform = 'translateY(calc(100% - 40px))';
-            document.body.classList.add('minimized');
-            document.body.classList.remove('expanded');
-        } else if (deltaY < -100) {
-            bottomSheet.style.transform = 'translateY(0)';
-            document.body.classList.add('expanded');
-            document.body.classList.remove('minimized');
-        } else {
-            bottomSheet.style.transform = document.body.classList.contains('expanded') ? 'translateY(0)' : 'translateY(calc(100% - 40px))';
-        }
-    });
-
-    document.getElementById('set-current-location')?.addEventListener('click', () => {
-        if (currentPosition) {
-            document.getElementById('point-a').value = 'My Location';
-            map.panTo(currentPosition);
-        } else {
-            showToast('Location unavailable. Enable location services.', 'error');
-        }
-    });
-
-    document.getElementById('get-route')?.addEventListener('click', () => {
-        const pointA = document.getElementById('point-a').value;
-        const pointB = document.getElementById('point-b').value;
-        if (!pointA || !pointB) {
-            showToast('Please enter both start and destination.', 'error');
-            return;
-        }
-        const origin = pointA === 'My Location' ? currentPosition : autocompleteA.getPlace()?.geometry?.location;
-        const destination = autocompleteB.getPlace()?.geometry?.location;
-        if (!origin || !destination) {
-            showToast('Invalid location selected.', 'error');
-            return;
-        }
-        directionsService.route({
-            origin,
-            destination,
-            travelMode: 'WALKING'
-        }, (response, status) => {
-            if (status === 'OK') {
-                directionsRenderer.setDirections(response);
-                map.fitBounds(response.routes[0].bounds);
-            } else {
-                showToast('Route calculation failed.', 'error');
-            }
-        });
-    });
-}
-
-// Setup Navigation
-function setupNavigation() {
-    const mapNav = document.getElementById('map-nav');
-    const profileNav = document.getElementById('profile-nav');
-    const indicator = document.querySelector('.indicator');
-    const navItems = document.querySelectorAll('.navigation ul li');
-
-    // Remove existing listeners to prevent duplicates
-    mapNav.removeEventListener('click', handleMapNavClick);
-    profileNav.removeEventListener('click', handleProfileNavClick);
-    indicator.removeEventListener('click', sendSOS);
-    navItems.forEach(item => item.removeEventListener('click', handleNavItemClick));
-
-    // Define handlers
-    function handleMapNavClick() {
-        mapContainer.classList.add('active');
-        bottomSheet.classList.add('active');
-        profilePage.classList.remove('active');
-        navItems.forEach(item => item.classList.remove('active'));
-        mapNav.classList.add('active');
+// Set Current Location as Start Point
+function setCurrentLocation() {
+    if (currentPosition) {
+        document.getElementById('point-a').value = 'My Location';
+        map.panTo(currentPosition);
+        showToast('Current location set as start point.', 'success');
+    } else {
+        showToast('Unable to get current location.', 'error');
+        getCurrentLocation();
     }
-
-    function handleProfileNavClick() {
-        mapContainer.classList.remove('active');
-        bottomSheet.classList.remove('active');
-        profilePage.classList.add('active');
-        navItems.forEach(item => item.classList.remove('active'));
-        profileNav.classList.add('active');
-        loadProfile();
-    }
-
-    function handleNavItemClick() {
-        navItems.forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
-    }
-
-    // Add listeners
-    mapNav?.addEventListener('click', handleMapNavClick);
-    profileNav?.addEventListener('click', handleProfileNavClick);
-    indicator?.addEventListener('click', sendSOS);
-    navItems.forEach(item => item.addEventListener('click', handleNavItemClick));
 }
 
-// Load Profile
-async function loadProfile() {
+// Get Route
+function getRoute() {
+    const start = document.getElementById('point-a').value;
+    const end = document.getElementById('point-b').value;
+    if (!start || !end) {
+        showToast('Please enter both start and destination.', 'error');
+        return;
+    }
     showLoading();
-    try {
-        if (!auth.currentUser || !db) throw new Error('Not authenticated');
-        const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
-        if (!userDoc.exists) throw new Error('User data not found');
-        const userData = userDoc.data();
-        document.getElementById('profile-name').textContent = userData.fullName || 'User';
-        document.getElementById('profile-email').innerHTML = `<i class="fas fa-envelope"></i> ${userData.email || 'N/A'}`;
-        document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${userData.phone || 'Not provided'}`;
-        document.getElementById('emergency-key').textContent = userData.emergencyKey || 'N/A';
-        document.getElementById('full-name').value = userData.fullName || '';
-        document.getElementById('email-display').value = userData.email || '';
-        document.getElementById('phone').value = userData.phone || '';
-        document.getElementById('emergency-message').value = userData.emergencyMessage || 'I need help!';
-        document.getElementById('last-verified').textContent = `Verified: ${new Date().toLocaleString()}`;
-        loadEmergencyContacts(userData.emergencyContacts || []);
-    } catch (error) {
-        console.error('Profile load error:', error);
-        showToast('Failed to load profile.', 'error');
-    } finally {
+    directionsService.route({
+        origin: start === 'My Location' ? currentPosition : start,
+        destination: end,
+        travelMode: google.maps.TravelMode.WALKING
+    }, (result, status) => {
         hideLoading();
-    }
-    setupProfileEvents();
-}
-
-// Load Emergency Contacts
-async function loadEmergencyContacts(contactKeys) {
-    if (!contactList) return;
-    contactList.innerHTML = '';
-    try {
-        const contactPromises = contactKeys.map(async key => {
-            const contactQuery = await db.collection('users').where('emergencyKey', '==', key).limit(1).get();
-            if (!contactQuery.empty) return contactQuery.docs[0].data();
-            return null;
-        });
-        const contacts = (await Promise.all(contactPromises)).filter(c => c);
-        contacts.forEach(contact => {
-            const item = document.createElement('div');
-            item.classList.add('contact-item');
-            item.innerHTML = `
-                <div class="contact-avatar"><i class="fas fa-user"></i></div>
-                <div class="contact-info">
-                    <div class="contact-name">${contact.fullName}</div>
-                    <div>${contact.phone || contact.email}</div>
-                </div>`;
-            contactList.appendChild(item);
-        });
-    } catch (error) {
-        console.error('Error loading contacts:', error);
-        showToast('Failed to load contacts.', 'error');
-    }
-}
-
-// Setup Profile Events
-function setupProfileEvents() {
-    const editBtn = document.getElementById('edit-profile');
-    const saveBtn = document.getElementById('save-changes');
-    const signOutBtn = document.getElementById('sign-out');
-    const editSection = document.getElementById('edit-section');
-    const fullNameInput = document.getElementById('full-name');
-    const phoneInput = document.getElementById('phone');
-    const emergencyMessageInput = document.getElementById('emergency-message');
-    const tabs = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const keyCopyBtn = document.querySelector('.key-copy');
-
-    editBtn?.removeEventListener('click', toggleEdit);
-    saveBtn?.removeEventListener('click', saveProfile);
-    signOutBtn?.removeEventListener('click', handleSignOut);
-    keyCopyBtn?.removeEventListener('click', copyEmergencyKey);
-    tabs.forEach(tab => tab.removeEventListener('click', handleTabClick));
-
-    function toggleEdit() {
-        editSection.classList.toggle('active');
-        const isEditing = editSection.classList.contains('active');
-        fullNameInput.readOnly = !isEditing;
-        phoneInput.readOnly = !isEditing;
-        emergencyMessageInput.readOnly = !isEditing;
-        saveBtn.disabled = !isEditing;
-        editBtn.textContent = isEditing ? 'Cancel' : 'Edit Details';
-    }
-
-    async function saveProfile() {
-        showLoading();
-        try {
-            if (!auth.currentUser || !db) throw new Error('Not authenticated');
-            const updates = {
-                fullName: fullNameInput.value.trim(),
-                phone: phoneInput.value.trim(),
-                emergencyMessage: emergencyMessageInput.value.trim()
-            };
-            if (!updates.fullName) throw new Error('Full name is required');
-            if (!validatePhone(updates.phone)) throw new Error('Invalid phone number');
-            await db.collection('users').doc(auth.currentUser.uid).update(updates);
-            toggleEdit();
-            loadProfile();
-            showToast('Profile updated successfully!', 'success');
-        } catch (error) {
-            console.error('Save profile error:', error);
-            showToast(error.message, 'error');
-        } finally {
-            hideLoading();
+        if (status === google.maps.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+            showToast('Route calculated successfully!', 'success');
+        } else {
+            showToast('Unable to find a route.', 'error');
         }
-    }
+    });
+}
 
-    async function handleSignOut() {
-        showLoading();
-        try {
-            await auth.signOut();
-            if (sosListener) sosListener();
+// Bottom Sheet Interaction
+function setupBottomSheet() {
+    const hammer = new Hammer(bottomSheet);
+    let startY = 0;
+    hammer.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
+    hammer.on('panstart', e => {
+        startY = customSheet.getBoundingClientRect().top;
+    });
+    hammer.on('pan', e => {
+        const newY = startY + e.deltaY;
+        customSheet.style.transform = `translateY(${newY}px)`;
+    });
+    hammer.on('panend', e => {
+        const threshold = window.innerHeight * 0.3;
+        const finalY = startY + e.deltaY;
+        if (finalY < threshold) {
+            document.body.classList.remove('minimized');
+            document.body.classList.add('expanded');
+            customSheet.style.transform = 'translateY(0)';
+        } else {
+            document.body.classList.remove('expanded');
+            document.body.classList.add('minimized');
+            customSheet.style.transform = 'translateY(calc(100% - 40px))';
+        }
+    });
+}
+
+// Navigation Setup
+function setupNavigation() {
+    const navItems = document.querySelectorAll('.navigation ul li');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            if (item.id === 'map-nav') {
+                profilePage.classList.remove('active');
+                mapContainer.classList.add('active');
+                bottomSheet.classList.add('active');
+            } else if (item.id === 'profile-nav') {
+                mapContainer.classList.remove('active');
+                bottomSheet.classList.remove('active');
+                profilePage.classList.add('active');
+            }
+        });
+    });
+}
+
+// Auth State Listener
+function setupAuthStateListener() {
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            showMainInterface();
+        } else {
             authForm.classList.add('active');
+            signupForm.classList.remove('active');
             mapContainer.classList.remove('active');
             navigation.classList.remove('active');
             bottomSheet.classList.remove('active');
             profilePage.classList.remove('active');
-            showToast('Logged out successfully!', 'success');
-        } catch (error) {
-            console.error('Sign out error:', error);
-            showToast('Failed to log out.', 'error');
-        } finally {
-            hideLoading();
         }
-    }
-
-    function handleTabClick() {
-        tabs.forEach(t => t.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById(this.dataset.tab).classList.add('active');
-    }
-
-    function copyEmergencyKey() {
-        const key = document.getElementById('emergency-key').textContent;
-        navigator.clipboard.writeText(key).then(() => showToast('Key copied to clipboard!', 'success'));
-    }
-
-    editBtn?.addEventListener('click', toggleEdit);
-    saveBtn?.addEventListener('click', saveProfile);
-    signOutBtn?.addEventListener('click', handleSignOut);
-    keyCopyBtn?.addEventListener('click', copyEmergencyKey);
-    tabs.forEach(tab => tab.addEventListener('click', handleTabClick));
+    });
 }
 
-// Emergency Contact Management
-addContactBtn?.addEventListener('click', () => addContactForm.classList.add('active'));
-cancelContactBtn?.addEventListener('click', () => addContactForm.classList.remove('active'));
-submitContactBtn?.addEventListener('click', async () => {
-    showLoading();
-    try {
-        if (!auth.currentUser || !db) throw new Error('Not authenticated');
-        const key = contactKeyInput.value.trim();
-        if (!key.startsWith('SOAPP-')) throw new Error('Invalid safety key format');
-        const contactQuery = await db.collection('users').where('emergencyKey', '==', key).limit(1).get();
-        if (contactQuery.empty) throw new Error('No user found with this key');
-        const contactData = contactQuery.docs[0].data();
-        const userDocRef = db.collection('users').doc(auth.currentUser.uid);
-        const userDoc = await userDocRef.get();
-        const currentContacts = userDoc.data().emergencyContacts || [];
-        if (currentContacts.includes(key)) throw new Error('Contact already added');
-        if (key === userDoc.data().emergencyKey) throw new Error('Cannot add yourself');
-        await userDocRef.update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayUnion(key)
-        });
-        addContactForm.classList.remove('active');
-        contactKeyInput.value = '';
-        loadProfile();
-        showToast('Contact added successfully!', 'success');
-    } catch (error) {
-        console.error('Add contact error:', error);
-        showError('add-contact-error', error.message);
-    } finally {
-        hideLoading();
-    }
-});
-
-// SOS Functionality
-async function sendSOS() {
-    showLoading();
-    try {
-        if (!auth.currentUser || !db || !currentPosition) throw new Error('Cannot send SOS');
-        const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
-        const userData = userDoc.data();
-        const sosData = {
-            senderId: auth.currentUser.uid,
-            senderName: userData.fullName,
-            message: userData.emergencyMessage || 'I need help!',
-            location: new firebase.firestore.GeoPoint(currentPosition.lat, currentPosition.lng),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        await db.collection('sos_alerts').add(sosData);
-        showToast('SOS sent to your emergency contacts!', 'success');
-    } catch (error) {
-        console.error('SOS error:', error);
-        showToast('Failed to send SOS.', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Setup SOS Listener
-function setupSOSListener() {
-    // Ensure prerequisites are met
-    if (!auth?.currentUser || !db) {
-        console.warn('Cannot setup SOS listener: User not authenticated or Firestore not initialized');
-        return;
-    }
-
-    // Clean up any existing listener to prevent duplicates
-    if (sosListener) {
-        sosListener(); // Unsubscribe from previous listener
-        sosListener = null;
-    }
-
-    // Fetch the user's emergency contacts to include in the listener query
-    let emergencyContacts = [];
-    showLoading();
-    db.collection('users').doc(auth.currentUser.uid).get()
-        .then(doc => {
-            if (doc.exists) {
-                emergencyContacts = doc.data().emergencyContacts || [];
-            } else {
-                throw new Error('User document not found');
-            }
-
-            // Set up the real-time Firestore listener for SOS alerts
-            sosListener = db.collection('sos_alerts')
-                .where('senderId', 'in', [auth.currentUser.uid, ...emergencyContacts])
-                .onSnapshot(
-                    snapshot => {
-                        snapshot.docChanges().forEach(change => {
-                            if (change.type === 'added') {
-                                const sosData = change.doc.data();
-
-                                // Skip displaying SOS if it's from the current user (they sent it)
-                                if (sosData.senderId === auth.currentUser.uid) {
-                                    return;
-                                }
-
-                                // Update SOS panel content
-                                if (sosSenderName && sosMessage && sosLocation) {
-                                    sosSenderName.textContent = sosData.senderName || 'Unknown Sender';
-                                    sosMessage.textContent = sosData.message || 'No message provided';
-                                    sosLocation.textContent = sosData.location
-                                        ? `${sosData.location.latitude.toFixed(4)}, ${sosData.location.longitude.toFixed(4)}`
-                                        : 'Location unavailable';
-                                } else {
-                                    console.error('SOS panel elements not found');
-                                    showToast('Error displaying SOS alert', 'error');
-                                    return;
-                                }
-
-                                // Show the SOS panel
-                                sosPanel.classList.add('active');
-
-                                // Set up the "Navigate to Sender" button
-                                sosRouteBtn.onclick = () => {
-                                    if (!map || !directionsService || !directionsRenderer) {
-                                        showToast('Map not initialized', 'error');
-                                        return;
-                                    }
-
-                                    const destination = {
-                                        lat: sosData.location.latitude,
-                                        lng: sosData.location.longitude
-                                    };
-
-                                    // Pan to the sender's location
-                                    map.panTo(destination);
-
-                                    // Calculate and display route if current position is available
-                                    if (currentPosition) {
-                                        directionsService.route({
-                                            origin: currentPosition,
-                                            destination: destination,
-                                            travelMode: 'WALKING'
-                                        }, (response, status) => {
-                                            if (status === 'OK') {
-                                                directionsRenderer.setDirections(response);
-                                                sosPanel.classList.remove('active');
-                                                showToast('Navigating to sender', 'success');
-                                            } else {
-                                                console.error('Route calculation failed:', status);
-                                                showToast('Failed to calculate route', 'error');
-                                            }
-                                        });
-                                    } else {
-                                        showToast('Current location unavailable', 'error');
-                                        map.setZoom(14); // Zoom in slightly for visibility
-                                    }
-                                };
-                            }
-                        });
-                    },
-                    error => {
-                        console.error('SOS listener error:', error);
-                        showToast('Failed to listen for SOS alerts', 'error');
-                    }
-                );
-        })
-        .catch(error => {
-            console.error('Error fetching user data for SOS listener:', error);
-            showToast('Failed to setup SOS listener', 'error');
-        })
-        .finally(() => {
-            hideLoading();
-        });
-}
-
-sosCloseBtn?.addEventListener('click', () => sosPanel.classList.remove('active'));
-
-// Check Auth State
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        await loadGoogleMapsScript();
-        initMap();
-        showMainInterface();
-    } else {
-        authForm.classList.add('active');
-        mapContainer.classList.remove('active');
-        navigation.classList.remove('active');
-        bottomSheet.classList.remove('active');
-        profilePage.classList.remove('active');
-    }
-});
+// Initialize App
+initializeFirebase();
     </script>
-    </body>
-</html>
+</body>
+</html> 
