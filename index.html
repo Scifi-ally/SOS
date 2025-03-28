@@ -1739,8 +1739,11 @@ function setupNavigation() {
 
     indicator?.addEventListener('click', sendSOS);
 
-    auth.onAuthStateChanged(user => {
-        if (user) loadProfile();
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
     });
 }
 
@@ -1766,16 +1769,19 @@ function loadProfile() {
         showToast('Failed to load profile.', 'error');
     }).finally(() => hideLoading());
 
-    document.getElementById('edit-profile')?.addEventListener('click', () => {
-        const editSection = document.getElementById('edit-section');
+    const editBtn = document.getElementById('edit-profile');
+    const saveBtn = document.getElementById('save-changes');
+    const editSection = document.getElementById('edit-section');
+
+    editBtn?.addEventListener('click', () => {
         editSection.classList.add('active');
+        saveBtn.disabled = false;
         document.getElementById('full-name').removeAttribute('readonly');
         document.getElementById('phone').removeAttribute('readonly');
         document.getElementById('emergency-message').removeAttribute('readonly');
-        document.getElementById('save-changes').disabled = false;
     });
 
-    document.getElementById('save-changes')?.addEventListener('click', () => {
+    saveBtn?.addEventListener('click', async () => {
         const fullName = document.getElementById('full-name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const emergencyMessage = document.getElementById('emergency-message').value.trim();
@@ -1783,31 +1789,37 @@ function loadProfile() {
             showToast('Full name is required.', 'error');
             return;
         }
+        if (!validatePhone(phone)) {
+            showToast('Invalid phone number.', 'error');
+            return;
+        }
         showLoading();
-        db.collection('users').doc(user.uid).update({ fullName, phone, emergencyMessage })
-            .then(() => {
-                showToast('Profile updated!', 'success');
-                document.getElementById('profile-name').textContent = fullName;
-                document.getElementById('profile-phone').innerHTML = `<i class="fas fa-phone"></i> ${phone || 'Not provided'}`;
-                document.getElementById('full-name').setAttribute('readonly', true);
-                document.getElementById('phone').setAttribute('readonly', true);
-                document.getElementById('emergency-message').setAttribute('readonly', true);
-                document.getElementById('edit-section').classList.remove('active');
-                document.getElementById('save-changes').disabled = true;
-            })
-            .catch(error => showToast('Failed to update profile.', 'error'))
-            .finally(() => hideLoading());
+        try {
+            await db.collection('users').doc(user.uid).update({
+                fullName, phone, emergencyMessage,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            loadProfile();
+            editSection.classList.remove('active');
+            saveBtn.disabled = true;
+            showToast('Profile updated!', 'success');
+        } catch (error) {
+            showToast('Failed to update profile.', 'error');
+        } finally {
+            hideLoading();
+        }
     });
 
-    document.getElementById('sign-out')?.addEventListener('click', () => {
-        auth.signOut().then(() => {
-            mapContainer.classList.remove('active');
-            bottomSheet.classList.remove('active');
-            profilePage.classList.remove('active');
-            navigation.classList.remove('active');
-            authForm.classList.add('active');
-            showToast('Signed out successfully!', 'success');
-        }).catch(error => showToast('Sign out failed.', 'error'));
+    document.getElementById('sign-out')?.addEventListener('click', async () => {
+        showLoading();
+        try {
+            await auth.signOut();
+            window.location.reload();
+        } catch (error) {
+            showToast('Sign out failed.', 'error');
+        } finally {
+            hideLoading();
+        }
     });
 
     document.querySelector('.key-copy')?.addEventListener('click', () => {
@@ -1819,122 +1831,189 @@ function loadProfile() {
 
 // Load Emergency Contacts
 function loadEmergencyContacts(contacts) {
+    if (!contactList) return;
     contactList.innerHTML = '';
-    if (!contacts.length) {
+    if (!contacts || contacts.length === 0) {
         contactList.innerHTML = '<p>No emergency contacts added yet.</p>';
         return;
     }
-    contacts.forEach(contactId => {
-        db.collection('users').doc(contactId).get().then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                const item = document.createElement('div');
-                item.classList.add('contact-item');
-                item.innerHTML = `
-                    <div class="contact-avatar">${data.fullName[0]}</div>
-                    <div class="contact-info">
-                        <div class="contact-name">${data.fullName}</div>
-                        <div>${data.phone || 'No phone'}</div>
-                    </div>`;
-                contactList.appendChild(item);
-            }
-        });
+    
+    contacts.forEach((contactId, index) => {
+        db.collection('users').doc(contactId).get()
+            .then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const item = document.createElement('div');
+                    item.classList.add('contact-item');
+                    item.innerHTML = `
+                        <div class="contact-avatar">${data.fullName[0]}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${data.fullName}</div>
+                            <div>${data.phone || 'No phone'}</div>
+                        </div>
+                        <button class="btn btn-outline remove-contact" data-id="${contactId}">Remove</button>
+                    `;
+                    contactList.appendChild(item);
+                    
+                    item.querySelector('.remove-contact').addEventListener('click', () => removeContact(contactId));
+                }
+            })
+            .catch(error => {
+                console.error('Error loading contact:', error);
+                showToast('Failed to load contact', 'error');
+            });
     });
 }
 
-// Add Emergency Contact
-addContactBtn?.addEventListener('click', () => addContactForm.classList.add('active'));
-cancelContactBtn?.addEventListener('click', () => addContactForm.classList.remove('active'));
-submitContactBtn?.addEventListener('click', async () => {
-    const key = contactKeyInput.value.trim();
-    if (!key) {
-        showError('add-contact-error', 'Enter a safety key.');
-        return;
-    }
+// Remove Emergency Contact
+async function removeContact(contactId) {
     showLoading();
     try {
-        const querySnapshot = await db.collection('users').where('emergencyKey', '==', key).get();
+        const user = auth.currentUser;
+        const userDocRef = db.collection('users').doc(user.uid);
+        const userDoc = await userDocRef.get();
+        const contacts = userDoc.data().emergencyContacts || [];
+        
+        const updatedContacts = contacts.filter(id => id !== contactId);
+        await userDocRef.update({
+            emergencyContacts: updatedContacts,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        loadEmergencyContacts(updatedContacts);
+        showToast('Contact removed successfully!', 'success');
+    } catch (error) {
+        showToast('Failed to remove contact', 'error');
+        console.error('Remove contact error:', error);
+    } finally {
+        hideLoading();
+    }
+}
+
+// Emergency Contact Form Controls
+addContactBtn?.addEventListener('click', () => addContactForm.classList.add('active'));
+cancelContactBtn?.addEventListener('click', () => {
+    addContactForm.classList.remove('active');
+    contactKeyInput.value = '';
+});
+
+submitContactBtn?.addEventListener('click', async () => {
+    const key = contactKeyInput.value.trim();
+    if (!key || !key.match(/^SOAPP-[A-Z0-9]{9}$/)) {
+        showError('add-contact-error', 'Please enter a valid safety key (format: SOAPP-XXXXXXXXX)');
+        return;
+    }
+
+    showLoading();
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('User not authenticated');
+
+        const querySnapshot = await db.collection('users')
+            .where('emergencyKey', '==', key)
+            .limit(1)
+            .get();
+
         if (querySnapshot.empty) {
-            showError('add-contact-error', 'Invalid safety key.');
-            return;
+            throw new Error('No user found with this safety key');
         }
+
         const contactDoc = querySnapshot.docs[0];
         const contactId = contactDoc.id;
-        const user = auth.currentUser;
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        const contacts = userDoc.data().emergencyContacts || [];
-        if (contacts.includes(contactId)) {
-            showError('add-contact-error', 'Contact already added.');
-            return;
+
+        if (contactId === user.uid) {
+            throw new Error('You cannot add yourself as an emergency contact');
         }
+
+        const userDocRef = db.collection('users').doc(user.uid);
+        const userDoc = await userDocRef.get();
+        const userData = userDoc.data();
+        const contacts = userData.emergencyContacts || [];
+
+        if (contacts.includes(contactId)) {
+            throw new Error('This contact is already in your emergency list');
+        }
+
         contacts.push(contactId);
-        await db.collection('users').doc(user.uid).update({ emergencyContacts: contacts });
+        await userDocRef.update({
+            emergencyContacts: contacts,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         loadEmergencyContacts(contacts);
         addContactForm.classList.remove('active');
         contactKeyInput.value = '';
-        showToast('Contact added!', 'success');
+        showToast('Emergency contact added successfully!', 'success');
     } catch (error) {
-        showError('add-contact-error', 'Failed to add contact.');
+        showError('add-contact-error', error.message);
+        console.error('Add contact error:', error);
     } finally {
         hideLoading();
     }
 });
 
 // Send SOS
-function sendSOS() {
+async function sendSOS() {
     if (!currentPosition) {
-        showToast('Location unavailable. Enable location services.', 'error');
+        showToast('Location unavailable.', 'error');
         return;
     }
     showLoading();
-    const user = auth.currentUser;
-    db.collection('users').doc(user.uid).get().then(doc => {
-        const data = doc.data();
+    try {
+        const user = auth.currentUser;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
         const sosData = {
             senderId: user.uid,
-            senderName: data.fullName,
-            message: data.emergencyMessage || 'I need help!',
+            senderName: userData.fullName,
+            message: userData.emergencyMessage || 'I need help!',
             location: new firebase.firestore.GeoPoint(currentPosition.lat, currentPosition.lng),
-            recipients: data.emergencyContacts || [],
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
-        db.collection('sos_alerts').add(sosData)
-            .then(() => showToast('SOS sent to your contacts!', 'success'))
-            .catch(error => showToast('Failed to send SOS.', 'error'))
-            .finally(() => hideLoading());
-    });
+        const contacts = userData.emergencyContacts || [];
+        await Promise.all(contacts.map(contactId =>
+            db.collection('users').doc(contactId).collection('sosAlerts').add(sosData)
+        ));
+        showToast('SOS sent to your emergency contacts!', 'success');
+    } catch (error) {
+        showToast('Failed to send SOS.', 'error');
+        console.error('SOS error:', error);
+    } finally {
+        hideLoading();
+    }
 }
 
 // Setup SOS Listener
 function setupSOSListener() {
+    if (sosListener) sosListener();
     const user = auth.currentUser;
     if (!user) return;
-    if (sosListener) sosListener();
-    sosListener = db.collection('sos_alerts')
-        .where('recipients', 'array-contains', user.uid)
+    sosListener = db.collection('users').doc(user.uid).collection('sosAlerts')
+        .orderBy('timestamp', 'desc')
+        .limit(1)
         .onSnapshot(snapshot => {
             snapshot.docChanges().forEach(change => {
                 if (change.type === 'added') {
-                    const data = change.doc.data();
-                    sosSenderName.textContent = data.senderName;
-                    sosMessage.textContent = data.message;
-                    sosLocation.textContent = `${data.location.latitude.toFixed(4)}, ${data.location.longitude.toFixed(4)}`;
+                    const sosData = change.doc.data();
+                    sosSenderName.textContent = sosData.senderName;
+                    sosMessage.textContent = sosData.message;
+                    sosLocation.textContent = `${sosData.location.latitude.toFixed(4)}, ${sosData.location.longitude.toFixed(4)}`;
                     sosPanel.classList.add('active');
-                    showToast(`SOS from ${data.senderName}!`, 'error', 'View', () => sosPanel.scrollIntoView());
+                    showToast(`SOS from ${sosData.senderName}!`, 'error', 'View', () => sosPanel.scrollIntoView());
                     sosRouteBtn.onclick = () => {
+                        mapContainer.classList.add('active');
+                        bottomSheet.classList.add('active');
+                        profilePage.classList.remove('active');
+                        directionsRenderer.setDirections(null);
                         directionsService.route({
                             origin: currentPosition,
-                            destination: { lat: data.location.latitude, lng: data.location.longitude },
+                            destination: { lat: sosData.location.latitude, lng: sosData.location.longitude },
                             travelMode: 'WALKING'
                         }, (response, status) => {
-                            if (status === 'OK') {
-                                directionsRenderer.setDirections(response);
-                                map.panTo({ lat: data.location.latitude, lng: data.location.longitude });
-                                sosPanel.classList.remove('active');
-                            } else {
-                                showToast('Failed to calculate route.', 'error');
-                            }
+                            if (status === 'OK') directionsRenderer.setDirections(response);
+                            else showToast('Route calculation failed.', 'error');
                         });
+                        sosPanel.classList.remove('active');
                     };
                 }
             });
@@ -1950,6 +2029,26 @@ document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.add('active');
         document.getElementById(tab.dataset.tab).classList.add('active');
     });
+});
+
+// Initial Setup
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await loadFirebase();
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loadGoogleMapsScript().then(() => {
+                    showMainInterface();
+                    loadProfile();
+                });
+            } else {
+                authForm.classList.add('active');
+            }
+        });
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showToast('App initialization failed.', 'error');
+    }
 });
     </script>
     </body>
