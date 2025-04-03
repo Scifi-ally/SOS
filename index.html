@@ -11,229 +11,1102 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE&libraries=places" async defer></script>
     <style>
-* {margin:0;padding:0;box-sizing:border-box;font-family:'Geist Mono',monospace;}
-:root {--primary:#000000;--secondary:#000000;--danger:#F44336;--white:#ffffff;--light-bg:#f8f8f8;--light-surface:#ffffff;--light-card:#ffffff;--light-border:#dddddd;--light-text:#000000;--light-text-secondary:#333333;--light-input:#ffffff;--light-hover:#f7f7f7;--gray-100:#ffffff;--gray-200:#f7f7f7;--gray-300:#dddddd;--gray-500:#777777;--gray-700:#333333;--gray-900:#000000;}
-html {height:100%;overflow:hidden;}
-body {background-color:var(--light-bg);color:var(--light-text);min-height:100vh;position:relative;overflow:hidden;}
-.container {padding:16px;max-width:100%;}
-.flex {display:flex;}
-.flex-col {flex-direction:column;}
-.items-center {align-items:center;}
-.justify-center {justify-content:center;}
-.justify-between {justify-content:space-between;}
-.text-center {text-align:center;}
-.text-primary {color:var(--primary);}
-.text-danger {color:var(--danger);}
-.text-gray {color:var(--light-text-secondary);}
-.text-white {color:var(--white);}
-.bg-primary {background-color:var(--primary);}
-.rounded {border-radius:8px;}
-.rounded-full {border-radius:50%;}
-.shadow {box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.w-full {width:100%;}
-.mr-2 {margin-right:8px;}
-.mb-2 {margin-bottom:8px;}
-.mb-4 {margin-bottom:16px;}
-.mb-6 {margin-bottom:24px;}
-.mt-2 {margin-top:8px;}
-.mt-4 {margin-top:16px;}
-.p-2 {padding:8px;}
-.p-4 {padding:16px;}
-.hidden {display:none !important;}
-.page {position:absolute;top:0;left:0;width:100%;min-height:100vh;padding-bottom:70px;opacity:0;transform:translateY(50px);z-index:1;overflow-y:hidden;transition:opacity 0.5s ease-in-out,transform 0.5s cubic-bezier(0.4,0,0.2,1);}
-.page.active {opacity:1;transform:translateY(0);z-index:10;}
-.form-group {margin-bottom:16px;}
-.form-label {display:block;font-size:14px;font-weight:500;margin-bottom:6px;color:var(--light-text);}
-.form-input,.form-select {width:100%;padding:12px 16px;border:1px solid var(--light-border);border-radius:8px;font-size:16px;background-color:var(--light-input);color:var(--light-text);transition:border-color 0.3s ease,box-shadow 0.3s ease;}
-.form-input:focus,.form-select:focus {outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(0,0,0,0.2);}
-.form-error {color:var(--danger);font-size:12px;margin-top:4px;min-height:18px;}
-.form-help {color:var(--light-text-secondary);font-size:12px;margin-top:4px;}
-.btn {display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:8px;font-weight:500;cursor:pointer;border:none;outline:none;font-size:16px;transition:transform 0.2s ease,background-color 0.3s ease;}
-.btn:hover {transform:scale(1.05);}
-.btn-primary {background-color:var(--primary);color:var(--white);}
-.btn-outline {background-color:transparent;border:1px solid var(--light-border);color:var(--light-text);}
-.btn-danger {background-color:var(--danger);color:var(--white);}
-.btn-icon {background:none;border:none;color:var(--light-text);cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background-color 0.3s ease,transform 0.2s ease;outline:none;}
-.btn-icon:hover {background-color:var(--light-hover);transform:scale(1.1);}
-.material-icons {outline:none;}
-.auth-container {min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;background-color:var(--light-bg);}
-.auth-logo {text-align:center;margin-bottom:40px;}
-.auth-logo h1 {font-size:36px;font-weight:700;color:var(--primary);margin-bottom:8px;}
-.auth-logo p {color:var(--light-text-secondary);}
-.auth-form {margin-bottom:32px;}
-.auth-link {color:var(--primary);text-decoration:none;font-weight:500;transition:color 0.3s ease;}
-.auth-link:hover {color:var(--secondary);text-decoration:underline;}
-.bottom-nav {position:fixed;bottom:0;left:0;right:0;height:70px;background-color:var(--light-bg);display:flex;justify-content:space-around;align-items:center;box-shadow:0 -1px 10px rgba(0,0,0,0.05);z-index:100;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);}
-.bottom-nav.hidden {transform:translateY(100%);}
-.bottom-nav-item {display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--light-text-secondary);font-size:12px;padding:8px 0;width:25%;transition:color 0.3s ease,transform 0.2s ease;}
-.bottom-nav-item:hover {transform:scale(1.1);}
-.bottom-nav-item.active {color:var(--primary);}
-.bottom-nav-item .material-icons {font-size:24px;margin-bottom:4px;}
-.sos-nav-item {width:50%;margin-top:-20px;}
-.sos-nav-button {background-color:var(--danger);color:var(--white);width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px;box-shadow:0 4px 10px rgba(244,67,54,0.3);transition:transform 0.3s ease;padding:0;overflow:hidden;outline:none;}
-.sos-nav-button:hover {transform:scale(1.15);}
-.sos-nav-button .material-icons {font-size:24px;margin-bottom:0;}
-.map-container {position:fixed;top:0;left:0;right:0;bottom:70px;width:100%;height:calc(100vh - 70px);overflow:hidden;z-index:0;}
-#map {position:absolute;top:0;bottom:0;left:0;right:0;z-index:1;touch-action:none;}
-.map-search-container {position:fixed;top:16px;left:16px;right:16px;display:flex;flex-direction:column;background-color:var(--light-bg);border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,0.15);overflow:hidden;z-index:100;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);}
-.map-search {display:flex;align-items:center;border-bottom:1px solid var(--light-border);padding:4px;}
-.map-search:last-of-type {border-bottom:none;}
-.search-icon {display:flex;align-items:center;justify-content:center;width:40px;height:40px;color:var(--light-text-secondary);}
-#home-page {overflow-y:hidden;}
-#profile-page {overflow-y:hidden;}
-.map-search input {flex:1;padding:12px 8px;border:none;font-size:16px;background-color:transparent;color:var(--light-text);transition:background-color 0.3s ease;}
-.map-search input::placeholder {color:var(--light-text-secondary);}
-.map-search input:focus {outline:none;background-color:var(--gray-200);}
-.location-btn {width:40px;height:40px;background:none;border:none;display:flex;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;color:var(--light-text-secondary);transition:transform 0.2s ease;outline:none;}
-.location-btn:hover {transform:scale(1.1);}
-.swap-locations-container {display:flex;justify-content:center;position:relative;}
-.swap-locations-btn {position:absolute;top:-14px;background-color:var(--light-card);border:1px solid var(--light-border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);cursor:pointer;z-index:2;color:var(--light-text);transition:transform 0.3s ease;outline:none;}
-.swap-locations-btn:hover {transform:rotate(180deg);}
-.route-search-container {padding:12px;}
-.route-search-btn {width:100%;height:46px;background-color:var(--primary);color:var(--white);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:500;transition:transform 0.2s ease,background-color 0.3s ease;outline:none;}
-.route-search-btn:hover {transform:scale(1.05);}
-.route-search-btn .material-icons {margin-right:8px;}
-.route-btn-text {font-size:14px;}
-.location-info {position:fixed;left:0;right:0;bottom:70px;background-color:var(--light-bg);border-top-left-radius:16px;border-top-right-radius:16px;padding:20px 16px;box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:98;height:auto;min-height:250px;max-height:calc(100vh - 125px);overflow-y:auto;transition:transform 0.3s ease-in-out;}
-.location-info.collapsed {transform:translateY(calc(100% - 20px));min-height:unset;}
-.bottom-nav.hidden ~ .location-info {bottom:0;}
-.location-info-header {position:absolute;top:0;left:0;right:0;height:20px;background-color:transparent;cursor:pointer;z-index:103;}
-.location-handle-container {position:absolute;left:-50px;top:0;width:50px;height:100px;display:flex;align-items:center;z-index:101;}
-.location-handle {width:50px;height:100px;background-color:var(--primary);border-radius:25px 0 0 25px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:-2px 0 5px rgba(0,0,0,0.1);transition:transform 0.3s ease;user-select:none;z-index:102;outline:none;}
-.location-handle:hover {transform:scale(1.05);}
-.location-handle::after {content:'';display:block;width:4px;height:40px;background-color:var(--white);border-radius:2px;}
-.location-actions {display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.route-options {margin:16px 0;}
-.route-mode-selector {display:flex;justify-content:center;background-color:var(--light-hover);border-radius:8px;padding:4px;width:fit-content;margin:0 auto 16px;border:1px solid var(--light-border);}
-.route-mode-btn {border:none;background:none;border-radius:6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 4px;cursor:pointer;color:var(--light-text-secondary);transition:background-color 0.3s ease,transform 0.2s ease;outline:none;}
-.route-mode-btn:hover {transform:scale(1.1);}
-.route-mode-btn.active {background-color:var(--light-bg);box-shadow:0 1px 3px rgba(0,0,0,0.1);color:var(--primary);}
-.route-mode-btn .material-icons {font-size:20px;}
-.alternative-routes {margin-top:16px;}
-.route-option {display:flex;align-items:center;padding:10px;border:1px solid var(--light-border);border-radius:8px;margin-bottom:8px;cursor:pointer;background-color:var(--light-card);transition:transform 0.3s ease,border-color 0.3s ease;}
-.route-option:hover {transform:translateX(5px);}
-.route-option.active {border-color:var(--primary);background-color:var(--light-hover);}
-.route-option-icon {background-color:var(--light-input);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:12px;color:var(--light-text);}
-.route-option-info {flex:1;}
-.route-option-title {font-weight:500;margin-bottom:2px;color:var(--light-text);}
-.route-option-details {font-size:12px;color:var(--light-text-secondary);}
-.route-details {position:fixed;top:0;right:-350px;width:320px;height:calc(100vh - 70px);background-color:var(--light-bg);z-index:200;box-shadow:-2px 0 10px rgba(0,0,0,0.1);padding:20px;display:flex;flex-direction:column;border-left:1px solid var(--light-border);overflow-y:auto;transition:right 0.4s cubic-bezier(0.4,0,0.2,1);}
-.route-details.visible {right:0;}
-.route-details-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--light-border);}
-.route-details-content {flex:1;overflow-y:auto;}
-.step-item {padding:12px;border-bottom:1px solid var(--light-border);display:flex;transition:background-color 0.3s ease;}
-.step-item:hover {background-color:var(--light-hover);}
-.step-item:last-child {border-bottom:none;}
-.step-number {width:24px;height:24px;border-radius:50%;background-color:var(--primary);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;margin-right:12px;flex-shrink:0;}
-.step-content {flex:1;color:var(--light-text);}
-.route-progress {background-color:var(--light-hover);border-radius:8px;padding:12px;margin-bottom:16px;border:1px solid var(--light-border);}
-.progress-bar-container {height:6px;background-color:var(--light-border);border-radius:3px;margin:8px 0;overflow:hidden;}
-.progress-bar {height:100%;background-color:var(--primary);width:0%;transition:width 0.5s ease-in-out;}
-.eta-info {display:flex;justify-content:space-between;font-size:12px;color:var(--light-text-secondary);}
-.profile-header {background-color:var(--primary);color:var(--white);padding:32px 16px;}
-.profile-header-content {display:flex;align-items:center;}
-.profile-picture {width:64px;height:64px;background-color:var(--white);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:16px;}
-.profile-picture .material-icons {font-size:32px;}
-.profile-info h2 {font-size:20px;font-weight:600;margin-bottom:4px;}
-.profile-info p {font-size:14px;opacity:0.9;}
-.guardian-key-section {background-color:var(--light-hover);padding:16px;border-radius:8px;margin-bottom:20px;border:1px solid var(--light-border);}
-.guardian-key {background-color:var(--light-bg);padding:12px;border-radius:8px;border:1px solid var(--light-border);font-weight:500;letter-spacing:1px;font-size:18px;text-align:center;color:var(--light-text);}
-.profile-section {background-color:var(--light-card);border-radius:12px;border:1px solid var(--light-border);margin-bottom:20px;overflow:hidden;}
-.profile-section-header {padding:16px;border-bottom:1px solid var(--light-border);}
-.empty-state {padding:32px 16px;text-align:center;}
-.empty-state p {color:var(--light-text-secondary);margin-bottom:16px;}
-.contact-item {display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--light-border);transition:background-color 0.3s ease;}
-.contact-item:hover {background-color:var(--light-hover);}
-.contact-info {display:flex;align-items:center;flex:1;}
-.contact-avatar {width:48px;height:48px;border-radius:50%;background-color:var(--light-surface);display:flex;align-items:center;justify-content:center;margin-right:12px;color:var(--light-text);}
-.contact-details h4 {font-weight:500;margin-bottom:2px;color:var(--light-text);}
-.contact-relation {font-size:12px;color:var(--light-text-secondary);}
-.contact-actions button {color:var(--light-text-secondary);}
-.settings-item {display:flex;align-items:center;padding:16px;cursor:pointer;transition:background-color 0.3s ease;}
-.settings-item:hover {background-color:var(--light-hover);}
-.settings-item .material-icons {margin-right:12px;}
-.modal-overlay {position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity 0.4s ease-in-out;}
-.modal-overlay.active {opacity:1;visibility:visible;}
-.modal {background-color:var(--light-bg);border-radius:12px;width:90%;max-width:400px;transform:scale(0.9);opacity:0;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1),opacity 0.4s ease-in-out;}
-.modal-overlay.active .modal {transform:scale(1);opacity:1;}
-.modal-header {padding:16px;border-bottom:1px solid var(--light-border);display:flex;align-items:center;justify-content:space-between;}
-.modal-body {padding:20px 16px;}
-.modal-footer {padding:16px;border-top:1px solid var(--light-border);display:flex;justify-content:flex-end;gap:12px;}
-.success-modal .modal-body {display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 24px;}
-.success-icon {width:80px;height:80px;background-color:var(--light-surface);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
-.success-icon .material-icons {font-size:40px;}
-.warning-icon {width:80px;height:80px;background-color:var(--light-surface);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
-.warning-icon .material-icons {font-size:40px;}
-.toast-container {position:fixed;bottom:80px;left:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:2000;}
-.toast {background-color:var(--light-bg);border-radius:8px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;transform:translateY(100%);opacity:0;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1),opacity 0.4s ease-in-out;}
-.toast.show {transform:translateY(0);opacity:1;}
-.toast-success {border-left:4px solid var(--secondary);}
-.toast-info {border-left:4px solid #2196F3;}
-.toast-error {border-left:4px solid var(--danger);}
-.toast-icon {margin-right:12px;color:var(--light-text);}
-.toast-content {flex:1;}
-.toast-title {font-weight:500;margin-bottom:2px;color:var(--light-text);}
-.toast-message {font-size:14px;color:var(--light-text-secondary);}
-@media (min-width:768px) {.container {padding:24px;}.auth-container {max-width:400px;margin:0 auto;}}
-
-/* Remove default focus and active styles */
-button:focus,
-button:active,
-a:focus,
-a:active,
-input:focus,
-input:active,
-select:focus,
-select:active {
-    outline: none;
-    background-color: transparent;
-    box-shadow: none;
-}
-
-/* Ensure custom buttons don’t get default browser styles */
-.btn:focus,
-.btn:active,
-.btn-icon:focus,
-.btn-icon:active,
-.location-btn:focus,
-.location-btn:active,
-.swap-locations-btn:focus,
-.swap-locations-btn:active,
-.route-search-btn:focus,
-.route-search-btn:active,
-.route-mode-btn:focus,
-.route-mode-btn:active {
-    outline: none;
-    background-color: inherit;
-    box-shadow: inherit;
-}
-
-/* Remove focus styles from navigation items */
-.bottom-nav-item:focus,
-.bottom-nav-item:active {
-    outline: none;
-    background-color: transparent;
-}
-
-/* Ensure Material Icons don’t trigger unwanted styles */
-.material-icons:focus,
-.material-icons:active {
-    outline: none;
-}
-button:focus, button:active {
-    outline: none;
-}
-button {
-    -webkit-tap-highlight-color: transparent;
-}
-button:active {
-    background-color: transparent; /* or set it to your button's default color */
-}
-* {
-    -webkit-tap-highlight-color: transparent;
-}
-
-
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Geist Mono', monospace;
+        }
+        :root {
+            --primary: #000000;
+            --secondary: #000000;
+            --danger: #F44336;
+            --white: #ffffff;
+            --light-bg: #f8f8f8;
+            --light-surface: #ffffff;
+            --light-card: #ffffff;
+            --light-border: #dddddd;
+            --light-text: #000000;
+            --light-text-secondary: #333333;
+            --light-input: #ffffff;
+            --light-hover: #f7f7f7;
+            --gray-100: #ffffff;
+            --gray-200: #f7f7f7;
+            --gray-300: #dddddd;
+            --gray-500: #777777;
+            --gray-700: #333333;
+            --gray-900: #000000;
+        }
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .container {
+            padding: 16px;
+            max-width: 100%;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .justify-center {
+            justify-content: center;
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-primary {
+            color: var(--primary);
+        }
+        .text-danger {
+            color: var(--danger);
+        }
+        .text-gray {
+            color: var(--light-text-secondary);
+        }
+        .text-white {
+            color: var(--white);
+        }
+        .bg-primary {
+            background-color: var(--primary);
+        }
+        .rounded {
+            border-radius: 8px;
+        }
+        .rounded-full {
+            border-radius: 50%;
+        }
+        .shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .w-full {
+            width: 100%;
+        }
+        .mr-2 {
+            margin-right: 8px;
+        }
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+        .mb-6 {
+            margin-bottom: 24px;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mt-4 {
+            margin-top: 16px;
+        }
+        .p-2 {
+            padding: 8px;
+        }
+        .p-4 {
+            padding: 16px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            padding-bottom: 70px;
+            opacity: 0;
+            transform: translateY(50px);
+            z-index: 1;
+            overflow-y: hidden;
+            transition: opacity 0.5s ease-in-out, transform 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+        .page.active {
+            opacity: 1;
+            transform: translateY(0);
+            z-index: 10;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--light-text);
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--light-border);
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: var(--light-input);
+            color: var(--light-text);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+        }
+        .form-error {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 18px;
+        }
+        .form-help {
+            color: var(--light-text-secondary);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--light-border);
+            color: var(--light-text);
+        }
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            outline: none;
+        }
+        .btn-icon:hover {
+            background-color: var(--light-hover);
+            transform: scale(1.1);
+        }
+        .material-icons {
+            outline: none;
+        }
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 32px 24px;
+            background-color: var(--light-bg);
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .auth-logo h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .auth-logo p {
+            color: var(--light-text-secondary);
+        }
+        .auth-form {
+            margin-bottom: 32px;
+        }
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .auth-link:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: var(--light-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .bottom-nav.hidden {
+            transform: translateY(100%);
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--light-text-secondary);
+            font-size: 12px;
+            padding: 8px 0;
+            width: 25%;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .bottom-nav-item:hover {
+            transform: scale(1.1);
+        }
+        .bottom-nav-item.active {
+            color: var(--primary);
+        }
+        .bottom-nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        .sos-nav-item {
+            width: 50%;
+            margin-top: -20px;
+        }
+        .sos-nav-button {
+            background-color: var(--danger);
+            color: var(--white);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            box-shadow: 0 4px 10px rgba(244,67,54,0.3);
+            transition: transform 0.3s ease;
+            padding: 0;
+            overflow: hidden;
+            outline: none;
+        }
+        .sos-nav-button:hover {
+            transform: scale(1.15);
+        }
+        .sos-nav-button .material-icons {
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+        .map-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 70px;
+            width: 100%;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+            z-index: 0;
+        }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+            touch-action: none;
+        }
+        .map-search-container {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--light-bg);
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .map-search {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--light-border);
+            padding: 4px;
+        }
+        .map-search:last-of-type {
+            border-bottom: none;
+        }
+        .search-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            color: var(--light-text-secondary);
+        }
+        #home-page {
+            overflow-y: hidden;
+        }
+        #profile-page {
+            overflow-y: hidden;
+        }
+        .map-search input {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            font-size: 16px;
+            background-color: transparent;
+            color: var(--light-text);
+            transition: background-color 0.3s ease;
+        }
+        .map-search input::placeholder {
+            color: var(--light-text-secondary);
+        }
+        .map-search input:focus {
+            outline: none;
+            background-color: var(--gray-200);
+        }
+        .location-btn {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+            display: flex;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--light-text-secondary);
+            transition: transform 0.2s ease;
+            outline: none;
+        }
+        .location-btn:hover {
+            transform: scale(1.1);
+        }
+        .swap-locations-container {
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        .swap-locations-btn {
+            position: absolute;
+            top: -14px;
+            background-color: var(--light-card);
+            border: 1px solid var(--light-border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 2;
+            color: var(--light-text);
+            transition: transform 0.3s ease;
+            outline: none;
+        }
+        .swap-locations-btn:hover {
+            transform: rotate(180deg);
+        }
+        .route-search-container {
+            padding: 12px;
+        }
+        .route-search-btn {
+            width: 100%;
+            height: 46px;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            outline: none;
+        }
+        .route-search-btn:hover {
+            transform: scale(1.05);
+        }
+        .route-search-btn .material-icons {
+            margin-right: 8px;
+        }
+        .route-btn-text {
+            font-size: 14px;
+        }
+        .location-info {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 70px;
+            background-color: var(--light-bg);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 20px 16px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 98;
+            height: auto;
+            min-height: 250px;
+            max-height: 45vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+        .location-info.collapsed {
+            transform: translateY(calc(100% - 20px));
+            min-height: unset;
+        }
+        .bottom-nav.hidden ~ .location-info {
+            bottom: 0;
+        }
+        .location-info-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-color: transparent;
+            cursor: pointer;
+            z-index: 103;
+        }
+        .location-handle-container {
+            position: absolute;
+            left: -50px;
+            top: 0;
+            width: 50px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            z-index: 101;
+        }
+        .location-handle {
+            width: 50px;
+            height: 100px;
+            background-color: var(--primary);
+            border-radius: 25px 0 0 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            user-select: none;
+            z-index: 102;
+            outline: none;
+        }
+        .location-handle:hover {
+            transform: scale(1.05);
+        }
+        .location-handle::after {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 40px;
+            background-color: var(--white);
+            border-radius: 2px;
+        }
+        .location-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .route-options {
+            margin: 16px 0;
+        }
+        .route-mode-selector {
+            display: flex;
+            justify-content: center;
+            background-color: var(--light-hover);
+            border-radius: 8px;
+            padding: 4px;
+            width: fit-content;
+            margin: 0 auto 16px;
+            border: 1px solid var(--light-border);
+        }
+        .route-mode-btn {
+            border: none;
+            background: none;
+            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 4px;
+            cursor: pointer;
+            color: var(--light-text-secondary);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            outline: none;
+        }
+        .route-mode-btn:hover {
+            transform: scale(1.1);
+        }
+        .route-mode-btn.active {
+            background-color: var(--light-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: var(--primary);
+        }
+        .route-mode-btn .material-icons {
+            font-size: 20px;
+        }
+        .alternative-routes {
+            margin-top: 16px;
+        }
+        .route-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--light-border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background-color: var(--light-card);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .route-option:hover {
+            transform: translateX(5px);
+        }
+        .route-option.active {
+            border-color: var(--primary);
+            background-color: var(--light-hover);
+        }
+        .route-option-icon {
+            background-color: var(--light-input);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--light-text);
+        }
+        .route-option-info {
+            flex: 1;
+        }
+        .route-option-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: var(--light-text);
+        }
+        .route-option-details {
+            font-size: 12px;
+            color: var(--light-text-secondary);
+        }
+        .route-details {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: calc(100vh - 70px);
+            background-color: var(--light-bg);
+            z-index: 200;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--light-border);
+            overflow-y: auto;
+            transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .route-details.visible {
+            right: 0;
+        }
+        .route-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--light-border);
+        }
+        .route-details-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .step-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--light-border);
+            display: flex;
+            transition: background-color 0.3s ease;
+        }
+        .step-item:hover {
+            background-color: var(--light-hover);
+        }
+        .step-item:last-child {
+            border-bottom: none;
+        }
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+            color: var(--light-text);
+        }
+        .route-progress {
+            background-color: var(--light-hover);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--light-border);
+        }
+        .progress-bar-container {
+            height: 6px;
+            background-color: var(--light-border);
+            border-radius: 3px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+        .eta-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--light-text-secondary);
+        }
+        .profile-container {
+            padding: 24px 16px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--light-bg) 30%);
+        }
+        .profile-header-new {
+            display: flex;
+            align-items: center;
+            padding: 24px 16px;
+            background: transparent;
+            margin-bottom: 24px;
+        }
+        .profile-avatar-container {
+            position: relative;
+            margin-right: 16px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background-color: var(--white);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+        .profile-avatar .material-icons {
+            font-size: 40px;
+        }
+        .profile-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            border: 2px solid var(--white);
+        }
+        .profile-header-info {
+            flex: 1;
+        }
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 4px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .profile-email {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+        }
+        .profile-card {
+            background-color: var(--light-card);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--light-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--light-text);
+        }
+        .btn-icon-small {
+            padding: 6px;
+            background-color: var(--light-hover);
+            border-radius: 50%;
+        }
+        .btn-icon-small:hover {
+            background-color: var(--gray-300);
+        }
+        .guardian-key-card {
+            background-color: var(--light-surface);
+        }
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--light-text-secondary);
+            margin-bottom: 12px;
+        }
+        .guardian-key-display {
+            background-color: var(--white);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-align: center;
+            color: var(--primary);
+            border: 1px dashed var(--light-border);
+            word-break: break-all;
+        }
+        .contacts-card {
+            padding-bottom: 0;
+        }
+        .contacts-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--light-border);
+            transition: background-color 0.3s ease;
+        }
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+        .contact-item:hover {
+            background-color: var(--light-hover);
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .contact-avatar {
+            width: 48px;
+            height: 48px;
+            background-color: var(--light-surface);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .contact-details h4 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--light-text);
+            margin-bottom: 2px;
+        }
+        .contact-relation {
+            font-size: 12px;
+            color: var(--light-text-secondary);
+        }
+        .contact-actions button {
+            color: var(--light-text-secondary);
+        }
+        .contact-actions button:hover {
+            color: var(--danger);
+        }
+        .empty-state {
+            padding: 32px 16px;
+            text-align: center;
+            color: var(--light-text-secondary);
+        }
+        .empty-icon {
+            font-size: 48px;
+            color: var(--gray-500);
+            margin-bottom: 12px;
+        }
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .settings-card {
+            padding: 1.3rem;
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-bottom: 1px solid var(--light-border);
+        }
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        .settings-item:hover {
+            background-color: var(--light-hover);
+        }
+        .settings-item .material-icons {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background-color: var(--light-bg);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease-in-out;
+        }
+        .modal-overlay.active .modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--light-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-body {
+            padding: 20px 16px;
+        }
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid var(--light-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .success-modal .modal-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 32px 24px;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--light-surface);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .success-icon .material-icons {
+            font-size: 40px;
+        }
+        .warning-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--light-surface);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .warning-icon .material-icons {
+            font-size: 40px;
+        }
+        .toast-container {
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 2000;
+        }
+        .toast {
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease-in-out;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-success {
+            border-left: 4px solid var(--secondary);
+        }
+        .toast-info {
+            border-left: 4px solid #2196F3;
+        }
+        .toast-error {
+            border-left: 4px solid var(--danger);
+        }
+        .toast-icon {
+            margin-right: 12px;
+            color: var(--light-text);
+        }
+        .toast-content {
+            flex: 1;
+        }
+        .toast-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: var(--light-text);
+        }
+        .toast-message {
+            font-size: 14px;
+            color: var(--light-text-secondary);
+        }
+        @media (min-width: 768px) {
+            .container {
+                padding: 24px;
+            }
+            .auth-container {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+        button:focus,
+        button:active,
+        a:focus,
+        a:active,
+        input:focus,
+        input:active,
+        select:focus,
+        select:active {
+            outline: none;
+            background-color: transparent;
+            box-shadow: none;
+        }
+        .btn:focus,
+        .btn:active,
+        .btn-icon:focus,
+        .btn-icon:active,
+        .location-btn:focus,
+        .location-btn:active,
+        .swap-locations-btn:focus,
+        .swap-locations-btn:active,
+        .route-search-btn:focus,
+        .route-search-btn:active,
+        .route-mode-btn:focus,
+        .route-mode-btn:active {
+            outline: none;
+            background-color: inherit;
+            box-shadow: inherit;
+        }
+        .bottom-nav-item:focus,
+        .bottom-nav-item:active {
+            outline: none;
+            background-color: transparent;
+        }
+        .material-icons:focus,
+        .material-icons:active {
+            outline: none;
+        }
+        button:focus, button:active {
+            outline: none;
+        }
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:active {
+            background-color: transparent;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
 <body>
@@ -355,39 +1228,50 @@ button:active {
         </div>
     </div>
     <div id="profile-page" class="page">
-        <div class="profile-header">
-            <div class="profile-header-content">
-                <div class="profile-picture"><span class="material-icons">person</span></div>
-                <div class="profile-info">
-                    <h2 id="profile-name">Loading...</h2>
-                    <p id="profile-email">loading@example.com</p>
+        <div class="profile-container">
+            <div class="profile-header-new">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar">
+                        <span class="material-icons">person</span>
+                    </div>
+                    <div class="profile-status"></div>
+                </div>
+                <div class="profile-header-info">
+                    <h2 id="profile-name" class="profile-name">Loading...</h2>
+                    <p id="profile-email" class="profile-email">loading@example.com</p>
                 </div>
             </div>
-        </div>
-        <div class="container" style="overflow-y:auto;height:calc(100vh - 70px - 96px);">
-            <div class="guardian-key-section">
-                <div class="flex justify-between items-center mb-2">
+            <div class="profile-card guardian-key-card">
+                <div class="card-header">
                     <h3>Your Guardian Key</h3>
-                    <button id="copy-key-btn" class="btn-icon"><span class="material-icons">content_copy</span></button>
+                    <button id="copy-key-btn" class="btn-icon btn-icon-small" title="Copy Key">
+                        <span class="material-icons">content_copy</span>
+                    </button>
                 </div>
-                <p class="text-gray mb-2">Share this key with trusted people to add you as their emergency contact</p>
-                <div class="guardian-key" id="guardian-key">Loading...</div>
+                <p class="card-subtitle">Share this with trusted contacts</p>
+                <div class="guardian-key-display" id="guardian-key">Loading...</div>
             </div>
-            <div class="profile-section">
-                <div class="profile-section-header">
-                    <div class="flex justify-between items-center">
-                        <h3>Emergency Contacts</h3>
-                        <button id="add-contact-btn" class="btn-icon"><span class="material-icons">add</span></button>
-                    </div>
+            <div class="profile-card contacts-card">
+                <div class="card-header">
+                    <h3>Emergency Contacts</h3>
+                    <button id="add-contact-btn" class="btn-icon btn-icon-small" title="Add Contact">
+                        <span class="material-icons">add</span>
+                    </button>
                 </div>
-                <div id="contacts-list">
+                <div id="contacts-list" class="contacts-list">
                     <div class="empty-state" id="empty-contacts">
+                        <span class="material-icons empty-icon">group</span>
                         <p>No emergency contacts added yet</p>
-                        <button class="btn btn-outline" id="add-first-contact-btn"><span class="material-icons mr-2">add</span>Add Contact</button>
+                        <button class="btn btn-primary" id="add-first-contact-btn">
+                            <span class="material-icons mr-2">add</span>Add Contact
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="profile-section">
+            <div class="profile-card settings-card">
+                <div class="card-header">
+                    <h3>Settings</h3>
+                </div>
                 <div class="settings-item" id="logout-btn">
                     <span class="material-icons text-danger">logout</span>
                     <span class="text-danger">Logout</span>
@@ -463,160 +1347,750 @@ button:active {
     </div>
     <div class="toast-container" id="toast-container"></div>
     <script>
-const firebaseConfig={apiKey:"AIzaSyAv2LUHlRxvadYD2ok9zs426TxIEpXCGWA",authDomain:"guardian-4a206.firebaseapp.com",projectId:"guardian-4a206",storageBucket:"guardian-4a206.firebasestorage.app",messagingSenderId:"249797346737",appId:"1:249797346737:web:29edab4d045345742d6990",measurementId:"G-X35KJKEPEB"};
+        const firebaseConfig = {
+    apiKey: "AIzaSyAv2LUHlRxvadYD2ok9zs426TxIEpXCGWA",
+    authDomain: "guardian-4a206.firebaseapp.com",
+    projectId: "guardian-4a206",
+    storageBucket: "guardian-4a206.firebasestorage.app",
+    messagingSenderId: "249797346737",
+    appId: "1:249797346737:web:29edab4d045345742d6990",
+    measurementId: "G-X35KJKEPEB"
+};
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
-const pages=document.querySelectorAll('.page');
-const bottomNav=document.getElementById('bottom-nav');
-const navItems=document.querySelectorAll('.bottom-nav-item');
-const loginForm=document.getElementById('login-form');
-const loginEmail=document.getElementById('login-email');
-const loginPassword=document.getElementById('login-password');
-const signupForm=document.getElementById('signup-form');
-const signupFullName=document.getElementById('signup-fullname');
-const signupEmail=document.getElementById('signup-email');
-const signupPhone=document.getElementById('signup-phone');
-const signupPassword=document.getElementById('signup-password');
-const goToSignupBtn=document.getElementById('go-to-signup');
-const goToLoginBtn=document.getElementById('go-to-login');
-const profileName=document.getElementById('profile-name');
-const profileEmail=document.getElementById('profile-email');
-const guardianKeyDisplay=document.getElementById('guardian-key');
-const copyKeyBtn=document.getElementById('copy-key-btn');
-const contactsList=document.getElementById('contacts-list');
-const emptyContacts=document.getElementById('empty-contacts');
-const addContactBtn=document.getElementById('add-contact-btn');
-const addFirstContactBtn=document.getElementById('add-first-contact-btn');
-const addContactModal=document.getElementById('add-contact-modal');
-const closeAddContactBtn=document.getElementById('close-add-contact');
-const cancelAddContactBtn=document.getElementById('cancel-add-contact');
-const addContactForm=document.getElementById('add-contact-form');
-const contactGuardianKey=document.getElementById('contact-guardian-key');
-const contactRelation=document.getElementById('contact-relation');
-const logoutBtn=document.getElementById('logout-btn');
-const sosButton=document.getElementById('sos-button');
-const sosConfirmModal=document.getElementById('sos-confirm-modal');
-const closeSosConfirmBtn=document.getElementById('close-sos-confirm');
-const cancelSosBtn=document.getElementById('cancel-sos');
-const confirmSosBtn=document.getElementById('confirm-sos');
-const sosSuccessModal=document.getElementById('sos-success-modal');
-const closeSosSuccessBtn=document.getElementById('close-sos-success');
-const mapElement=document.getElementById('map');
-const originSearchInput=document.getElementById('origin-search-input');
-const destinationSearchInput=document.getElementById('destination-search-input');
-const currentLocationOriginBtn=document.getElementById('current-location-origin-btn');
-const currentLocationDestBtn=document.getElementById('current-location-dest-btn');
-const swapLocationsBtn=document.getElementById('swap-locations-btn');
-const routeSearchBtn=document.getElementById('route-search-btn');
-const locationInfo=document.getElementById('location-info');
-const locationInfoHeader=document.getElementById('location-info-header');
-const locationHandle=document.querySelector('.location-handle');
-const locationName=document.getElementById('location-name');
-const locationAddress=document.getElementById('location-address');
-const shareLocationBtn=document.getElementById('share-location-btn');
-const navigateBtn=document.getElementById('navigate-btn');
-const routeDetailsPanel=document.getElementById('route-details-panel');
-const closeRouteDetailsBtn=document.getElementById('close-route-details');
-const routeDetailsContent=document.getElementById('route-details-content');
-const routeProgress=document.getElementById('route-progress');
-const routeProgressBar=document.getElementById('route-progress-bar');
-const routeCurrentTime=document.getElementById('route-current-time');
-const routeEta=document.getElementById('route-eta');
-const alternativeRoutes=document.getElementById('alternative-routes');
-const routeAlternativesContainer=document.getElementById('route-alternatives-container');
-const drivingModeBtn=document.getElementById('driving-mode');
-const walkingModeBtn=document.getElementById('walking-mode');
-const transitModeBtn=document.getElementById('transit-mode');
-const startRouteBtn=document.getElementById('start-route-btn');
-const clearRouteBtn=document.getElementById('clear-route-btn');
-let currentUser=null;
-let map=null;
-let userMarker=null;
-let originMarker=null;
-let destinationMarker=null;
-let currentLocation=null;
-let directionsService=null;
-let directionsRenderer=null;
-let isSettingOrigin=false;
-let isSettingDestination=false;
-let routeMode='DRIVING';
-let currentRoute=null;
-let alternativeRoutesData=[];
-let selectedRouteIndex=0;
-let routeUpdateInterval=null;
-let sosTimer=null;
-let sosCountdown=10;
-const sosPassword="stop123";
-function showPage(pageId){pages.forEach(page=>page.classList.remove('active'));const page=document.getElementById(pageId+'-page');if(page){page.classList.add('active');const mapContainer=document.querySelector('.map-container');if(pageId==='home'){mapContainer.style.display='block';if(!map&&google&&google.maps)initMap();else if(!map){const checkGoogleMaps=setInterval(()=>{if(google&&google.maps){clearInterval(checkGoogleMaps);initMap();}},100);}}else mapContainer.style.display='none';navItems.forEach(item=>item.classList.toggle('active',item.dataset.page===pageId));}if(pageId==='login'||pageId==='signup')bottomNav.classList.add('hidden');else if(currentUser)bottomNav.classList.remove('hidden');}
-function showToast(type,title,message,duration=3000){const toast=document.createElement('div');toast.className=`toast toast-${type}`;let icon=type==='success'?'check_circle':type==='info'?'info':'error';toast.innerHTML=`<div class="toast-icon"><span class="material-icons">${icon}</span></div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>`;const toastContainer=document.getElementById('toast-container');toastContainer.appendChild(toast);toast.offsetHeight;toast.classList.add('show');setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toastContainer.removeChild(toast),300);},duration);}
-function showModal(modal){modal.classList.add('active');}
-function hideModal(modal){modal.classList.remove('active');}
-function generateGuardianKey(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let key='';for(let group=0;group<3;group++){for(let i=0;i<4;i++)key+=chars[Math.floor(Math.random()*chars.length)];if(group<2)key+='-';}return key;}
-async function registerUser(email,password,fullName,phone){try{const userCredential=await auth.createUserWithEmailAndPassword(email,password);const user=userCredential.user;const guardianKey=generateGuardianKey();await db.collection('users').doc(user.uid).set({fullName,email,phone,guardianKey,emergencyContacts:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});return user;}catch(error){throw error;}}
-async function loginUser(email,password){try{const userCredential=await auth.signInWithEmailAndPassword(email,password);return userCredential.user;}catch(error){throw error;}}
-async function logoutUser(){try{await auth.signOut();bottomNav.classList.add('hidden');showPage('login');}catch(error){throw error;}}
-async function getUserData(userId){try{const doc=await db.collection('users').doc(userId).get();if(doc.exists)return doc.data();throw new Error('No user data found in Firestore');}catch(error){throw error;}}
-async function addEmergencyContact(guardianKey,relation){try{const querySnapshot=await db.collection('users').where('guardianKey','==',guardianKey).limit(1).get();if(querySnapshot.empty)throw new Error('No user found with that Guardian Key');const contactDoc=querySnapshot.docs[0];const contactData=contactDoc.data();const userData=await getUserData(currentUser.uid);if(userData.emergencyContacts.some(contact=>contact.id===contactDoc.id))throw new Error('This contact is already in your emergency contacts');const contactToAdd={id:contactDoc.id,name:contactData.fullName,phone:contactData.phone,guardianKey:contactData.guardianKey,relation,addedAt:firebase.firestore.FieldValue.serverTimestamp()};await db.collection('users').doc(currentUser.uid).update({emergencyContacts:firebase.firestore.FieldValue.arrayUnion(contactToAdd)});return contactToAdd;}catch(error){throw error;}}
-async function removeEmergencyContact(contactId){try{const userData=await getUserData(currentUser.uid);const contactToRemove=userData.emergencyContacts.find(contact=>contact.id===contactId);if(!contactToRemove)throw new Error('Contact not found');await db.collection('users').doc(currentUser.uid).update({emergencyContacts:firebase.firestore.FieldValue.arrayRemove(contactToRemove)});return true;}catch(error){throw error;}}
-async function sendSOSAlert(location){try{const userData=await getUserData(currentUser.uid);if(!userData.emergencyContacts||userData.emergencyContacts.length===0)throw new Error('No emergency contacts found');const sosAlert={userId:currentUser.uid,userName:userData.fullName,location,timestamp:firebase.firestore.FieldValue.serverTimestamp(),status:'active'};const alertRef=await db.collection('sosAlerts').add(sosAlert);return alertRef.id;}catch(error){throw error;}}
-function initMap(){const defaultLocation={lat:28.6139,lng:77.2090};const mapStyle=[{"featureType":"all","elementType":"geometry.fill","stylers":[{"weight":"2.00"}]},{"featureType":"all","elementType":"geometry.stroke","stylers":[{"color":"#f0f0f0"}]},{"featureType":"all","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f9f9f9"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"landscape.man_made","elementType":"geometry.fill","stylers":[{"color":"#f5f5f5"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#eeeeee"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#7b7b7b"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#e9e9e9"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#e9e9e9"}]}];map=new google.maps.Map(mapElement,{center:defaultLocation,zoom:15,mapTypeControl:false,streetViewControl:false,fullscreenControl:false,gestureHandling:'greedy',zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_BOTTOM},padding:{bottom:locationInfo.classList.contains('collapsed')?90:250,left:locationInfo.classList.contains('collapsed')?50:0},scrollwheel:true,draggable:true,disableDefaultUI:false,styles:mapStyle});userMarker=new google.maps.Marker({map,position:defaultLocation,icon:{url:'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'},visible:false});originMarker=new google.maps.Marker({map,position:defaultLocation,icon:{url:'https://maps.google.com/mapfiles/ms/icons/green-dot.png'},visible:false});destinationMarker=new google.maps.Marker({map,position:defaultLocation,icon:{url:'https://maps.google.com/mapfiles/ms/icons/red-dot.png'},visible:false});directionsService=new google.maps.DirectionsService();directionsRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#000000',strokeWeight:5,strokeOpacity:0.7}});getCurrentLocation();const originAutocomplete=new google.maps.places.Autocomplete(originSearchInput);const destAutocomplete=new google.maps.places.Autocomplete(destinationSearchInput);originAutocomplete.addListener('place_changed',()=>{const place=originAutocomplete.getPlace();if(!place.geometry||!place.geometry.location)return;const location={lat:place.geometry.location.lat(),lng:place.geometry.location.lng()};originMarker.setPosition(location);originMarker.setVisible(true);map.setCenter(location);if(destinationMarker.getVisible())calculateRoute();});destAutocomplete.addListener('place_changed',()=>{const place=destAutocomplete.getPlace();if(!place.geometry||!place.geometry.location)return;const location={lat:place.geometry.location.lat(),lng:place.geometry.location.lng()};destinationMarker.setPosition(location);destinationMarker.setVisible(true);map.setCenter(location);updateLocationInfo(place.name,place.formatted_address||place.name,location);if(originMarker.getVisible())calculateRoute();});map.addListener('click',event=>handleMapClick(event.latLng));}
-function getCurrentLocation(){if(!navigator.geolocation){showToast('error','Geolocation Error','Your browser does not support geolocation');return;}navigator.geolocation.getCurrentPosition(position=>{const location={lat:position.coords.latitude,lng:position.coords.longitude};if(!map)return;map.setCenter(location);userMarker.setPosition(location);userMarker.setVisible(true);if(!originMarker.getVisible()){originMarker.setPosition(location);originMarker.setVisible(true);originSearchInput.value='Current Location';}const geocoder=new google.maps.Geocoder();geocoder.geocode({location},(results,status)=>{if(status==='OK'&&results[0]){updateLocationInfo('Current Location',results[0].formatted_address,location);originSearchInput.value=results[0].formatted_address;if(destinationMarker.getVisible())calculateRoute();}else updateLocationInfo('Current Location','Address not available',location);});},error=>{let errorMessage='Unable to get your current location';switch(error.code){case error.PERMISSION_DENIED:errorMessage='Location permission denied';break;case error.POSITION_UNAVAILABLE:errorMessage='Location information unavailable';break;case error.TIMEOUT:errorMessage='Location request timed out';break;}showToast('error','Location Error',errorMessage);updateLocationInfo('Unknown Location','Please enable location services',null);},{timeout:10000,enableHighAccuracy:true});}
-function updateLocationInfo(name,address,location){currentLocation=location;locationName.textContent=name;locationAddress.textContent=address;}
-function handleMapClick(latLng){if(isSettingOrigin){originMarker.setPosition(latLng);originMarker.setVisible(true);isSettingOrigin=false;const location={lat:latLng.lat(),lng:latLng.lng()};const geocoder=new google.maps.Geocoder();geocoder.geocode({location},(results,status)=>{if(status==='OK'&&results[0]){originSearchInput.value=results[0].formatted_address;}else{originSearchInput.value=`${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}`;}});if(destinationMarker.getVisible())calculateRoute();}else if(isSettingDestination){destinationMarker.setPosition(latLng);destinationMarker.setVisible(true);isSettingDestination=false;const location={lat:latLng.lat(),lng:latLng.lng()};const geocoder=new google.maps.Geocoder();geocoder.geocode({location},(results,status)=>{if(status==='OK'&&results[0]){destinationSearchInput.value=results[0].formatted_address;}else{destinationSearchInput.value=`${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}`;}});if(originMarker.getVisible())calculateRoute();}else if(!locationInfo.classList.contains('collapsed')){collapseLocationPanel();}}
-function calculateRoute(){if(!originMarker.getVisible()||!destinationMarker.getVisible()){showToast('error','Route Error','Please set both origin and destination points');return;}const request={origin:originMarker.getPosition(),destination:destinationMarker.getPosition(),travelMode:google.maps.TravelMode[routeMode],provideRouteAlternatives:true};directionsService.route(request,(result,status)=>{if(status==='OK'){stopRouteTracking();alternativeRoutesData=result.routes;selectedRouteIndex=0;currentRoute=alternativeRoutesData[selectedRouteIndex];displaySelectedRoute();if(alternativeRoutesData.length>1)showAlternativeRoutes();else alternativeRoutes.style.display='none';const route=result.routes[0];const leg=route.legs[0];updateLocationInfo('Route: '+leg.start_address.split(',')[0]+' to '+leg.end_address.split(',')[0],'Distance: '+leg.distance.text+' • Duration: '+leg.duration.text,null);updateRouteDetailsPanel(leg);initRouteProgress(leg);if(locationInfo.classList.contains('collapsed'))expandLocationPanel();}else showToast('error','Route Error','Failed to calculate route: '+status);});}
-function displaySelectedRoute(){if(!currentRoute)return;directionsRenderer.setDirections({routes:[currentRoute],request:{travelMode:google.maps.TravelMode[routeMode]}});}
-function showAlternativeRoutes(){routeAlternativesContainer.innerHTML='';alternativeRoutesData.forEach((route,index)=>{const leg=route.legs[0];const isActive=index===selectedRouteIndex;const routeOption=document.createElement('div');routeOption.className=`route-option${isActive?' active':''}`;routeOption.dataset.index=index;let icon=routeMode==='WALKING'?'directions_walk':routeMode==='TRANSIT'?'directions_transit':'directions_car';routeOption.innerHTML=`<div class="route-option-icon"><span class="material-icons">${icon}</span></div><div class="route-option-info"><div class="route-option-title">Route ${index+1}</div><div class="route-option-details">${leg.distance.text} • ${leg.duration.text}${index===0?' (Recommended)':''}</div></div>`;routeOption.addEventListener('click',()=>{selectedRouteIndex=index;currentRoute=alternativeRoutesData[index];document.querySelectorAll('.route-option').forEach(el=>el.classList.remove('active'));routeOption.classList.add('active');displaySelectedRoute();updateRouteDetailsPanel(currentRoute.legs[0]);initRouteProgress(currentRoute.legs[0]);});routeAlternativesContainer.appendChild(routeOption);});alternativeRoutes.style.display='block';}
-function initRouteProgress(leg){if(!leg)return;const now=new Date();const eta=new Date(now.getTime()+leg.duration.value*1000);const timeFormat={hour:'numeric',minute:'numeric'};routeCurrentTime.textContent='Started: '+now.toLocaleTimeString([],timeFormat);routeEta.textContent='ETA: '+eta.toLocaleTimeString([],timeFormat);routeProgressBar.style.width='0%';routeProgress.style.display='block';startRouteTracking(leg.duration.value);}
-function startRouteTracking(durationInSeconds){stopRouteTracking();let elapsedSeconds=0;const startTime=new Date().getTime();routeUpdateInterval=setInterval(()=>{const now=new Date().getTime();elapsedSeconds=Math.floor((now-startTime)/1000);const progressPercent=Math.min(Math.floor((elapsedSeconds/durationInSeconds)*100),100);routeProgressBar.style.width=`${progressPercent}%`;if(progressPercent>=100){stopRouteTracking();showToast('success','Arrived','You have reached your destination');}},1000);}
-function stopRouteTracking(){if(routeUpdateInterval){clearInterval(routeUpdateInterval);routeUpdateInterval=null;}}
-function setRouteMode(mode){routeMode=mode;document.querySelectorAll('.route-mode-btn').forEach(btn=>btn.classList.remove('active'));const modeBtn=document.getElementById(`${mode.toLowerCase()}-mode`);if(modeBtn)modeBtn.classList.add('active');if(originMarker.getVisible()&&destinationMarker.getVisible())calculateRoute();}
-function swapLocations(){if(!originMarker.getVisible()&&!destinationMarker.getVisible())return;const originPos=originMarker.getVisible()?originMarker.getPosition():null;const destPos=destinationMarker.getVisible()?destinationMarker.getPosition():null;if(originPos){destinationMarker.setPosition(originPos);destinationMarker.setVisible(true);}else destinationMarker.setVisible(false);if(destPos){originMarker.setPosition(destPos);originMarker.setVisible(true);}else originMarker.setVisible(false);const originValue=originSearchInput.value;const destValue=destinationSearchInput.value;originSearchInput.value=destValue;destinationSearchInput.value=originValue;if(originMarker.getVisible()&&destinationMarker.getVisible())calculateRoute();}
-function clearRoute(){directionsRenderer.setDirections({routes:[]});originMarker.setVisible(false);destinationMarker.setVisible(false);isSettingOrigin=false;isSettingDestination=false;originSearchInput.value='';destinationSearchInput.value='';hideRouteDetailsPanel();collapseLocationPanel();routeProgress.style.display='none';alternativeRoutes.style.display='none';stopRouteTracking();if(currentLocation){const geocoder=new google.maps.Geocoder();geocoder.geocode({location:currentLocation},(results,status)=>{if(status==='OK'&&results[0])updateLocationInfo('Current Location',results[0].formatted_address,currentLocation);else updateLocationInfo('Current Location','Address not available',currentLocation);});}}
-function expandLocationPanel(){if(locationInfo.classList.contains('collapsed')){locationInfo.classList.remove('collapsed');if(map)map.setOptions({padding:{bottom:250,left:0}});}}
-function collapseLocationPanel(){if(!locationInfo.classList.contains('collapsed')){locationInfo.classList.add('collapsed');if(map)map.setOptions({padding:{bottom:90,left:50}});}}
-function toggleLocationPanel(){if(locationInfo.classList.contains('collapsed')){expandLocationPanel();}else{collapseLocationPanel();}}
-function showRouteDetailsPanel(){routeDetailsPanel.classList.add('visible');}
-function hideRouteDetailsPanel(){routeDetailsPanel.classList.remove('visible');}
-function updateRouteDetailsPanel(leg){routeDetailsContent.innerHTML='';leg.steps.forEach((step,index)=>{const stepItem=document.createElement('div');stepItem.className='step-item';stepItem.innerHTML=`<div class="step-number">${index+1}</div><div class="step-content">${step.instructions}</div>`;routeDetailsContent.appendChild(stepItem);});}
-function shareLocation(){if(!currentLocation){showToast('error','Share Error','No location available to share');return;}const text=`My location: https://maps.google.com/?q=${currentLocation.lat},${currentLocation.lng}`;if(navigator.share){navigator.share({title:'My Location',text,url:text}).then(()=>{/* No toast needed */}).catch(()=>showToast('error','Share Error','Failed to share location'));}else{navigator.clipboard.writeText(text).then(()=>{/* No toast needed */});}}
-function navigateToLocation(){let targetLocation=currentLocation;if(destinationMarker&&destinationMarker.getVisible()){targetLocation={lat:destinationMarker.getPosition().lat(),lng:destinationMarker.getPosition().lng()};}if(!targetLocation){showToast('error','Navigation Error','No destination set');return;}const url=`https://www.google.com/maps/dir/?api=1&destination=${targetLocation.lat},${targetLocation.lng}&travelmode=${routeMode.toLowerCase()}`;window.open(url,'_blank');}
-function startSosTimer(){sosCountdown=30;const timerDisplay=document.getElementById('sos-timer');timerDisplay.textContent=`Time remaining: ${sosCountdown}s`;showModal(sosConfirmModal);sosTimer=setInterval(async()=>{sosCountdown--;timerDisplay.textContent=`Time remaining: ${sosCountdown}s`;if(sosCountdown<=0){clearInterval(sosTimer);hideModal(sosConfirmModal);try{const sosId=await sendSOSAlert(currentLocation);showModal(sosSuccessModal);}catch(error){showToast('error','SOS Failed',error.message);}}},1000);}
-function stopSosTimer(){clearInterval(sosTimer);hideModal(sosConfirmModal);}
-auth.onAuthStateChanged(async user=>{currentUser=user;if(user){const userData=await getUserData(user.uid);profileName.textContent=userData.fullName;profileEmail.textContent=user.email;guardianKeyDisplay.textContent=userData.guardianKey;showPage('home');bottomNav.classList.remove('hidden');if(userData.emergencyContacts&&userData.emergencyContacts.length>0){emptyContacts.style.display='none';contactsList.innerHTML='';userData.emergencyContacts.forEach(contact=>{const contactItem=document.createElement('div');contactItem.className='contact-item';contactItem.innerHTML=`<div class="contact-info"><div class="contact-avatar"><span class="material-icons">person</span></div><div class="contact-details"><h4>${contact.name}</h4><div class="contact-relation">${contact.relation} • ${contact.phone}</div></div></div><div class="contact-actions"><button class="btn-icon remove-contact" data-id="${contact.id}"><span class="material-icons">delete</span></button></div>`;contactsList.appendChild(contactItem);});document.querySelectorAll('.remove-contact').forEach(btn=>{btn.addEventListener('click',async()=>{const contactId=btn.dataset.id;try{await removeEmergencyContact(contactId);btn.closest('.contact-item').remove();if(!contactsList.children.length)emptyContacts.style.display='block';}catch(error){showToast('error','Remove Error',error.message);}});});}else emptyContacts.style.display='block';}else{bottomNav.classList.add('hidden');showPage('login');contactsList.innerHTML='';emptyContacts.style.display='block';}});
-loginForm.addEventListener('submit',async e=>{e.preventDefault();try{await loginUser(loginEmail.value,loginPassword.value);showToast('success','Login Successful','Welcome back!');}catch(error){showToast('error','Login Failed',error.message);}});
-signupForm.addEventListener('submit',async e=>{e.preventDefault();try{await registerUser(signupEmail.value,signupPassword.value,signupFullName.value,signupPhone.value);showToast('success','Signup Successful','Welcome to Guardian!');showPage('home');}catch(error){showToast('error','Signup Failed',error.message);}});
-goToSignupBtn.addEventListener('click',e=>{e.preventDefault();showPage('signup');});
-goToLoginBtn.addEventListener('click',e=>{e.preventDefault();showPage('login');});
-navItems.forEach(item=>{item.addEventListener('click',e=>{e.preventDefault();if(item.dataset.page!=='sos')showPage(item.dataset.page);});});
-copyKeyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(guardianKeyDisplay.textContent).then(()=>{/* No toast needed */});});
-addContactBtn.addEventListener('click',()=>showModal(addContactModal));
-addFirstContactBtn.addEventListener('click',()=>showModal(addContactModal));
-closeAddContactBtn.addEventListener('click',()=>hideModal(addContactModal));
-cancelAddContactBtn.addEventListener('click',()=>hideModal(addContactModal));
-addContactForm.addEventListener('submit',async e=>{e.preventDefault();try{const contact=await addEmergencyContact(contactGuardianKey.value,contactRelation.value);hideModal(addContactModal);const contactItem=document.createElement('div');contactItem.className='contact-item';contactItem.innerHTML=`<div class="contact-info"><div class="contact-avatar"><span class="material-icons">person</span></div><div class="contact-details"><h4>${contact.name}</h4><div class="contact-relation">${contact.relation} • ${contact.phone}</div></div></div><div class="contact-actions"><button class="btn-icon remove-contact" data-id="${contact.id}"><span class="material-icons">delete</span></button></div>`;contactsList.appendChild(contactItem);emptyContacts.style.display='none';contactItem.querySelector('.remove-contact').addEventListener('click',async()=>{try{await removeEmergencyContact(contact.id);contactItem.remove();if(!contactsList.children.length)emptyContacts.style.display='block';}catch(error){showToast('error','Remove Error',error.message);}});contactGuardianKey.value='';contactRelation.value='';}catch(error){showToast('error','Add Contact Failed',error.message);}});
-logoutBtn.addEventListener('click',async()=>{try{await logoutUser();showToast('success','Logged Out','You have been logged out successfully');}catch(error){showToast('error','Logout Failed',error.message);}});
-sosButton.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();startSosTimer();});
-closeSosConfirmBtn.addEventListener('click',()=>hideModal(sosConfirmModal));
-cancelSosBtn.addEventListener('click',()=>{const passwordInput=document.getElementById('sos-password').value;if(passwordInput===sosPassword)stopSosTimer();else showToast('error','Invalid Password','Incorrect password entered');});
-confirmSosBtn.addEventListener('click',async()=>{clearInterval(sosTimer);hideModal(sosConfirmModal);try{const sosId=await sendSOSAlert(currentLocation);showModal(sosSuccessModal);}catch(error){showToast('error','SOS Failed',error.message);}});
-closeSosSuccessBtn.addEventListener('click',()=>hideModal(sosSuccessModal));
-currentLocationOriginBtn.addEventListener('click',()=>getCurrentLocation());
-currentLocationDestBtn.addEventListener('click',()=>{if(!navigator.geolocation){showToast('error','Geolocation Error','Your browser does not support geolocation');return;}navigator.geolocation.getCurrentPosition(position=>{const location={lat:position.coords.latitude,lng:position.coords.longitude};destinationMarker.setPosition(location);destinationMarker.setVisible(true);map.setCenter(location);const geocoder=new google.maps.Geocoder();geocoder.geocode({location},(results,status)=>{if(status==='OK'&&results[0]){destinationSearchInput.value=results[0].formatted_address;updateLocationInfo('Destination',results[0].formatted_address,location);}else destinationSearchInput.value='Current Location';});if(originMarker.getVisible())calculateRoute();},error=>showToast('error','Location Error','Unable to get current location'));});
-swapLocationsBtn.addEventListener('click',swapLocations);
-routeSearchBtn.addEventListener('click',calculateRoute);
-locationHandle.addEventListener('click',toggleLocationPanel);
-locationInfoHeader.addEventListener('click',expandLocationPanel);
-shareLocationBtn.addEventListener('click',shareLocation);
-navigateBtn.addEventListener('click',navigateToLocation);
-startRouteBtn.addEventListener('click',()=>{isSettingOrigin=true;});
-clearRouteBtn.addEventListener('click',clearRoute);
-closeRouteDetailsBtn.addEventListener('click',hideRouteDetailsPanel);
-drivingModeBtn.addEventListener('click',()=>setRouteMode('DRIVING'));
-walkingModeBtn.addEventListener('click',()=>setRouteMode('WALKING'));
-transitModeBtn.addEventListener('click',()=>setRouteMode('TRANSIT'));
-document.getElementById('route-details-btn').addEventListener('click',()=>{if(!currentRoute)return;if(routeDetailsPanel.classList.contains('visible'))hideRouteDetailsPanel();else showRouteDetailsPanel();});
-document.addEventListener('DOMContentLoaded',()=>{if(!locationInfo.classList.contains('collapsed')){locationInfo.classList.add('collapsed');}});
+const auth = firebase.auth();
+const db = firebase.firestore();
+const pages = document.querySelectorAll('.page');
+const bottomNav = document.getElementById('bottom-nav');
+const navItems = document.querySelectorAll('.bottom-nav-item');
+const loginForm = document.getElementById('login-form');
+const loginEmail = document.getElementById('login-email');
+const loginPassword = document.getElementById('login-password');
+const signupForm = document.getElementById('signup-form');
+const signupFullName = document.getElementById('signup-fullname');
+const signupEmail = document.getElementById('signup-email');
+const signupPhone = document.getElementById('signup-phone');
+const signupPassword = document.getElementById('signup-password');
+const goToSignupBtn = document.getElementById('go-to-signup');
+const goToLoginBtn = document.getElementById('go-to-login');
+const profileName = document.getElementById('profile-name');
+const profileEmail = document.getElementById('profile-email');
+const guardianKeyDisplay = document.getElementById('guardian-key');
+const copyKeyBtn = document.getElementById('copy-key-btn');
+const contactsList = document.getElementById('contacts-list');
+const emptyContacts = document.getElementById('empty-contacts');
+const addContactBtn = document.getElementById('add-contact-btn');
+const addFirstContactBtn = document.getElementById('add-first-contact-btn');
+const addContactModal = document.getElementById('add-contact-modal');
+const closeAddContactBtn = document.getElementById('close-add-contact');
+const cancelAddContactBtn = document.getElementById('cancel-add-contact');
+const addContactForm = document.getElementById('add-contact-form');
+const contactGuardianKey = document.getElementById('contact-guardian-key');
+const contactRelation = document.getElementById('contact-relation');
+const logoutBtn = document.getElementById('logout-btn');
+const sosButton = document.getElementById('sos-button');
+const sosConfirmModal = document.getElementById('sos-confirm-modal');
+const closeSosConfirmBtn = document.getElementById('close-sos-confirm');
+const cancelSosBtn = document.getElementById('cancel-sos');
+const confirmSosBtn = document.getElementById('confirm-sos');
+const sosSuccessModal = document.getElementById('sos-success-modal');
+const closeSosSuccessBtn = document.getElementById('close-sos-success');
+const mapElement = document.getElementById('map');
+const originSearchInput = document.getElementById('origin-search-input');
+const destinationSearchInput = document.getElementById('destination-search-input');
+const currentLocationOriginBtn = document.getElementById('current-location-origin-btn');
+const currentLocationDestBtn = document.getElementById('current-location-dest-btn');
+const swapLocationsBtn = document.getElementById('swap-locations-btn');
+const routeSearchBtn = document.getElementById('route-search-btn');
+const locationInfo = document.getElementById('location-info');
+const locationInfoHeader = document.getElementById('location-info-header');
+const locationHandle = document.querySelector('.location-handle');
+const locationName = document.getElementById('location-name');
+const locationAddress = document.getElementById('location-address');
+const shareLocationBtn = document.getElementById('share-location-btn');
+const navigateBtn = document.getElementById('navigate-btn');
+const routeDetailsPanel = document.getElementById('route-details-panel');
+const closeRouteDetailsBtn = document.getElementById('close-route-details');
+const routeDetailsContent = document.getElementById('route-details-content');
+const routeProgress = document.getElementById('route-progress');
+const routeProgressBar = document.getElementById('route-progress-bar');
+const routeCurrentTime = document.getElementById('route-current-time');
+const routeEta = document.getElementById('route-eta');
+const alternativeRoutes = document.getElementById('alternative-routes');
+const routeAlternativesContainer = document.getElementById('route-alternatives-container');
+const drivingModeBtn = document.getElementById('driving-mode');
+const walkingModeBtn = document.getElementById('walking-mode');
+const transitModeBtn = document.getElementById('transit-mode');
+const startRouteBtn = document.getElementById('start-route-btn');
+const clearRouteBtn = document.getElementById('clear-route-btn');
+let currentUser = null;
+let map = null;
+let userMarker = null;
+let originMarker = null;
+let destinationMarker = null;
+let currentLocation = null;
+let directionsService = null;
+let directionsRenderer = null;
+let isSettingOrigin = false;
+let isSettingDestination = false;
+let routeMode = 'DRIVING';
+let currentRoute = null;
+let alternativeRoutesData = [];
+let selectedRouteIndex = 0;
+let routeUpdateInterval = null;
+let sosTimer = null;
+let sosCountdown = 10;
+const sosPassword = "stop123";
+function showPage(pageId) {
+    pages.forEach(page => page.classList.remove('active'));
+    const page = document.getElementById(pageId + '-page');
+    if (page) {
+        page.classList.add('active');
+        const mapContainer = document.querySelector('.map-container');
+        if (pageId === 'home') {
+            mapContainer.style.display = 'block';
+            if (!map && google && google.maps) initMap();
+            else if (!map) {
+                const checkGoogleMaps = setInterval(() => {
+                    if (google && google.maps) {
+                        clearInterval(checkGoogleMaps);
+                        initMap();
+                    }
+                }, 100);
+            }
+        } else mapContainer.style.display = 'none';
+        navItems.forEach(item => item.classList.toggle('active', item.dataset.page === pageId));
+    }
+    if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
+    else if (currentUser) bottomNav.classList.remove('hidden');
+}
+function showToast(type, title, message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    let icon = type === 'success' ? 'check_circle' : type === 'info' ? 'info' : 'error';
+    toast.innerHTML = `
+        <div class="toast-icon"><span class="material-icons">${icon}</span></div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+    `;
+    const toastContainer = document.getElementById('toast-container');
+    toastContainer.appendChild(toast);
+    toast.offsetHeight;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toastContainer.removeChild(toast), 300);
+    }, duration);
+}
+function showModal(modal) {
+    modal.classList.add('active');
+}
+function hideModal(modal) {
+    modal.classList.remove('active');
+}
+function generateGuardianKey() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let key = '';
+    for (let group = 0; group < 3; group++) {
+        for (let i = 0; i < 4; i++) key += chars[Math.floor(Math.random() * chars.length)];
+        if (group < 2) key += '-';
+    }
+    return key;
+}
+async function registerUser(email, password, fullName, phone) {
+    try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        const guardianKey = generateGuardianKey();
+        await db.collection('users').doc(user.uid).set({
+            fullName,
+            email,
+            phone,
+            guardianKey,
+            emergencyContacts: [],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
+async function loginUser(email, password) {
+    try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        return userCredential.user;
+    } catch (error) {
+        throw error;
+    }
+}
+async function logoutUser() {
+    try {
+        await auth.signOut();
+        bottomNav.classList.add('hidden');
+        showPage('login');
+    } catch (error) {
+        throw error;
+    }
+}
+async function getUserData(userId) {
+    try {
+        const doc = await db.collection('users').doc(userId).get();
+        if (doc.exists) return doc.data();
+        throw new Error('No user data found in Firestore');
+    } catch (error) {
+        throw error;
+    }
+}
+async function addEmergencyContact(guardianKey, relation) {
+    try {
+        const querySnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).limit(1).get();
+        if (querySnapshot.empty) throw new Error('No user found with that Guardian Key');
+        const contactDoc = querySnapshot.docs[0];
+        const contactData = contactDoc.data();
+        const userData = await getUserData(currentUser.uid);
+        if (userData.emergencyContacts.some(contact => contact.id === contactDoc.id))
+            throw new Error('This contact is already in your emergency contacts');
+        const contactToAdd = {
+            id: contactDoc.id,
+            name: contactData.fullName,
+            phone: contactData.phone,
+            guardianKey: contactData.guardianKey,
+            relation,
+            addedAt: new Date().toISOString()
+        };
+        await db.collection('users').doc(currentUser.uid).update({
+            emergencyContacts: firebase.firestore.FieldValue.arrayUnion(contactToAdd)
+        });
+        return contactToAdd;
+    } catch (error) {
+        throw error;
+    }
+}
+async function removeEmergencyContact(contactId) {
+    try {
+        const userData = await getUserData(currentUser.uid);
+        const contactToRemove = userData.emergencyContacts.find(contact => contact.id === contactId);
+        if (!contactToRemove) throw new Error('Contact not found');
+        await db.collection('users').doc(currentUser.uid).update({
+            emergencyContacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
+        });
+        return true;
+    } catch (error) {
+        throw error;
+    }
+}
+async function sendSOSAlert(location) {
+    try {
+        const userData = await getUserData(currentUser.uid);
+        if (!userData.emergencyContacts || userData.emergencyContacts.length === 0)
+            throw new Error('No emergency contacts found');
+        const sosAlert = {
+            userId: currentUser.uid,
+            userName: userData.fullName,
+            location,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'active'
+        };
+        const alertRef = await db.collection('sosAlerts').add(sosAlert);
+        return alertRef.id;
+    } catch (error) {
+        throw error;
+    }
+}
+function initMap() {
+    const defaultLocation = { lat: 28.6139, lng: 77.2090 };
+    const mapStyle = [
+        { "featureType": "all", "elementType": "geometry.fill", "stylers": [{ "weight": "2.00" }] },
+        { "featureType": "all", "elementType": "geometry.stroke", "stylers": [{ "color": "#f0f0f0" }] },
+        { "featureType": "all", "elementType": "labels.text", "stylers": [{ "visibility": "on" }] },
+        { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#f9f9f9" }] },
+        { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "color": "#ffffff" }] },
+        { "featureType": "landscape.man_made", "elementType": "geometry.fill", "stylers": [{ "color": "#f5f5f5" }] },
+        { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+        { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] },
+        { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#eeeeee" }] },
+        { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#7b7b7b" }] },
+        { "featureType": "road", "elementType": "labels.text.stroke", "stylers": [{ "color": "#ffffff" }] },
+        { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] },
+        { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+        { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+        { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#e9e9e9" }, { "visibility": "on" }] },
+        { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#e9e9e9" }] }
+    ];
+    map = new google.maps.Map(mapElement, {
+        center: defaultLocation,
+        zoom: 15,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        gestureHandling: 'greedy',
+        zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
+        padding: { bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 },
+        scrollwheel: true,
+        draggable: true,
+        disableDefaultUI: false,
+        styles: mapStyle
+    });
+    userMarker = new google.maps.Marker({
+        map,
+        position: defaultLocation,
+        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' },
+        visible: false
+    });
+    originMarker = new google.maps.Marker({
+        map,
+        position: defaultLocation,
+        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' },
+        visible: false
+    });
+    destinationMarker = new google.maps.Marker({
+        map,
+        position: defaultLocation,
+        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' },
+        visible: false
+    });
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({
+        map,
+        suppressMarkers: true,
+        polylineOptions: { strokeColor: '#000000', strokeWeight: 5, strokeOpacity: 0.7 }
+    });
+    getCurrentLocation();
+    const originAutocomplete = new google.maps.places.Autocomplete(originSearchInput);
+    const destAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
+    originAutocomplete.addListener('place_changed', () => {
+        const place = originAutocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) return;
+        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+        originMarker.setPosition(location);
+        originMarker.setVisible(true);
+        map.setCenter(location);
+        if (destinationMarker.getVisible()) calculateRoute();
+    });
+    destAutocomplete.addListener('place_changed', () => {
+        const place = destAutocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) return;
+        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+        destinationMarker.setPosition(location);
+        destinationMarker.setVisible(true);
+        map.setCenter(location);
+        updateLocationInfo(place.name, place.formatted_address || place.name, location);
+        if (originMarker.getVisible()) calculateRoute();
+    });
+    map.addListener('click', event => handleMapClick(event.latLng));
+}
+function getCurrentLocation() {
+    if (!navigator.geolocation) {
+        showToast('error', 'Geolocation Error', 'Your browser does not support geolocation');
+        return;
+    }
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+            if (!map) return;
+            map.setCenter(location);
+            userMarker.setPosition(location);
+            userMarker.setVisible(true);
+            if (!originMarker.getVisible()) {
+                originMarker.setPosition(location);
+                originMarker.setVisible(true);
+                originSearchInput.value = 'Current Location';
+            }
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    updateLocationInfo('Current Location', results[0].formatted_address, location);
+                    originSearchInput.value = results[0].formatted_address;
+                    if (destinationMarker.getVisible()) calculateRoute();
+                } else updateLocationInfo('Current Location', 'Address not available', location);
+            });
+        },
+        error => {
+            let errorMessage = 'Unable to get your current location';
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = 'Location permission denied';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = 'Location information unavailable';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = 'Location request timed out';
+                    break;
+            }
+            showToast('error', 'Location Error', errorMessage);
+        }
+    );
+}
+function updateLocationInfo(name, address, coords) {
+    currentLocation = coords;
+    locationName.textContent = name || 'Unknown Location';
+    locationAddress.textContent = address || 'No address available';
+}
+function handleMapClick(latLng) {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: latLng }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+            const location = { lat: latLng.lat(), lng: latLng.lng() };
+            updateLocationInfo(results[0].name || 'Selected Location', results[0].formatted_address, location);
+            if (isSettingOrigin) {
+                originMarker.setPosition(location);
+                originMarker.setVisible(true);
+                originSearchInput.value = results[0].formatted_address;
+                isSettingOrigin = false;
+                if (destinationMarker.getVisible()) calculateRoute();
+            } else if (isSettingDestination) {
+                destinationMarker.setPosition(location);
+                destinationMarker.setVisible(true);
+                destinationSearchInput.value = results[0].formatted_address;
+                isSettingDestination = false;
+                if (originMarker.getVisible()) calculateRoute();
+            } else {
+                destinationMarker.setPosition(location);
+                destinationMarker.setVisible(true);
+                destinationSearchInput.value = results[0].formatted_address;
+                if (originMarker.getVisible()) calculateRoute();
+            }
+        }
+    });
+}
+function calculateRoute() {
+    if (!originMarker.getVisible() || !destinationMarker.getVisible()) return;
+    const origin = originMarker.getPosition();
+    const destination = destinationMarker.getPosition();
+    directionsService.route(
+        {
+            origin,
+            destination,
+            travelMode: google.maps.TravelMode[routeMode],
+            provideRouteAlternatives: true
+        },
+        (result, status) => {
+            if (status === 'OK') {
+                directionsRenderer.setDirections(result);
+                currentRoute = result.routes[0];
+                alternativeRoutesData = result.routes;
+                selectedRouteIndex = 0;
+                updateRouteDetails();
+                renderAlternativeRoutes();
+                alternativeRoutes.style.display = 'block';
+                locationInfo.classList.remove('collapsed');
+                map.setPadding({ bottom: 250, left: 50 });
+            } else {
+                showToast('error', 'Route Error', 'Unable to calculate route');
+            }
+        }
+    );
+}
+function updateRouteDetails() {
+    if (!currentRoute) return;
+    const leg = currentRoute.legs[0];
+    routeDetailsContent.innerHTML = leg.steps.map((step, index) => `
+        <div class="step-item">
+            <div class="step-number">${index + 1}</div>
+            <div class="step-content">${step.instructions}</div>
+        </div>
+    `).join('');
+    updateLocationInfo(leg.end_address.split(',')[0], `${leg.distance.text} - ${leg.duration.text}`, leg.end_location);
+}
+function renderAlternativeRoutes() {
+    routeAlternativesContainer.innerHTML = alternativeRoutesData.map((route, index) => {
+        const leg = route.legs[0];
+        return `
+            <div class="route-option ${index === selectedRouteIndex ? 'active' : ''}" data-index="${index}">
+                <div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div>
+                <div class="route-option-info">
+                    <div class="route-option-title">${leg.distance.text}</div>
+                    <div class="route-option-details">${leg.duration.text}${index === 0 ? ' - Fastest' : ''}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    const routeOptions = document.querySelectorAll('.route-option');
+    routeOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            selectedRouteIndex = parseInt(option.dataset.index);
+            directionsRenderer.setRouteIndex(selectedRouteIndex);
+            currentRoute = alternativeRoutesData[selectedRouteIndex];
+            updateRouteDetails();
+            routeOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+        });
+    });
+}
+function startRouteTracking() {
+    if (!currentRoute) return;
+    routeProgress.style.display = 'block';
+    const leg = currentRoute.legs[0];
+    let totalDistance = leg.distance.value;
+    let totalDuration = leg.duration.value;
+    let startTime = Date.now();
+    routeUpdateInterval = setInterval(() => {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+                userMarker.setPosition(currentPos);
+                const distanceToEnd = google.maps.geometry.spherical.computeDistanceBetween(currentPos, leg.end_location);
+                const remainingDistance = Math.max(0, distanceToEnd);
+                const progress = Math.min(100, ((totalDistance - remainingDistance) / totalDistance) * 100);
+                routeProgressBar.style.width = `${progress}%`;
+                const elapsedTime = (Date.now() - startTime) / 1000;
+                const remainingTime = Math.max(0, totalDuration - elapsedTime);
+                routeCurrentTime.textContent = `Elapsed: ${Math.floor(elapsedTime / 60)}m ${Math.floor(elapsedTime % 60)}s`;
+                routeEta.textContent = `ETA: ${Math.floor(remainingTime / 60)}m ${Math.floor(remainingTime % 60)}s`;
+                if (remainingDistance < 50) {
+                    clearInterval(routeUpdateInterval);
+                    routeProgressBar.style.width = '100%';
+                    routeEta.textContent = 'Arrived';
+                }
+            },
+            () => console.log('Error getting position during route tracking')
+        );
+    }, 5000);
+}
+function clearRoute() {
+    directionsRenderer.setDirections(null);
+    originMarker.setVisible(false);
+    destinationMarker.setVisible(false);
+    originSearchInput.value = '';
+    destinationSearchInput.value = '';
+    routeProgress.style.display = 'none';
+    alternativeRoutes.style.display = 'none';
+    routeDetailsPanel.classList.remove('visible');
+    currentRoute = null;
+    alternativeRoutesData = [];
+    selectedRouteIndex = 0;
+    clearInterval(routeUpdateInterval);
+    getCurrentLocation();
+}
+function renderContacts(contacts) {
+    if (contacts.length === 0) {
+        emptyContacts.style.display = 'block';
+        return;
+    }
+    emptyContacts.style.display = 'none';
+    contactsList.innerHTML = contacts.map(contact => `
+        <div class="contact-item" data-id="${contact.id}">
+            <div class="contact-info">
+                <div class="contact-avatar"><span class="material-icons">person</span></div>
+                <div class="contact-details">
+                    <h4>${contact.name}</h4>
+                    <p class="contact-relation">${contact.relation} - ${contact.phone}</p>
+                </div>
+            </div>
+            <div class="contact-actions">
+                <button class="btn-icon remove-contact-btn" title="Remove Contact"><span class="material-icons">delete</span></button>
+            </div>
+        </div>
+    `).join('');
+    document.querySelectorAll('.remove-contact-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const contactId = btn.closest('.contact-item').dataset.id;
+            try {
+                await removeEmergencyContact(contactId);
+                const userData = await getUserData(currentUser.uid);
+                renderContacts(userData.emergencyContacts);
+            } catch (error) {
+                showToast('error', 'Error', error.message);
+            }
+        });
+    });
+}
+auth.onAuthStateChanged(async user => {
+    if (user) {
+        currentUser = user;
+        const userData = await getUserData(user.uid);
+        profileName.textContent = userData.fullName;
+        profileEmail.textContent = user.email;
+        guardianKeyDisplay.textContent = userData.guardianKey;
+        renderContacts(userData.emergencyContacts || []);
+        showPage('home');
+    } else {
+        currentUser = null;
+        showPage('login');
+    }
+});
+loginForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+        await loginUser(loginEmail.value, loginPassword.value);
+    } catch (error) {
+        document.getElementById('login-password-error').textContent = error.message;
+    }
+});
+signupForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+        await registerUser(signupEmail.value, signupPassword.value, signupFullName.value, signupPhone.value);
+    } catch (error) {
+        document.getElementById('signup-password-error').textContent = error.message;
+    }
+});
+goToSignupBtn.addEventListener('click', e => {
+    e.preventDefault();
+    showPage('signup');
+});
+goToLoginBtn.addEventListener('click', e => {
+    e.preventDefault();
+    showPage('login');
+});
+navItems.forEach(item => {
+    item.addEventListener('click', e => {
+        e.preventDefault();
+        const page = item.dataset.page;
+        if (page !== 'sos') showPage(page);
+    });
+});
+copyKeyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(guardianKeyDisplay.textContent);
+});
+addContactBtn.addEventListener('click', () => showModal(addContactModal));
+addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
+closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
+cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
+addContactForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+        const contact = await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
+        const userData = await getUserData(currentUser.uid);
+        renderContacts(userData.emergencyContacts);
+        hideModal(addContactModal);
+        contactGuardianKey.value = '';
+        contactRelation.value = '';
+    } catch (error) {
+        document.getElementById('contact-guardian-key-error').textContent = error.message;
+    }
+});
+logoutBtn.addEventListener('click', async () => {
+    try {
+        await logoutUser();
+    } catch (error) {
+        showToast('error', 'Logout Error', error.message);
+    }
+});
+sosButton.addEventListener('click', () => {
+    if (!currentUser) {
+        showPage('login');
+        return;
+    }
+    showModal(sosConfirmModal);
+    sosCountdown = 10;
+    document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
+    sosTimer = setInterval(() => {
+        sosCountdown--;
+        document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
+        if (sosCountdown <= 0) {
+            clearInterval(sosTimer);
+            confirmSosBtn.click();
+        }
+    }, 1000);
+});
+closeSosConfirmBtn.addEventListener('click', () => {
+    clearInterval(sosTimer);
+    hideModal(sosConfirmModal);
+});
+cancelSosBtn.addEventListener('click', () => {
+    const enteredPassword = document.getElementById('sos-password').value;
+    if (enteredPassword === sosPassword) {
+        clearInterval(sosTimer);
+        hideModal(sosConfirmModal);
+        document.getElementById('sos-password').value = '';
+    } else {
+        showToast('error', 'Invalid Password', 'Incorrect password to cancel SOS');
+    }
+});
+confirmSosBtn.addEventListener('click', async () => {
+    clearInterval(sosTimer);
+    hideModal(sosConfirmModal);
+    try {
+        await sendSOSAlert(currentLocation);
+        showModal(sosSuccessModal);
+    } catch (error) {
+        showToast('error', 'SOS Error', error.message);
+    }
+});
+closeSosSuccessBtn.addEventListener('click', () => hideModal(sosSuccessModal));
+currentLocationOriginBtn.addEventListener('click', () => getCurrentLocation());
+currentLocationDestBtn.addEventListener('click', () => {
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+            destinationMarker.setPosition(location);
+            destinationMarker.setVisible(true);
+            map.setCenter(location);
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    destinationSearchInput.value = results[0].formatted_address;
+                    updateLocationInfo('Current Location', results[0].formatted_address, location);
+                }
+                if (originMarker.getVisible()) calculateRoute();
+            });
+        },
+        () => showToast('error', 'Location Error', 'Unable to get current location')
+    );
+});
+swapLocationsBtn.addEventListener('click', () => {
+    const originPos = originMarker.getPosition();
+    const destPos = destinationMarker.getPosition();
+    const originText = originSearchInput.value;
+    const destText = destinationSearchInput.value;
+    originMarker.setPosition(destPos);
+    destinationMarker.setPosition(originPos);
+    originSearchInput.value = destText;
+    destinationSearchInput.value = originText;
+    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+});
+routeSearchBtn.addEventListener('click', () => {
+    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+});
+locationInfoHeader.addEventListener('click', () => {
+    locationInfo.classList.toggle('collapsed');
+    map.setPadding({ bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 });
+});
+locationHandle.addEventListener('click', () => {
+    locationInfo.classList.toggle('collapsed');
+    map.setPadding({ bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 });
+});
+shareLocationBtn.addEventListener('click', () => {
+    if (!currentLocation) return;
+    const url = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+    navigator.clipboard.writeText(url);
+    showToast('success', 'Location Copied', 'Location URL copied to clipboard');
+});
+navigateBtn.addEventListener('click', () => {
+    if (!currentLocation) return;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${currentLocation.lat},${currentLocation.lng}&travelmode=${routeMode.toLowerCase()}`;
+    window.open(url, '_blank');
+});
+document.getElementById('route-details-btn').addEventListener('click', () => {
+    if (currentRoute) routeDetailsPanel.classList.add('visible');
+});
+closeRouteDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.remove('visible'));
+drivingModeBtn.addEventListener('click', () => {
+    routeMode = 'DRIVING';
+    drivingModeBtn.classList.add('active');
+    walkingModeBtn.classList.remove('active');
+    transitModeBtn.classList.remove('active');
+    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+});
+walkingModeBtn.addEventListener('click', () => {
+    routeMode = 'WALKING';
+    walkingModeBtn.classList.add('active');
+    drivingModeBtn.classList.remove('active');
+    transitModeBtn.classList.remove('active');
+    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+});
+transitModeBtn.addEventListener('click', () => {
+    routeMode = 'TRANSIT';
+    transitModeBtn.classList.add('active');
+    drivingModeBtn.classList.remove('active');
+    walkingModeBtn.classList.remove('active');
+    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+});
+startRouteBtn.addEventListener('click', () => startRouteTracking());
+clearRouteBtn.addEventListener('click', () => clearRoute());
     </script>
 </body>
 </html>
