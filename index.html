@@ -15,6 +15,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            outline: none;
             font-family: 'Geist Mono', monospace;
         }
         :root {
@@ -832,8 +833,10 @@
         .contacts-list {
             max-height: 300px;
             overflow-y: auto;
+            overflow-x: hidden;
         }
         .contact-item {
+            overflow-x: hidden;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1107,6 +1110,30 @@
         * {
             -webkit-tap-highlight-color: transparent;
         }
+        @keyframes slide-out {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-20px);
+        height: 0;
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
+}
+/* Hide Google Maps default controls */
+.gm-style .gm-control-active,
+.gm-style .gm-ui-hover-effect,
+.gm-style .gm-bundled-control {
+    display: none !important;
+}
+
+.slide-out {
+    animation: slide-out 0.3s ease-in-out forwards;
+}
     </style>
 </head>
 <body>
@@ -1348,525 +1375,254 @@
     <div class="toast-container" id="toast-container"></div>
     <script>
         const firebaseConfig = {
-    apiKey: "AIzaSyAv2LUHlRxvadYD2ok9zs426TxIEpXCGWA",
-    authDomain: "guardian-4a206.firebaseapp.com",
-    projectId: "guardian-4a206",
-    storageBucket: "guardian-4a206.firebasestorage.app",
-    messagingSenderId: "249797346737",
-    appId: "1:249797346737:web:29edab4d045345742d6990",
-    measurementId: "G-X35KJKEPEB"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const pages = document.querySelectorAll('.page');
-const bottomNav = document.getElementById('bottom-nav');
-const navItems = document.querySelectorAll('.bottom-nav-item');
-const loginForm = document.getElementById('login-form');
-const loginEmail = document.getElementById('login-email');
-const loginPassword = document.getElementById('login-password');
-const signupForm = document.getElementById('signup-form');
-const signupFullName = document.getElementById('signup-fullname');
-const signupEmail = document.getElementById('signup-email');
-const signupPhone = document.getElementById('signup-phone');
-const signupPassword = document.getElementById('signup-password');
-const goToSignupBtn = document.getElementById('go-to-signup');
-const goToLoginBtn = document.getElementById('go-to-login');
-const profileName = document.getElementById('profile-name');
-const profileEmail = document.getElementById('profile-email');
-const guardianKeyDisplay = document.getElementById('guardian-key');
-const copyKeyBtn = document.getElementById('copy-key-btn');
-const contactsList = document.getElementById('contacts-list');
-const emptyContacts = document.getElementById('empty-contacts');
-const addContactBtn = document.getElementById('add-contact-btn');
-const addFirstContactBtn = document.getElementById('add-first-contact-btn');
-const addContactModal = document.getElementById('add-contact-modal');
-const closeAddContactBtn = document.getElementById('close-add-contact');
-const cancelAddContactBtn = document.getElementById('cancel-add-contact');
-const addContactForm = document.getElementById('add-contact-form');
-const contactGuardianKey = document.getElementById('contact-guardian-key');
-const contactRelation = document.getElementById('contact-relation');
-const logoutBtn = document.getElementById('logout-btn');
-const sosButton = document.getElementById('sos-button');
-const sosConfirmModal = document.getElementById('sos-confirm-modal');
-const closeSosConfirmBtn = document.getElementById('close-sos-confirm');
-const cancelSosBtn = document.getElementById('cancel-sos');
-const confirmSosBtn = document.getElementById('confirm-sos');
-const sosSuccessModal = document.getElementById('sos-success-modal');
-const closeSosSuccessBtn = document.getElementById('close-sos-success');
-const mapElement = document.getElementById('map');
-const originSearchInput = document.getElementById('origin-search-input');
-const destinationSearchInput = document.getElementById('destination-search-input');
-const currentLocationOriginBtn = document.getElementById('current-location-origin-btn');
-const currentLocationDestBtn = document.getElementById('current-location-dest-btn');
-const swapLocationsBtn = document.getElementById('swap-locations-btn');
-const routeSearchBtn = document.getElementById('route-search-btn');
-const locationInfo = document.getElementById('location-info');
-const locationInfoHeader = document.getElementById('location-info-header');
-const locationHandle = document.querySelector('.location-handle');
-const locationName = document.getElementById('location-name');
-const locationAddress = document.getElementById('location-address');
-const shareLocationBtn = document.getElementById('share-location-btn');
-const navigateBtn = document.getElementById('navigate-btn');
-const routeDetailsPanel = document.getElementById('route-details-panel');
-const closeRouteDetailsBtn = document.getElementById('close-route-details');
-const routeDetailsContent = document.getElementById('route-details-content');
-const routeProgress = document.getElementById('route-progress');
-const routeProgressBar = document.getElementById('route-progress-bar');
-const routeCurrentTime = document.getElementById('route-current-time');
-const routeEta = document.getElementById('route-eta');
-const alternativeRoutes = document.getElementById('alternative-routes');
-const routeAlternativesContainer = document.getElementById('route-alternatives-container');
-const drivingModeBtn = document.getElementById('driving-mode');
-const walkingModeBtn = document.getElementById('walking-mode');
-const transitModeBtn = document.getElementById('transit-mode');
-const startRouteBtn = document.getElementById('start-route-btn');
-const clearRouteBtn = document.getElementById('clear-route-btn');
-let currentUser = null;
-let map = null;
-let userMarker = null;
-let originMarker = null;
-let destinationMarker = null;
-let currentLocation = null;
-let directionsService = null;
-let directionsRenderer = null;
-let isSettingOrigin = false;
-let isSettingDestination = false;
-let routeMode = 'DRIVING';
-let currentRoute = null;
-let alternativeRoutesData = [];
-let selectedRouteIndex = 0;
-let routeUpdateInterval = null;
-let sosTimer = null;
-let sosCountdown = 10;
-const sosPassword = "stop123";
-function showPage(pageId) {
-    pages.forEach(page => page.classList.remove('active'));
-    const page = document.getElementById(pageId + '-page');
-    if (page) {
-        page.classList.add('active');
-        const mapContainer = document.querySelector('.map-container');
-        if (pageId === 'home') {
-            mapContainer.style.display = 'block';
-            if (!map && google && google.maps) initMap();
-            else if (!map) {
-                const checkGoogleMaps = setInterval(() => {
-                    if (google && google.maps) {
-                        clearInterval(checkGoogleMaps);
-                        initMap();
+            apiKey: "AIzaSyAv2LUHlRxvadYD2ok9zs426TxIEpXCGWA",
+            authDomain: "guardian-4a206.firebaseapp.com",
+            projectId: "guardian-4a206",
+            storageBucket: "guardian-4a206.firebasestorage.app",
+            messagingSenderId: "249797346737",
+            appId: "1:249797346737:web:29edab4d045345742d6990",
+            measurementId: "G-X35KJKEPEB"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const pages = document.querySelectorAll('.page');
+        const bottomNav = document.getElementById('bottom-nav');
+        const navItems = document.querySelectorAll('.bottom-nav-item');
+        const loginForm = document.getElementById('login-form');
+        const loginEmail = document.getElementById('login-email');
+        const loginPassword = document.getElementById('login-password');
+        const signupForm = document.getElementById('signup-form');
+        const signupFullName = document.getElementById('signup-fullname');
+        const signupEmail = document.getElementById('signup-email');
+        const signupPhone = document.getElementById('signup-phone');
+        const signupPassword = document.getElementById('signup-password');
+        const goToSignupBtn = document.getElementById('go-to-signup');
+        const goToLoginBtn = document.getElementById('go-to-login');
+        const profileName = document.getElementById('profile-name');
+        const profileEmail = document.getElementById('profile-email');
+        const guardianKeyDisplay = document.getElementById('guardian-key');
+        const copyKeyBtn = document.getElementById('copy-key-btn');
+        const contactsList = document.getElementById('contacts-list');
+        const emptyContacts = document.getElementById('empty-contacts');
+        const addContactBtn = document.getElementById('add-contact-btn');
+        const addFirstContactBtn = document.getElementById('add-first-contact-btn');
+        const addContactModal = document.getElementById('add-contact-modal');
+        const closeAddContactBtn = document.getElementById('close-add-contact');
+        const cancelAddContactBtn = document.getElementById('cancel-add-contact');
+        const addContactForm = document.getElementById('add-contact-form');
+        const contactGuardianKey = document.getElementById('contact-guardian-key');
+        const contactRelation = document.getElementById('contact-relation');
+        const logoutBtn = document.getElementById('logout-btn');
+        const sosButton = document.getElementById('sos-button');
+        const sosConfirmModal = document.getElementById('sos-confirm-modal');
+        const closeSosConfirmBtn = document.getElementById('close-sos-confirm');
+        const cancelSosBtn = document.getElementById('cancel-sos');
+        const confirmSosBtn = document.getElementById('confirm-sos');
+        const sosSuccessModal = document.getElementById('sos-success-modal');
+        const closeSosSuccessBtn = document.getElementById('close-sos-success');
+        const mapElement = document.getElementById('map');
+        const originSearchInput = document.getElementById('origin-search-input');
+        const destinationSearchInput = document.getElementById('destination-search-input');
+        const currentLocationOriginBtn = document.getElementById('current-location-origin-btn');
+        const currentLocationDestBtn = document.getElementById('current-location-dest-btn');
+        const swapLocationsBtn = document.getElementById('swap-locations-btn');
+        const routeSearchBtn = document.getElementById('route-search-btn');
+        const locationInfo = document.getElementById('location-info');
+        const locationInfoHeader = document.getElementById('location-info-header');
+        const locationHandle = document.querySelector('.location-handle');
+        const locationName = document.getElementById('location-name');
+        const locationAddress = document.getElementById('location-address');
+        const shareLocationBtn = document.getElementById('share-location-btn');
+        const navigateBtn = document.getElementById('navigate-btn');
+        const routeDetailsPanel = document.getElementById('route-details-panel');
+        const closeRouteDetailsBtn = document.getElementById('close-route-details');
+        const routeDetailsContent = document.getElementById('route-details-content');
+        const routeProgress = document.getElementById('route-progress');
+        const routeProgressBar = document.getElementById('route-progress-bar');
+        const routeCurrentTime = document.getElementById('route-current-time');
+        const routeEta = document.getElementById('route-eta');
+        const alternativeRoutes = document.getElementById('alternative-routes');
+        const routeAlternativesContainer = document.getElementById('route-alternatives-container');
+        const drivingModeBtn = document.getElementById('driving-mode');
+        const walkingModeBtn = document.getElementById('walking-mode');
+        const transitModeBtn = document.getElementById('transit-mode');
+        const startRouteBtn = document.getElementById('start-route-btn');
+        const clearRouteBtn = document.getElementById('clear-route-btn');
+        let currentUser = null;
+        let map = null;
+        let userMarker = null;
+        let originMarker = null;
+        let destinationMarker = null;
+        let currentLocation = null;
+        let directionsService = null;
+        let directionsRenderer = null;
+        let isSettingOrigin = false;
+        let isSettingDestination = false;
+        let routeMode = 'DRIVING';
+        let currentRoute = null;
+        let alternativeRoutesData = [];
+        let selectedRouteIndex = 0;
+        let routeUpdateInterval = null;
+        let sosTimer = null;
+        let sosCountdown = 10;
+        const sosPassword = "stop123";
+        
+        function showPage(pageId) {
+            pages.forEach(page => page.classList.remove('active'));
+            const page = document.getElementById(pageId + '-page');
+            if (page) {
+                page.classList.add('active');
+                const mapContainer = document.querySelector('.map-container');
+                if (pageId === 'home') {
+                    mapContainer.style.display = 'block';
+                    if (!map && google && google.maps) initMap();
+                    else if (!map) {
+                        const checkGoogleMaps = setInterval(() => {
+                            if (google && google.maps) {
+                                clearInterval(checkGoogleMaps);
+                                initMap();
+                            }
+                        }, 100);
                     }
-                }, 100);
+                } else mapContainer.style.display = 'none';
+                navItems.forEach(item => item.classList.toggle('active', item.dataset.page === pageId));
             }
-        } else mapContainer.style.display = 'none';
-        navItems.forEach(item => item.classList.toggle('active', item.dataset.page === pageId));
-    }
-    if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
-    else if (currentUser) bottomNav.classList.remove('hidden');
-}
-function showToast(type, title, message, duration = 3000) {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    let icon = type === 'success' ? 'check_circle' : type === 'info' ? 'info' : 'error';
-    toast.innerHTML = `
-        <div class="toast-icon"><span class="material-icons">${icon}</span></div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-    `;
-    const toastContainer = document.getElementById('toast-container');
-    toastContainer.appendChild(toast);
-    toast.offsetHeight;
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toastContainer.removeChild(toast), 300);
-    }, duration);
-}
-function showModal(modal) {
-    modal.classList.add('active');
-}
-function hideModal(modal) {
-    modal.classList.remove('active');
-}
-function generateGuardianKey() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let key = '';
-    for (let group = 0; group < 3; group++) {
-        for (let i = 0; i < 4; i++) key += chars[Math.floor(Math.random() * chars.length)];
-        if (group < 2) key += '-';
-    }
-    return key;
-}
-async function registerUser(email, password, fullName, phone) {
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        const guardianKey = generateGuardianKey();
-        await db.collection('users').doc(user.uid).set({
-            fullName,
-            email,
-            phone,
-            guardianKey,
-            emergencyContacts: [],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return user;
-    } catch (error) {
-        throw error;
-    }
-}
-async function loginUser(email, password) {
-    try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        return userCredential.user;
-    } catch (error) {
-        throw error;
-    }
-}
-async function logoutUser() {
-    try {
-        await auth.signOut();
-        bottomNav.classList.add('hidden');
-        showPage('login');
-    } catch (error) {
-        throw error;
-    }
-}
-async function getUserData(userId) {
-    try {
-        const doc = await db.collection('users').doc(userId).get();
-        if (doc.exists) return doc.data();
-        throw new Error('No user data found in Firestore');
-    } catch (error) {
-        throw error;
-    }
-}
-async function addEmergencyContact(guardianKey, relation) {
-    try {
-        const querySnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).limit(1).get();
-        if (querySnapshot.empty) throw new Error('No user found with that Guardian Key');
-        const contactDoc = querySnapshot.docs[0];
-        const contactData = contactDoc.data();
-        const userData = await getUserData(currentUser.uid);
-        if (userData.emergencyContacts.some(contact => contact.id === contactDoc.id))
-            throw new Error('This contact is already in your emergency contacts');
-        const contactToAdd = {
-            id: contactDoc.id,
-            name: contactData.fullName,
-            phone: contactData.phone,
-            guardianKey: contactData.guardianKey,
-            relation,
-            addedAt: new Date().toISOString()
-        };
-        await db.collection('users').doc(currentUser.uid).update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayUnion(contactToAdd)
-        });
-        return contactToAdd;
-    } catch (error) {
-        throw error;
-    }
-}
-async function removeEmergencyContact(contactId) {
-    try {
-        const userData = await getUserData(currentUser.uid);
-        const contactToRemove = userData.emergencyContacts.find(contact => contact.id === contactId);
-        if (!contactToRemove) throw new Error('Contact not found');
-        await db.collection('users').doc(currentUser.uid).update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
-        });
-        return true;
-    } catch (error) {
-        throw error;
-    }
-}
-async function sendSOSAlert(location) {
-    try {
-        const userData = await getUserData(currentUser.uid);
-        if (!userData.emergencyContacts || userData.emergencyContacts.length === 0)
-            throw new Error('No emergency contacts found');
-        const sosAlert = {
-            userId: currentUser.uid,
-            userName: userData.fullName,
-            location,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'active'
-        };
-        const alertRef = await db.collection('sosAlerts').add(sosAlert);
-        return alertRef.id;
-    } catch (error) {
-        throw error;
-    }
-}
-function initMap() {
-    const defaultLocation = { lat: 28.6139, lng: 77.2090 };
-    const mapStyle = [
-        { "featureType": "all", "elementType": "geometry.fill", "stylers": [{ "weight": "2.00" }] },
-        { "featureType": "all", "elementType": "geometry.stroke", "stylers": [{ "color": "#f0f0f0" }] },
-        { "featureType": "all", "elementType": "labels.text", "stylers": [{ "visibility": "on" }] },
-        { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#f9f9f9" }] },
-        { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "color": "#ffffff" }] },
-        { "featureType": "landscape.man_made", "elementType": "geometry.fill", "stylers": [{ "color": "#f5f5f5" }] },
-        { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
-        { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] },
-        { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#eeeeee" }] },
-        { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#7b7b7b" }] },
-        { "featureType": "road", "elementType": "labels.text.stroke", "stylers": [{ "color": "#ffffff" }] },
-        { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] },
-        { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
-        { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
-        { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#e9e9e9" }, { "visibility": "on" }] },
-        { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#e9e9e9" }] }
-    ];
-    map = new google.maps.Map(mapElement, {
-        center: defaultLocation,
-        zoom: 15,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        gestureHandling: 'greedy',
-        zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
-        padding: { bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 },
-        scrollwheel: true,
-        draggable: true,
-        disableDefaultUI: false,
-        styles: mapStyle
-    });
-    userMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' },
-        visible: false
-    });
-    originMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' },
-        visible: false
-    });
-    destinationMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' },
-        visible: false
-    });
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
-        map,
-        suppressMarkers: true,
-        polylineOptions: { strokeColor: '#000000', strokeWeight: 5, strokeOpacity: 0.7 }
-    });
-    getCurrentLocation();
-    const originAutocomplete = new google.maps.places.Autocomplete(originSearchInput);
-    const destAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
-    originAutocomplete.addListener('place_changed', () => {
-        const place = originAutocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
-        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        originMarker.setPosition(location);
-        originMarker.setVisible(true);
-        map.setCenter(location);
-        if (destinationMarker.getVisible()) calculateRoute();
-    });
-    destAutocomplete.addListener('place_changed', () => {
-        const place = destAutocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
-        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        map.setCenter(location);
-        updateLocationInfo(place.name, place.formatted_address || place.name, location);
-        if (originMarker.getVisible()) calculateRoute();
-    });
-    map.addListener('click', event => handleMapClick(event.latLng));
-}
-function getCurrentLocation() {
-    if (!navigator.geolocation) {
-        showToast('error', 'Geolocation Error', 'Your browser does not support geolocation');
-        return;
-    }
-    navigator.geolocation.getCurrentPosition(
-        position => {
-            const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-            if (!map) return;
-            map.setCenter(location);
-            userMarker.setPosition(location);
-            userMarker.setVisible(true);
-            if (!originMarker.getVisible()) {
-                originMarker.setPosition(location);
-                originMarker.setVisible(true);
-                originSearchInput.value = 'Current Location';
-            }
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ location }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    updateLocationInfo('Current Location', results[0].formatted_address, location);
-                    originSearchInput.value = results[0].formatted_address;
-                    if (destinationMarker.getVisible()) calculateRoute();
-                } else updateLocationInfo('Current Location', 'Address not available', location);
-            });
-        },
-        error => {
-            let errorMessage = 'Unable to get your current location';
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = 'Location permission denied';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage = 'Location information unavailable';
-                    break;
-                case error.TIMEOUT:
-                    errorMessage = 'Location request timed out';
-                    break;
-            }
-            showToast('error', 'Location Error', errorMessage);
+            if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
+            else if (currentUser) bottomNav.classList.remove('hidden');
         }
-    );
-}
-function updateLocationInfo(name, address, coords) {
-    currentLocation = coords;
-    locationName.textContent = name || 'Unknown Location';
-    locationAddress.textContent = address || 'No address available';
-}
-function handleMapClick(latLng) {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: latLng }, (results, status) => {
-        if (status === 'OK' && results[0]) {
-            const location = { lat: latLng.lat(), lng: latLng.lng() };
-            updateLocationInfo(results[0].name || 'Selected Location', results[0].formatted_address, location);
-            if (isSettingOrigin) {
-                originMarker.setPosition(location);
-                originMarker.setVisible(true);
-                originSearchInput.value = results[0].formatted_address;
-                isSettingOrigin = false;
-                if (destinationMarker.getVisible()) calculateRoute();
-            } else if (isSettingDestination) {
-                destinationMarker.setPosition(location);
-                destinationMarker.setVisible(true);
-                destinationSearchInput.value = results[0].formatted_address;
-                isSettingDestination = false;
-                if (originMarker.getVisible()) calculateRoute();
-            } else {
-                destinationMarker.setPosition(location);
-                destinationMarker.setVisible(true);
-                destinationSearchInput.value = results[0].formatted_address;
-                if (originMarker.getVisible()) calculateRoute();
-            }
-        }
-    });
-}
-function calculateRoute() {
-    if (!originMarker.getVisible() || !destinationMarker.getVisible()) return;
-    const origin = originMarker.getPosition();
-    const destination = destinationMarker.getPosition();
-    directionsService.route(
-        {
-            origin,
-            destination,
-            travelMode: google.maps.TravelMode[routeMode],
-            provideRouteAlternatives: true
-        },
-        (result, status) => {
-            if (status === 'OK') {
-                directionsRenderer.setDirections(result);
-                currentRoute = result.routes[0];
-                alternativeRoutesData = result.routes;
-                selectedRouteIndex = 0;
-                updateRouteDetails();
-                renderAlternativeRoutes();
-                alternativeRoutes.style.display = 'block';
-                locationInfo.classList.remove('collapsed');
-                map.setPadding({ bottom: 250, left: 50 });
-            } else {
-                showToast('error', 'Route Error', 'Unable to calculate route');
-            }
-        }
-    );
-}
-function updateRouteDetails() {
-    if (!currentRoute) return;
-    const leg = currentRoute.legs[0];
-    routeDetailsContent.innerHTML = leg.steps.map((step, index) => `
-        <div class="step-item">
-            <div class="step-number">${index + 1}</div>
-            <div class="step-content">${step.instructions}</div>
-        </div>
-    `).join('');
-    updateLocationInfo(leg.end_address.split(',')[0], `${leg.distance.text} - ${leg.duration.text}`, leg.end_location);
-}
-function renderAlternativeRoutes() {
-    routeAlternativesContainer.innerHTML = alternativeRoutesData.map((route, index) => {
-        const leg = route.legs[0];
-        return `
-            <div class="route-option ${index === selectedRouteIndex ? 'active' : ''}" data-index="${index}">
-                <div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div>
-                <div class="route-option-info">
-                    <div class="route-option-title">${leg.distance.text}</div>
-                    <div class="route-option-details">${leg.duration.text}${index === 0 ? ' - Fastest' : ''}</div>
+        
+        function showToast(type, title, message, duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            let icon = type === 'success' ? 'check_circle' : type === 'info' ? 'info' : 'error';
+            toast.innerHTML = `
+                <div class="toast-icon"><span class="material-icons">${icon}</span></div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
                 </div>
-            </div>
-        `;
-    }).join('');
-    const routeOptions = document.querySelectorAll('.route-option');
-    routeOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            selectedRouteIndex = parseInt(option.dataset.index);
-            directionsRenderer.setRouteIndex(selectedRouteIndex);
-            currentRoute = alternativeRoutesData[selectedRouteIndex];
-            updateRouteDetails();
-            routeOptions.forEach(opt => opt.classList.remove('active'));
-            option.classList.add('active');
-        });
-    });
-}
-function startRouteTracking() {
-    if (!currentRoute) return;
-    routeProgress.style.display = 'block';
-    const leg = currentRoute.legs[0];
-    let totalDistance = leg.distance.value;
-    let totalDuration = leg.duration.value;
-    let startTime = Date.now();
-    routeUpdateInterval = setInterval(() => {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-                userMarker.setPosition(currentPos);
-                const distanceToEnd = google.maps.geometry.spherical.computeDistanceBetween(currentPos, leg.end_location);
-                const remainingDistance = Math.max(0, distanceToEnd);
-                const progress = Math.min(100, ((totalDistance - remainingDistance) / totalDistance) * 100);
-                routeProgressBar.style.width = `${progress}%`;
-                const elapsedTime = (Date.now() - startTime) / 1000;
-                const remainingTime = Math.max(0, totalDuration - elapsedTime);
-                routeCurrentTime.textContent = `Elapsed: ${Math.floor(elapsedTime / 60)}m ${Math.floor(elapsedTime % 60)}s`;
-                routeEta.textContent = `ETA: ${Math.floor(remainingTime / 60)}m ${Math.floor(remainingTime % 60)}s`;
-                if (remainingDistance < 50) {
-                    clearInterval(routeUpdateInterval);
-                    routeProgressBar.style.width = '100%';
-                    routeEta.textContent = 'Arrived';
-                }
-            },
-            () => console.log('Error getting position during route tracking')
-        );
-    }, 5000);
-}
-function clearRoute() {
-    directionsRenderer.setDirections(null);
-    originMarker.setVisible(false);
-    destinationMarker.setVisible(false);
-    originSearchInput.value = '';
-    destinationSearchInput.value = '';
-    routeProgress.style.display = 'none';
-    alternativeRoutes.style.display = 'none';
-    routeDetailsPanel.classList.remove('visible');
-    currentRoute = null;
-    alternativeRoutesData = [];
-    selectedRouteIndex = 0;
-    clearInterval(routeUpdateInterval);
-    getCurrentLocation();
-}
-function renderContacts(contacts) {
+            `;
+            const toastContainer = document.getElementById('toast-container');
+            toastContainer.appendChild(toast);
+            toast.offsetHeight;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toastContainer.removeChild(toast), 300);
+            }, duration);
+        }
+        
+        function showModal(modal) {
+            modal.classList.add('active');
+        }
+        
+        function hideModal(modal) {
+            modal.classList.remove('active');
+        }
+        
+        function generateGuardianKey() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let key = '';
+            for (let group = 0; group < 3; group++) {
+                for (let i = 0; i < 4; i++) key += chars[Math.floor(Math.random() * chars.length)];
+                if (group < 2) key += '-';
+            }
+            return key;
+        }
+        
+        async function registerUser(email, password, fullName, phone) {
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                const guardianKey = generateGuardianKey();
+                await db.collection('users').doc(user.uid).set({
+                    fullName,
+                    email,
+                    phone,
+                    guardianKey,
+                    emergencyContacts: [],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return user;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        async function loginUser(email, password) {
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                return userCredential.user;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        async function logoutUser() {
+            try {
+                await auth.signOut();
+                bottomNav.classList.add('hidden');
+                showPage('login');
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        async function getUserData(userId) {
+            try {
+                const doc = await db.collection('users').doc(userId).get();
+                if (doc.exists) return doc.data();
+                throw new Error('No user data found in Firestore');
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        async function addEmergencyContact(guardianKey, relation) {
+            try {
+                const querySnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).limit(1).get();
+                if (querySnapshot.empty) throw new Error('No user found with that Guardian Key');
+                const contactDoc = querySnapshot.docs[0];
+                const contactData = contactDoc.data();
+                const userData = await getUserData(currentUser.uid);
+                if (userData.emergencyContacts.some(contact => contact.id === contactDoc.id))
+                    throw new Error('This contact is already in your emergency contacts');
+                const contactToAdd = {
+                    id: contactDoc.id,
+                    name: contactData.fullName,
+                    phone: contactData.phone,
+                    guardianKey: contactData.guardianKey,
+                    relation,
+                    addedAt: new Date().toISOString()
+                };
+                await db.collection('users').doc(currentUser.uid).update({
+                    emergencyContacts: firebase.firestore.FieldValue.arrayUnion(contactToAdd)
+                });
+                return contactToAdd;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        async function removeEmergencyContact(contactId) {
+            try {
+                const userData = await getUserData(currentUser.uid);
+                const contactToRemove = userData.emergencyContacts.find(contact => contact.id === contactId);
+                if (!contactToRemove) throw new Error('Contact not found');
+                await db.collection('users').doc(currentUser.uid).update({
+                    emergencyContacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
+                });
+                return contactToRemove; // Return the removed contact for immediate UI update
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        function renderContacts(contacts) {
     if (contacts.length === 0) {
         emptyContacts.style.display = 'block';
+        contactsList.innerHTML = '';
         return;
     }
     emptyContacts.style.display = 'none';
@@ -1884,213 +1640,553 @@ function renderContacts(contacts) {
             </div>
         </div>
     `).join('');
+    // Remove existing event listeners to prevent duplicates
+    document.querySelectorAll('.remove-contact-btn').forEach(btn => {
+        btn.replaceWith(btn.cloneNode(true)); // Clone to remove old listeners
+    });
+    // Add new event listeners
     document.querySelectorAll('.remove-contact-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
-            const contactId = btn.closest('.contact-item').dataset.id;
+            const contactItem = btn.closest('.contact-item');
+            const contactId = contactItem.dataset.id;
             try {
                 await removeEmergencyContact(contactId);
-                const userData = await getUserData(currentUser.uid);
-                renderContacts(userData.emergencyContacts);
+                // Add animation class
+                contactItem.classList.add('slide-out');
+                // Wait for animation to complete before removing from DOM
+                setTimeout(() => {
+                    contactItem.remove();
+                    const userData = awaitgetUserData(currentUser.uid);
+                    if (userData.emergencyContacts.length === 0) {
+                        emptyContacts.style.display = 'block';
+                        contactsList.innerHTML = '';
+                    }
+                }, 300); // Match the animation duration (0.3s)
             } catch (error) {
                 showToast('error', 'Error', error.message);
+                const userData = await getUserData(currentUser.uid);
+                renderContacts(userData.emergencyContacts); // Re-render on error
             }
         });
     });
-}
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        currentUser = user;
-        const userData = await getUserData(user.uid);
-        profileName.textContent = userData.fullName;
-        profileEmail.textContent = user.email;
-        guardianKeyDisplay.textContent = userData.guardianKey;
-        renderContacts(userData.emergencyContacts || []);
-        showPage('home');
-    } else {
-        currentUser = null;
-        showPage('login');
-    }
-});
-loginForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await loginUser(loginEmail.value, loginPassword.value);
-    } catch (error) {
-        document.getElementById('login-password-error').textContent = error.message;
-    }
-});
-signupForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await registerUser(signupEmail.value, signupPassword.value, signupFullName.value, signupPhone.value);
-    } catch (error) {
-        document.getElementById('signup-password-error').textContent = error.message;
-    }
-});
-goToSignupBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('signup');
-});
-goToLoginBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('login');
-});
-navItems.forEach(item => {
-    item.addEventListener('click', e => {
-        e.preventDefault();
-        const page = item.dataset.page;
-        if (page !== 'sos') showPage(page);
-    });
-});
-copyKeyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(guardianKeyDisplay.textContent);
-});
-addContactBtn.addEventListener('click', () => showModal(addContactModal));
-addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
-closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-addContactForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        const contact = await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
-        const userData = await getUserData(currentUser.uid);
-        renderContacts(userData.emergencyContacts);
-        hideModal(addContactModal);
-        contactGuardianKey.value = '';
-        contactRelation.value = '';
-    } catch (error) {
-        document.getElementById('contact-guardian-key-error').textContent = error.message;
-    }
-});
-logoutBtn.addEventListener('click', async () => {
-    try {
-        await logoutUser();
-    } catch (error) {
-        showToast('error', 'Logout Error', error.message);
-    }
-});
-sosButton.addEventListener('click', () => {
-    if (!currentUser) {
-        showPage('login');
-        return;
-    }
-    showModal(sosConfirmModal);
-    sosCountdown = 10;
-    document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-    sosTimer = setInterval(() => {
-        sosCountdown--;
-        document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-        if (sosCountdown <= 0) {
-            clearInterval(sosTimer);
-            confirmSosBtn.click();
+}        
+        async function sendSOSAlert(location) {
+            try {
+                const userData = await getUserData(currentUser.uid);
+                if (!userData.emergencyContacts || userData.emergencyContacts.length === 0)
+                    throw new Error('No emergency contacts found');
+                const sosAlert = {
+                    userId: currentUser.uid,
+                    userName: userData.fullName,
+                    location,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'active'
+                };
+                const alertRef = await db.collection('sosAlerts').add(sosAlert);
+                return alertRef.id;
+            } catch (error) {
+                throw error;
+            }
         }
-    }, 1000);
-});
-closeSosConfirmBtn.addEventListener('click', () => {
-    clearInterval(sosTimer);
-    hideModal(sosConfirmModal);
-});
-cancelSosBtn.addEventListener('click', () => {
-    const enteredPassword = document.getElementById('sos-password').value;
-    if (enteredPassword === sosPassword) {
-        clearInterval(sosTimer);
-        hideModal(sosConfirmModal);
-        document.getElementById('sos-password').value = '';
-    } else {
-        showToast('error', 'Invalid Password', 'Incorrect password to cancel SOS');
-    }
-});
-confirmSosBtn.addEventListener('click', async () => {
-    clearInterval(sosTimer);
-    hideModal(sosConfirmModal);
-    try {
-        await sendSOSAlert(currentLocation);
-        showModal(sosSuccessModal);
-    } catch (error) {
-        showToast('error', 'SOS Error', error.message);
-    }
-});
-closeSosSuccessBtn.addEventListener('click', () => hideModal(sosSuccessModal));
-currentLocationOriginBtn.addEventListener('click', () => getCurrentLocation());
-currentLocationDestBtn.addEventListener('click', () => {
-    navigator.geolocation.getCurrentPosition(
-        position => {
-            const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-            destinationMarker.setPosition(location);
-            destinationMarker.setVisible(true);
-            map.setCenter(location);
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ location }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    destinationSearchInput.value = results[0].formatted_address;
-                    updateLocationInfo('Current Location', results[0].formatted_address, location);
-                }
+        
+        function initMap() {
+            const defaultLocation = { lat: 28.6139, lng: 77.2090 };
+            const mapStyle = [
+                { "featureType": "all", "elementType": "geometry.fill", "stylers": [{ "weight": "2.00" }] },
+                { "featureType": "all", "elementType": "geometry.stroke", "stylers": [{ "color": "#f0f0f0" }] },
+                { "featureType": "all", "elementType": "labels.text", "stylers": [{ "visibility": "on" }] },
+                { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#f9f9f9" }] },
+                { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "color": "#ffffff" }] },
+                { "featureType": "landscape.man_made", "elementType": "geometry.fill", "stylers": [{ "color": "#f5f5f5" }] },
+                { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+                { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] },
+                { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#eeeeee" }] },
+                { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#7b7b7b" }] },
+                { "featureType": "road", "elementType": "labels.text.stroke", "stylers": [{ "color": "#ffffff" }] },
+                { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] },
+                { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+                { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+                { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#e9e9e9" }, { "visibility": "on" }] },
+                { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#e9e9e9" }] }
+            ];
+            map = new google.maps.Map(mapElement, {
+                center: defaultLocation,
+                zoom: 15,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                gestureHandling: 'greedy',
+                zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
+                padding: { bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 },
+                scrollwheel: true,
+                draggable: true,
+                disableDefaultUI: false,
+                styles: mapStyle
+            });
+            userMarker = new google.maps.Marker({
+                map,
+                position: defaultLocation,
+                icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' },
+                visible: false
+            });
+            originMarker = new google.maps.Marker({
+                map,
+                position: defaultLocation,
+                icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' },
+                visible: false
+            });
+            destinationMarker = new google.maps.Marker({
+                map,
+                position: defaultLocation,
+                icon: { url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' },
+                visible: false
+            });
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map,
+                suppressMarkers: true,
+                polylineOptions: { strokeColor: '#000000', strokeWeight: 5, strokeOpacity: 0.7 }
+            });
+            getCurrentLocation();
+            const originAutocomplete = new google.maps.places.Autocomplete(originSearchInput);
+            const destAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
+            originAutocomplete.addListener('place_changed', () => {
+                const place = originAutocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) return;
+                const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+                originMarker.setPosition(location);
+                originMarker.setVisible(true);
+                map.setCenter(location);
+                if (destinationMarker.getVisible()) calculateRoute();
+            });
+            destAutocomplete.addListener('place_changed', () => {
+                const place = destAutocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) return;
+                const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+                destinationMarker.setPosition(location);
+                destinationMarker.setVisible(true);
+                map.setCenter(location);
+                updateLocationInfo(place.name, place.formatted_address || place.name, location);
                 if (originMarker.getVisible()) calculateRoute();
             });
-        },
-        () => showToast('error', 'Location Error', 'Unable to get current location')
-    );
-});
-swapLocationsBtn.addEventListener('click', () => {
-    const originPos = originMarker.getPosition();
-    const destPos = destinationMarker.getPosition();
-    const originText = originSearchInput.value;
-    const destText = destinationSearchInput.value;
-    originMarker.setPosition(destPos);
-    destinationMarker.setPosition(originPos);
-    originSearchInput.value = destText;
-    destinationSearchInput.value = originText;
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
-});
-routeSearchBtn.addEventListener('click', () => {
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
-});
-locationInfoHeader.addEventListener('click', () => {
-    locationInfo.classList.toggle('collapsed');
-    map.setPadding({ bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 });
-});
-locationHandle.addEventListener('click', () => {
-    locationInfo.classList.toggle('collapsed');
-    map.setPadding({ bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 });
-});
-shareLocationBtn.addEventListener('click', () => {
-    if (!currentLocation) return;
-    const url = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
-    navigator.clipboard.writeText(url);
-    showToast('success', 'Location Copied', 'Location URL copied to clipboard');
-});
-navigateBtn.addEventListener('click', () => {
-    if (!currentLocation) return;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${currentLocation.lat},${currentLocation.lng}&travelmode=${routeMode.toLowerCase()}`;
-    window.open(url, '_blank');
-});
-document.getElementById('route-details-btn').addEventListener('click', () => {
-    if (currentRoute) routeDetailsPanel.classList.add('visible');
-});
-closeRouteDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.remove('visible'));
-drivingModeBtn.addEventListener('click', () => {
-    routeMode = 'DRIVING';
-    drivingModeBtn.classList.add('active');
-    walkingModeBtn.classList.remove('active');
-    transitModeBtn.classList.remove('active');
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
-});
-walkingModeBtn.addEventListener('click', () => {
-    routeMode = 'WALKING';
-    walkingModeBtn.classList.add('active');
-    drivingModeBtn.classList.remove('active');
-    transitModeBtn.classList.remove('active');
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
-});
-transitModeBtn.addEventListener('click', () => {
-    routeMode = 'TRANSIT';
-    transitModeBtn.classList.add('active');
-    drivingModeBtn.classList.remove('active');
-    walkingModeBtn.classList.remove('active');
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
-});
-startRouteBtn.addEventListener('click', () => startRouteTracking());
-clearRouteBtn.addEventListener('click', () => clearRoute());
-    </script>
+            map.addListener('click', event => handleMapClick(event.latLng));
+        }
+        
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                showToast('error', 'Geolocation Error', 'Your browser does not support geolocation');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    if (!map) return;
+                    map.setCenter(location);
+                    userMarker.setPosition(location);
+                    userMarker.setVisible(true);
+                    if (!originMarker.getVisible()) {
+                        originMarker.setPosition(location);
+                        originMarker.setVisible(true);
+                        originSearchInput.value = 'Current Location';
+                    }
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            updateLocationInfo('Current Location', results[0].formatted_address, location);
+                            originSearchInput.value = results[0].formatted_address;
+                            if (destinationMarker.getVisible()) calculateRoute();
+                        } else updateLocationInfo('Current Location', 'Address not available', location);
+                    });
+                },
+                error => {
+                    let errorMessage = 'Unable to get your current location';
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location permission denied';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out';
+                            break;
+                    }
+                    showToast('error', 'Location Error', errorMessage);
+                }
+            );
+        }
+        
+        function updateLocationInfo(name, address, coords) {
+            currentLocation = coords;
+            locationName.textContent = name || 'Unknown Location';
+            locationAddress.textContent = address || 'No address available';
+        }
+        
+        function handleMapClick(latLng) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: latLng }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    const location = { lat: latLng.lat(), lng: latLng.lng() };
+                    updateLocationInfo(results[0].name || 'Selected Location', results[0].formatted_address, location);
+                    if (isSettingOrigin) {
+                        originMarker.setPosition(location);
+                        originMarker.setVisible(true);
+                        originSearchInput.value = results[0].formatted_address;
+                        isSettingOrigin = false;
+                        if (destinationMarker.getVisible()) calculateRoute();
+                    } else if (isSettingDestination) {
+                        destinationMarker.setPosition(location);
+                        destinationMarker.setVisible(true);
+                        destinationSearchInput.value = results[0].formatted_address;
+                        isSettingDestination = false;
+                        if (originMarker.getVisible()) calculateRoute();
+                    } else {
+                        destinationMarker.setPosition(location);
+                        destinationMarker.setVisible(true);
+                        destinationSearchInput.value = results[0].formatted_address;
+                        if (originMarker.getVisible()) calculateRoute();
+                    }
+                }
+            });
+        }
+        
+        function calculateRoute() {
+            if (!originMarker.getVisible() || !destinationMarker.getVisible()) return;
+            const origin = originMarker.getPosition();
+            const destination = destinationMarker.getPosition();
+            directionsService.route(
+                {
+                    origin,
+                    destination,
+                    travelMode: google.maps.TravelMode[routeMode],
+                    provideRouteAlternatives: true
+                },
+                (result, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(result);
+                        currentRoute = result.routes[0];
+                        alternativeRoutesData = result.routes;
+                        selectedRouteIndex = 0;
+                        updateRouteDetails();
+                        renderAlternativeRoutes();
+                        alternativeRoutes.style.display = 'block';
+                        locationInfo.classList.remove('collapsed');
+                        map.setPadding({ bottom: 250, left: 50 });
+                    } else {
+                        showToast('error', 'Route Error', 'Unable to calculate route');
+                    }
+                }
+            );
+        }
+        
+        function updateRouteDetails() {
+            if (!currentRoute) return;
+            const leg = currentRoute.legs[0];
+            routeDetailsContent.innerHTML = leg.steps.map((step, index) => `
+                <div class="step-item">
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-content">${step.instructions}</div>
+                </div>
+            `).join('');
+            updateLocationInfo(leg.end_address.split(',')[0], `${leg.distance.text} - ${leg.duration.text}`, leg.end_location);
+        }
+        
+        function renderAlternativeRoutes() {
+            routeAlternativesContainer.innerHTML = alternativeRoutesData.map((route, index) => {
+                const leg = route.legs[0];
+                return `
+                    <div class="route-option ${index === selectedRouteIndex ? 'active' : ''}" data-index="${index}">
+                        <div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div>
+                        <div class="route-option-info">
+                            <div class="route-option-title">${leg.distance.text}</div>
+                            <div class="route-option-details">${leg.duration.text}${index === 0 ? ' - Fastest' : ''}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            const routeOptions = document.querySelectorAll('.route-option');
+            routeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    selectedRouteIndex = parseInt(option.dataset.index);
+                    directionsRenderer.setRouteIndex(selectedRouteIndex);
+                    currentRoute = alternativeRoutesData[selectedRouteIndex];
+                    updateRouteDetails();
+                    routeOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                });
+            });
+        }
+        
+        function startRouteTracking() {
+            if (!currentRoute) return;
+            routeProgress.style.display = 'block';
+            const leg = currentRoute.legs[0];
+            let totalDistance = leg.distance.value;
+            let totalDuration = leg.duration.value;
+            let startTime = Date.now();
+            routeUpdateInterval = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+                        userMarker.setPosition(currentPos);
+                        const distanceToEnd = google.maps.geometry.spherical.computeDistanceBetween(currentPos, leg.end_location);
+                        const remainingDistance = Math.max(0, distanceToEnd);
+                        const progress = Math.min(100, ((totalDistance - remainingDistance) / totalDistance) * 100);
+                        routeProgressBar.style.width = `${progress}%`;
+                        const elapsedTime = (Date.now() - startTime) / 1000;
+                        const remainingTime = Math.max(0, totalDuration - elapsedTime);
+                        routeCurrentTime.textContent = `Elapsed: ${Math.floor(elapsedTime / 60)}m ${Math.floor(elapsedTime % 60)}s`;
+                        routeEta.textContent = `ETA: ${Math.floor(remainingTime / 60)}m ${Math.floor(remainingTime % 60)}s`;
+                        if (remainingDistance < 50) {
+                            clearInterval(routeUpdateInterval);
+                            routeProgressBar.style.width = '100%';
+                            routeEta.textContent = 'Arrived';
+                        }
+                    },
+                    () => console.log('Error getting position during route tracking')
+                );
+            }, 5000);
+        }
+        
+        function clearRoute() {
+            directionsRenderer.setDirections(null);
+            originMarker.setVisible(false);
+            destinationMarker.setVisible(false);
+            originSearchInput.value = '';
+            destinationSearchInput.value = '';
+            routeProgress.style.display = 'none';
+            alternativeRoutes.style.display = 'none';
+            routeDetailsPanel.classList.remove('visible');
+            currentRoute = null;
+            alternativeRoutesData = [];
+            selectedRouteIndex = 0;
+            clearInterval(routeUpdateInterval);
+            getCurrentLocation();
+        }
+        
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                currentUser = user;
+                const userData = await getUserData(user.uid);
+                profileName.textContent = userData.fullName;
+                profileEmail.textContent = user.email;
+                guardianKeyDisplay.textContent = userData.guardianKey;
+                renderContacts(userData.emergencyContacts || []);
+                showPage('home');
+            } else {
+                currentUser = null;
+                showPage('login');
+            }
+        });
+        
+        loginForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            try {
+                await loginUser(loginEmail.value, loginPassword.value);
+            } catch (error) {
+                document.getElementById('login-password-error').textContent = error.message;
+            }
+        });
+        
+        signupForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            try {
+                await registerUser(signupEmail.value, signupPassword.value, signupFullName.value, signupPhone.value);
+            } catch (error) {
+                document.getElementById('signup-password-error').textContent = error.message;
+            }
+        });
+        
+        goToSignupBtn.addEventListener('click', e => {
+            e.preventDefault();
+            showPage('signup');
+        });
+        
+        goToLoginBtn.addEventListener('click', e => {
+            e.preventDefault();
+            showPage('login');
+        });
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', e => {
+                e.preventDefault();
+                const page = item.dataset.page;
+                if (page !== 'sos') showPage(page);
+            });
+        });
+        
+        copyKeyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(guardianKeyDisplay.textContent);
+        });
+        
+        addContactBtn.addEventListener('click', () => showModal(addContactModal));
+        addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
+        closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
+        cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
+        
+        addContactForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            try {
+                await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
+                const userData = await getUserData(currentUser.uid);
+                renderContacts(userData.emergencyContacts);
+                hideModal(addContactModal);
+                contactGuardianKey.value = '';
+                contactRelation.value = '';
+            } catch (error) {
+                document.getElementById('contact-guardian-key-error').textContent = error.message;
+            }
+        });
+        
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await logoutUser();
+            } catch (error) {
+                showToast('error', 'Logout Error', error.message);
+            }
+        });
+        
+        sosButton.addEventListener('click', () => {
+            if (!currentUser) {
+                showPage('login');
+                return;
+            }
+            showModal(sosConfirmModal);
+            sosCountdown = 10;
+            document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
+            sosTimer = setInterval(() => {
+                sosCountdown--;
+                document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
+                if (sosCountdown <= 0) {
+                    clearInterval(sosTimer);
+                    confirmSosBtn.click();
+                }
+            }, 1000);
+        });
+        
+        closeSosConfirmBtn.addEventListener('click', () => {
+            clearInterval(sosTimer);
+            hideModal(sosConfirmModal);
+        });
+        
+        cancelSosBtn.addEventListener('click', () => {
+            const enteredPassword = document.getElementById('sos-password').value;
+            if (enteredPassword === sosPassword) {
+                clearInterval(sosTimer);
+                hideModal(sosConfirmModal);
+                document.getElementById('sos-password').value = '';
+            } else {
+                showToast('error', 'Invalid Password', 'Incorrect password to cancel SOS');
+            }
+        });
+        
+        confirmSosBtn.addEventListener('click', async () => {
+            clearInterval(sosTimer);
+            hideModal(sosConfirmModal);
+            try {
+                await sendSOSAlert(currentLocation);
+                showModal(sosSuccessModal);
+            } catch (error) {
+                showToast('error', 'SOS Error', error.message);
+            }
+        });
+        
+        closeSosSuccessBtn.addEventListener('click', () => hideModal(sosSuccessModal));
+        
+        currentLocationOriginBtn.addEventListener('click', () => getCurrentLocation());
+        
+        currentLocationDestBtn.addEventListener('click', () => {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    destinationMarker.setPosition(location);
+                    destinationMarker.setVisible(true);
+                    map.setCenter(location);
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            destinationSearchInput.value = results[0].formatted_address;
+                            updateLocationInfo('Current Location', results[0].formatted_address, location);
+                        }
+                        if (originMarker.getVisible()) calculateRoute();
+                    });
+                },
+                () => showToast('error', 'Location Error', 'Unable to get current location')
+            );
+        });
+        
+        swapLocationsBtn.addEventListener('click', () => {
+            const originPos = originMarker.getPosition();
+            const destPos = destinationMarker.getPosition();
+            const originText = originSearchInput.value;
+            const destText = destinationSearchInput.value;
+            originMarker.setPosition(destPos);
+            destinationMarker.setPosition(originPos);
+            originSearchInput.value = destText;
+            destinationSearchInput.value = originText;
+            if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+        });
+        
+        routeSearchBtn.addEventListener('click', () => {
+            if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+        });
+        
+        locationInfoHeader.addEventListener('click', () => {
+            locationInfo.classList.toggle('collapsed');
+            map.setPadding({ bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 });
+        });
+        
+        locationHandle.addEventListener('click', () => {
+            locationInfo.classList.toggle('collapsed');
+            map.setPadding({ bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 });
+        });
+        
+        shareLocationBtn.addEventListener('click', () => {
+            if (!currentLocation) return;
+            const url = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+            navigator.clipboard.writeText(url);
+            showToast('success', 'Location Copied', 'Location URL copied to clipboard');
+        });
+        
+        navigateBtn.addEventListener('click', () => {
+            if (!currentLocation) return;
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${currentLocation.lat},${currentLocation.lng}&travelmode=${routeMode.toLowerCase()}`;
+            window.open(url, '_blank');
+        });
+        
+        document.getElementById('route-details-btn').addEventListener('click', () => {
+            if (currentRoute) routeDetailsPanel.classList.add('visible');
+        });
+        
+        closeRouteDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.remove('visible'));
+        
+        drivingModeBtn.addEventListener('click', () => {
+            routeMode = 'DRIVING';
+            drivingModeBtn.classList.add('active');
+            walkingModeBtn.classList.remove('active');
+            transitModeBtn.classList.remove('active');
+            if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+        });
+        
+        walkingModeBtn.addEventListener('click', () => {
+            routeMode = 'WALKING';
+            walkingModeBtn.classList.add('active');
+            drivingModeBtn.classList.remove('active');
+            transitModeBtn.classList.remove('active');
+            if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+        });
+        
+        transitModeBtn.addEventListener('click', () => {
+            routeMode = 'TRANSIT';
+            transitModeBtn.classList.add('active');
+            drivingModeBtn.classList.remove('active');
+            walkingModeBtn.classList.remove('active');
+            if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+        });
+        
+        startRouteBtn.addEventListener('click', () => startRouteTracking());
+        
+        clearRouteBtn.addEventListener('click', () => clearRoute());
+        </script>
 </body>
 </html>
