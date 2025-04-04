@@ -83,23 +83,20 @@
         .auth-link {color: var(--primary); text-decoration: none; font-weight: 500; transition: color 0.3s ease;}
         .auth-link:hover {color: var(--secondary); text-decoration: underline;}
         .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px; /* Explicitly set navbar height */
-    background-color: var(--light-bg);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05);
-    z-index: 100; /* Navbar z-index */
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.bottom-nav.hidden {
-    transform: translateY(100%);
-}
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: var(--light-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bottom-nav.hidden {transform: translateY(100%);}
         .bottom-nav-item {display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--light-text-secondary); font-size: 12px; padding: 8px 0; width: 25%; transition: color 0.3s ease, transform 0.2s ease;}
         .bottom-nav-item:hover {transform: scale(1.1);}
         .bottom-nav-item.active {color: var(--primary);}
@@ -109,16 +106,16 @@
         .sos-nav-button:hover {transform: scale(1.15);}
         .sos-nav-button .material-icons {font-size: 24px; margin-bottom: 0;}
         .map-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 70px; /* Ensure it doesn't go under navbar */
-    width: 100%;
-    height: calc(100vh - 70px);
-    overflow: hidden;
-    z-index: 0; /* Keep this low */
-}
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 70px;
+            width: 100%;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+            z-index: 0;
+        }
         #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; touch-action: none;}
         .map-search-container {position: fixed; top: 16px; left: 16px; right: 16px; display: flex; flex-direction: column; background-color: var(--light-bg); border-radius: 12px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); overflow: hidden; z-index: 100; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
         .map-search {display: flex; align-items: center; border-bottom: 1px solid var(--light-border); padding: 4px;}
@@ -140,29 +137,24 @@
         .route-search-btn .material-icons {margin-right: 8px;}
         .route-btn-text {font-size: 14px;}
         .location-info {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 70px; /* Exactly matches navbar height to sit just above it */
-    background-color: #808080; /* Gray background */
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    padding: 20px 16px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 101; /* Higher than navbar to ensure it’s on top */
-    height: auto;
-    min-height: 250px;
-    max-height: 45vh;
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
-    transform: translateY(0); /* Default state: fully visible */
-}
-
-/* Collapsed state slides it down but keeps it above navbar */
-.location-info.collapsed {
-    transform: translateY(calc(100% - 20px)); /* Slides down, leaving 20px visible */
-    min-height: unset;
-}
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 70px;
+            background-color: #808080;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 20px 16px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 101;
+            height: auto;
+            min-height: 250px;
+            max-height: 45vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(0);
+        }
+        .location-info.collapsed {transform: translateY(calc(100% - 20px)); min-height: unset;}
         .location-info-header {position: absolute; top: 0; left: 0; right: 0; height: 20px; background-color: transparent; cursor: pointer; z-index: 103;}
         .location-handle-container {position: absolute; left: -50px; top: 0; width: 50px; height: 100px; display: flex; align-items: center; z-index: 101;}
         .location-handle {width: 50px; height: 100px; background-color: var(--primary); border-radius: 25px 0 0 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease; user-select: none; z-index: 102; outline: none;}
@@ -677,7 +669,6 @@ let activeSosId = null;
 let lastSosLocation = null;
 let firstSosReceived = {};
 const sosPassword = "stop123";
-
 function showPage(pageId) {
     pages.forEach(page => page.classList.remove('active'));
     const page = document.getElementById(pageId + '-page');
@@ -721,24 +712,20 @@ function showToast(type, title, message, duration = 3000) {
         setTimeout(() => toastContainer.removeChild(toast), 300);
     }, duration);
 }
-
 function showModal(modal) {
     modal.classList.add('active');
 }
-
 function hideModal(modal) {
     modal.classList.remove('active');
 }
-
 function showEmergencyNotification(message, location) {
     sosNotificationMessage.textContent = message;
     emergencyNotification.classList.add('active');
     lastSosLocation = location;
     setTimeout(() => {
         emergencyNotification.classList.remove('active');
-    }, 10000); // Hide after 10 seconds
+    }, 10000);
 }
-
 function generateGuardianKey() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let key = '';
@@ -748,7 +735,6 @@ function generateGuardianKey() {
     }
     return key;
 }
-
 async function registerUser(email, password, fullName, phone) {
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
@@ -767,7 +753,6 @@ async function registerUser(email, password, fullName, phone) {
         throw error;
     }
 }
-
 async function loginUser(email, password) {
     try {
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
@@ -776,7 +761,6 @@ async function loginUser(email, password) {
         throw error;
     }
 }
-
 async function logoutUser() {
     try {
         await auth.signOut();
@@ -786,7 +770,6 @@ async function logoutUser() {
         throw error;
     }
 }
-
 async function getUserData(userId) {
     try {
         const doc = await db.collection('users').doc(userId).get();
@@ -796,7 +779,6 @@ async function getUserData(userId) {
         throw error;
     }
 }
-
 async function addEmergencyContact(guardianKey, relation) {
     try {
         const querySnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).limit(1).get();
@@ -821,7 +803,6 @@ async function addEmergencyContact(guardianKey, relation) {
         throw error;
     }
 }
-
 async function removeEmergencyContact(contactId) {
     try {
         const userData = await getUserData(currentUser.uid);
@@ -835,7 +816,6 @@ async function removeEmergencyContact(contactId) {
         throw error;
     }
 }
-
 function renderContacts(contacts) {
     if (contacts.length === 0) {
         emptyContacts.style.display = 'block';
@@ -854,138 +834,70 @@ function renderContacts(contacts) {
             try {
                 await removeEmergencyContact(contactId);
                 contactItem.classList.add('slide-out');
-                setTimeout(async () => {
-                    contactItem.remove();
-                    const userData = await getUserData(currentUser.uid);
-                    if (userData.emergencyContacts.length === 0) {
-                        emptyContacts.style.display = 'block';
-                        contactsList.innerHTML = '';
-                    }
-                }, 300);
-            } catch (error) {
-                showToast('error', 'Error', error.message);
+                setTimeout(() => contactItem.remove(), 300);
                 const userData = await getUserData(currentUser.uid);
                 renderContacts(userData.emergencyContacts);
+                showToast('success', 'Contact Removed', 'Emergency contact removed successfully');
+            } catch (error) {
+                showToast('error', 'Error', error.message);
             }
         });
     });
 }
-
-async function sendSOSAlert(location) {
+async function sendSosAlert() {
     try {
-        const userData = await getUserData(currentUser.uid);
-        if (!userData.emergencyContacts || userData.emergencyContacts.length === 0) throw new Error('No emergency contacts found');
-        const sosAlert = {
+        if (!navigator.geolocation) throw new Error('Geolocation not supported');
+        const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));
+        const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const geocoder = new google.maps.Geocoder();
+        const geocodeResult = await new Promise((resolve, reject) => {
+            geocoder.geocode({ location }, (results, status) => {
+                if (status === 'OK' && results[0]) resolve(results[0].formatted_address);
+                else reject(new Error('Unable to get address'));
+            });
+        });
+        const sosData = {
             userId: currentUser.uid,
-            userName: userData.fullName,
             location,
+            address: geocodeResult,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'active'
+            active: true
         };
-        const alertRef = await db.collection('sosAlerts').add(sosAlert);
-        activeSosId = alertRef.id;
-        lastSosLocation = location;
-        sosIcon.textContent = 'stop'; // Change icon to "stop"
-        for (let contact of userData.emergencyContacts) {
-            await notifyEmergencyContact(contact, userData.fullName, location);
-        }
-        showModal(sosSuccessModal);
-        startSosInterval(location);
-        return alertRef.id;
+        const sosRef = await db.collection('sos_alerts').add(sosData);
+        const userData = await getUserData(currentUser.uid);
+        userData.emergencyContacts.forEach(contact => {
+            db.collection('users').doc(contact.id).collection('notifications').add({
+                type: 'sos',
+                message: `${userData.fullName} has initiated an SOS alert at ${geocodeResult}`,
+                location,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false,
+                sosId: sosRef.id
+            });
+        });
+        return { sosId: sosRef.id, location, address: geocodeResult };
     } catch (error) {
         throw error;
     }
 }
-
-async function notifyEmergencyContact(contact, userName, userLocation) {
-    console.log(`Notifying ${contact.name} (${contact.phone}) of SOS from ${userName} at ${userLocation.lat}, ${userLocation.lng}`);
-    const notificationData = {
-        contactId: contact.id,
-        userName,
-        location: userLocation,
-        timestamp: new Date().toISOString()
-    };
-    await db.collection('notifications').add(notificationData);
-}
-
-function startSosInterval(location) {
-    if (sosInterval) clearInterval(sosInterval);
-    sosInterval = setInterval(async () => {
-        try {
-            const userData = await getUserData(currentUser.uid);
-            const updatedLocation = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }), reject);
-            });
-            lastSosLocation = updatedLocation;
-            for (let contact of userData.emergencyContacts) {
-                await notifyEmergencyContact(contact, userData.fullName, updatedLocation);
-            }
-            showToast('info', 'SOS Update', 'SOS alert resent with updated location');
-        } catch (error) {
-            showToast('error', 'SOS Update Error', 'Failed to resend SOS: ' + error.message);
-        }
-    }, 30000); // Every 30 seconds
-}
-
-async function endSOSAlert() {
-    if (!activeSosId) return;
+async function endSosAlert(sosId) {
     try {
-        await db.collection('sosAlerts').doc(activeSosId).update({ status: 'inactive' });
-        clearInterval(sosInterval);
-        activeSosId = null;
-        lastSosLocation = null;
-        sosIcon.textContent = 'emergency'; // Revert icon to "emergency"
-        showToast('success', 'SOS Ended', 'SOS alert has been stopped');
+        await db.collection('sos_alerts').doc(sosId).update({ active: false });
+        const userData = await getUserData(currentUser.uid);
+        userData.emergencyContacts.forEach(contact => {
+            db.collection('users').doc(contact.id).collection('notifications').add({
+                type: 'sos_end',
+                message: `${userData.fullName}'s SOS alert has ended`,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false,
+                sosId
+            });
+        });
     } catch (error) {
-        showToast('error', 'End SOS Error', error.message);
+        throw error;
     }
 }
-
-function listenForSOSAlerts() {
-    db.collection('sosAlerts')
-        .where('status', '==', 'active')
-        .onSnapshot(async snapshot => {
-            snapshot.docChanges().forEach(async change => {
-                if (change.type === 'added' || change.type === 'modified') {
-                    const sosData = change.doc.data();
-                    const senderId = sosData.userId;
-                    const senderData = await getUserData(senderId);
-                    if (currentUser && senderData.emergencyContacts.some(contact => contact.id === currentUser.uid)) {
-                        const message = `${sosData.userName} triggered an SOS at ${sosData.location.lat}, ${sosData.location.lng}`;
-                        showEmergencyNotification(message, sosData.location);
-                        if (!firstSosReceived[senderId]) {
-                            firstSosReceived[senderId] = true;
-                            navigateToSosLocation(sosData.location, true);
-                        }
-                    }
-                }
-            });
-        }, error => {
-            console.error("Error listening for SOS alerts:", error);
-            showToast('error', 'SOS Listener Error', 'Failed to listen for SOS alerts: ' + error.message);
-        });
-}
-
-function navigateToSosLocation(location, autoStart = false) {
-    if (!location || !map) return;
-    showPage('home');
-    navigator.geolocation.getCurrentPosition(position => {
-        const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-        originMarker.setPosition(currentPos);
-        originMarker.setVisible(true);
-        originSearchInput.value = 'Current Location';
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        destinationSearchInput.value = `SOS Location (${location.lat}, ${location.lng})`;
-        calculateRoute();
-        if (autoStart) startRouteTracking();
-    }, error => {
-        showToast('error', 'Navigation Error', 'Failed to get current location: ' + error.message);
-    });
-}
-
 function initMap() {
-    const defaultLocation = { lat: 28.6139, lng: 77.2090 };
     const mapStyle = [
         {"featureType": "all", "elementType": "geometry.fill", "stylers": [{"weight": "2.00"}]},
         {"featureType": "all", "elementType": "geometry.stroke", "stylers": [{"color": "#f0f0f0"}]},
@@ -1004,250 +916,169 @@ function initMap() {
         {"featureType": "water", "elementType": "all", "stylers": [{"color": "#e9e9e9"}, {"visibility": "on"}]},
         {"featureType": "water", "elementType": "geometry.fill", "stylers": [{"color": "#e9e9e9"}]}
     ];
+
     map = new google.maps.Map(mapElement, {
-        center: defaultLocation,
-        zoom: 15,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
+        center: { lat: 37.7749, lng: -122.4194 },
+        zoom: 14,
+        disableDefaultUI: true,
         gestureHandling: 'greedy',
-        zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
-        padding: { bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 },
-        scrollwheel: true,
-        draggable: true,
-        disableDefaultUI: false,
-        styles: mapStyle
-    });
-    userMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue.png' },
-        visible: false
-    });
-    originMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green.png' },
-        visible: false
-    });
-    destinationMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/purple.png' },
-        visible: false
+        styles: mapStyle // Apply the custom map style here
     });
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
         map,
         suppressMarkers: true,
-        polylineOptions: { strokeColor: '#000000', strokeWeight: 5, strokeOpacity: 0.7 }
+        polylineOptions: { strokeColor: '#000000', strokeWeight: 5 }
     });
-    getCurrentLocation();
     const originAutocomplete = new google.maps.places.Autocomplete(originSearchInput);
-    const destAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
+    const destinationAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
+    originAutocomplete.bindTo('bounds', map);
+    destinationAutocomplete.bindTo('bounds', map);
     originAutocomplete.addListener('place_changed', () => {
         const place = originAutocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
-        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        originMarker.setPosition(location);
-        originMarker.setVisible(true);
-        map.setCenter(location);
-        if (destinationMarker.getVisible()) calculateRoute();
-    });
-    destAutocomplete.addListener('place_changed', () => {
-        const place = destAutocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
-        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        map.setCenter(location);
-        updateLocationInfo(place.name, place.formatted_address || place.name, location);
-        if (originMarker.getVisible()) calculateRoute();
-    });
-
-    // Add listener for map panning/dragging
-    map.addListener('dragstart', () => {
-        if (!locationInfo.classList.contains('collapsed')) {
-            locationInfo.classList.add('collapsed');
+        if (place.geometry) {
+            originMarker?.setMap(null);
+            originMarker = new google.maps.Marker({
+                position: place.geometry.location,
+                map,
+                title: 'Origin',
+                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+            });
+            map.panTo(place.geometry.location);
         }
     });
-
-    // Add touch listener for mobile devices
-    mapElement.addEventListener('touchstart', () => {
-        if (!locationInfo.classList.contains('collapsed')) {
-            locationInfo.classList.add('collapsed');
+    destinationAutocomplete.addListener('place_changed', () => {
+        const place = destinationAutocomplete.getPlace();
+        if (place.geometry) {
+            destinationMarker?.setMap(null);
+            destinationMarker = new google.maps.Marker({
+                position: place.geometry.location,
+                map,
+                title: 'Destination',
+                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+            });
+            map.panTo(place.geometry.location);
         }
     });
-}
-// map.addListener('click', event => handleMapClick(event.latLng));
-function getCurrentLocation() {
-    if (!navigator.geolocation) {
-        showToast('error', 'Geolocation Error', 'Your browser does not support geolocation');
-        return;
-    }
     navigator.geolocation.getCurrentPosition(position => {
-        const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-        if (!map) return;
-        map.setCenter(location);
-        userMarker.setPosition(location);
-        userMarker.setVisible(true);
-        if (!originMarker.getVisible()) {
-            originMarker.setPosition(location);
-            originMarker.setVisible(true);
-            originSearchInput.value = 'Current Location';
-        }
+        currentLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+        map.setCenter(currentLocation);
+        userMarker = new google.maps.Marker({
+            position: currentLocation,
+            map,
+            title: 'You',
+            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
+        });
         const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location }, (results, status) => {
+        geocoder.geocode({ location: currentLocation }, (results, status) => {
             if (status === 'OK' && results[0]) {
-                updateLocationInfo('Current Location', results[0].formatted_address, location);
-                originSearchInput.value = results[0].formatted_address;
-                if (destinationMarker.getVisible()) calculateRoute();
-            } else {
-                updateLocationInfo('Current Location', 'Address not available', location);
+                locationAddress.textContent = results[0].formatted_address;
+                locationName.textContent = 'Current Location';
             }
         });
-    }, error => {
-        let errorMessage = 'Unable to get your current location';
-        switch (error.code) {
-            case error.PERMISSION_DENIED: errorMessage = 'Location permission denied'; break;
-            case error.POSITION_UNAVAILABLE: errorMessage = 'Location information unavailable'; break;
-            case error.TIMEOUT: errorMessage = 'Location request timed out'; break;
-        }
-        showToast('error', 'Location Error', errorMessage);
+    }, () => {
+        showToast('error', 'Location Error', 'Unable to retrieve your location');
     });
 }
-
-function updateLocationInfo(name, address, coords) {
-    currentLocation = coords;
-    locationName.textContent = name || 'Unknown Location';
-    locationAddress.textContent = address || 'No address available';
-}
-
-function handleMapClick(latLng) {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: latLng }, (results, status) => {
-        if (status === 'OK' && results[0]) {
-            const location = { lat: latLng.lat(), lng: latLng.lng() };
-            updateLocationInfo(results[0].name || 'Selected Location', results[0].formatted_address, location);
-            if (isSettingOrigin) {
-                originMarker.setPosition(location);
-                originMarker.setVisible(true);
-                originSearchInput.value = results[0].formatted_address;
-                isSettingOrigin = false;
-                if (destinationMarker.getVisible()) calculateRoute();
-            } else if (isSettingDestination) {
-                destinationMarker.setPosition(location);
-                destinationMarker.setVisible(true);
-                destinationSearchInput.value = results[0].formatted_address;
-                isSettingDestination = false;
-                if (originMarker.getVisible()) calculateRoute();
-            } else {
-                destinationMarker.setPosition(location);
-                destinationMarker.setVisible(true);
-                destinationSearchInput.value = results[0].formatted_address;
-                if (originMarker.getVisible()) calculateRoute();
-            }
-        }
-    });
-}
-
 function calculateRoute() {
-    if (!originMarker.getVisible() || !destinationMarker.getVisible()) {
-        showToast('error', 'Route Error', 'Please set both origin and destination');
+    const origin = originSearchInput.value;
+    const destination = destinationSearchInput.value;
+    if (!origin || !destination) {
+        showToast('error', 'Input Error', 'Please enter both origin and destination');
         return;
     }
-    const origin = originMarker.getPosition();
-    const destination = destinationMarker.getPosition();
     directionsService.route({
         origin,
         destination,
-        travelMode: google.maps.TravelMode[routeMode],
+        travelMode: routeMode,
         provideRouteAlternatives: true
-    }, (result, status) => {
+    }, (response, status) => {
         if (status === 'OK') {
-            directionsRenderer.setDirections(result);
-            currentRoute = result.routes[0];
-            alternativeRoutesData = result.routes;
+            directionsRenderer.setDirections(response);
+            currentRoute = response.routes[0];
+            alternativeRoutesData = response.routes;
             selectedRouteIndex = 0;
-            updateRouteDetails();
-            updateAlternativeRoutes();
-            map.setZoom(14);
+            displayRouteDetails(currentRoute);
+            renderAlternativeRoutes(alternativeRoutesData);
             locationInfo.classList.remove('collapsed');
+            alternativeRoutes.style.display = 'block';
+            map.fitBounds(currentRoute.bounds);
         } else {
-            showToast('error', 'Route Error', 'Unable to calculate route: ' + status);
+            showToast('error', 'Route Error', 'Unable to calculate route');
         }
     });
 }
-function updateRouteDetails() {
-    if (!currentRoute) return;
-    routeDetailsContent.innerHTML = '';
-    const steps = currentRoute.legs[0].steps;
-    steps.forEach((step, index) => {
-        const stepDiv = document.createElement('div');
-        stepDiv.className = 'step-item';
-        stepDiv.innerHTML = `<div class="step-number">${index + 1}</div><div class="step-content">${step.instructions}<br><small>${step.distance.text} - ${step.duration.text}</small></div>`;
-        routeDetailsContent.appendChild(stepDiv);
-    });
+function displayRouteDetails(route) {
+    const distance = route.legs[0].distance.text;
+    const duration = route.legs[0].duration.text;
+    locationName.textContent = `Route to ${destinationSearchInput.value}`;
+    locationAddress.textContent = `${distance} - ${duration}`;
+    routeDetailsContent.innerHTML = route.legs[0].steps.map((step, index) => `<div class="step-item"><div class="step-number">${index + 1}</div><div class="step-content">${step.instructions}</div></div>`).join('');
 }
-
-function updateAlternativeRoutes() {
-    routeAlternativesContainer.innerHTML = '';
-    alternativeRoutes.style.display = 'block';
-    alternativeRoutesData.forEach((route, index) => {
-        const routeOption = document.createElement('div');
-        routeOption.className = `route-option ${index === selectedRouteIndex ? 'active' : ''}`;
-        routeOption.innerHTML = `<div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div><div class="route-option-info"><div class="route-option-title">Route ${index + 1}</div><div class="route-option-details">${route.legs[0].distance.text} - ${route.legs[0].duration.text}</div></div>`;
-        routeOption.addEventListener('click', () => {
+function renderAlternativeRoutes(routes) {
+    routeAlternativesContainer.innerHTML = routes.map((route, index) => {
+        const distance = route.legs[0].distance.text;
+        const duration = route.legs[0].duration.text;
+        return `<div class="route-option ${index === selectedRouteIndex ? 'active' : ''}" data-index="${index}"><div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div><div class="route-option-info"><div class="route-option-title">Route ${index + 1}</div><div class="route-option-details">${distance} - ${duration}</div></div></div>`;
+    }).join('');
+    document.querySelectorAll('.route-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const index = parseInt(option.dataset.index);
             directionsRenderer.setRouteIndex(index);
             selectedRouteIndex = index;
             currentRoute = alternativeRoutesData[index];
-            updateRouteDetails();
-            updateAlternativeRoutes();
+            displayRouteDetails(currentRoute);
+            document.querySelectorAll('.route-option').forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
         });
-        routeAlternativesContainer.appendChild(routeOption);
     });
 }
-
 function startRouteTracking() {
-    if (!currentRoute) return;
+    if (!currentRoute) {
+        showToast('error', 'Route Error', 'No route selected');
+        return;
+    }
     routeProgress.style.display = 'block';
     const totalDistance = currentRoute.legs[0].distance.value;
-    const totalDuration = currentRoute.legs[0].duration.value;
     routeUpdateInterval = setInterval(() => {
         navigator.geolocation.getCurrentPosition(position => {
-            const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-            userMarker.setPosition(currentPos);
-            const distanceToDest = google.maps.geometry.spherical.computeDistanceBetween(currentPos, destinationMarker.getPosition());
-            const progress = ((totalDistance - distanceToDest) / totalDistance) * 100;
-            routeProgressBar.style.width = `${Math.min(progress, 100)}%`;
+            const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+            userMarker.setPosition(userLocation);
+            const nearestPoint = google.maps.geometry.spherical.interpolate(
+                currentRoute.legs[0].start_location,
+                currentRoute.legs[0].end_location,
+                0.5
+            );
+            const distanceTravelled = google.maps.geometry.spherical.computeDistanceBetween(userLocation, currentRoute.legs[0].start_location);
+            const remainingDistance = google.maps.geometry.spherical.computeDistanceBetween(userLocation, currentRoute.legs[0].end_location);
+            const progress = Math.min((distanceTravelled / totalDistance) * 100, 100);
+            routeProgressBar.style.width = `${progress}%`;
             routeCurrentTime.textContent = new Date().toLocaleTimeString();
-            const remainingDuration = (distanceToDest / totalDistance) * totalDuration;
-            const eta = new Date(Date.now() + remainingDuration * 1000);
-            routeEta.textContent = `ETA: ${eta.toLocaleTimeString()}`;
-            if (distanceToDest < 50) {
+            const etaSeconds = (remainingDistance / 500) * 60;
+            const etaTime = new Date(Date.now() + etaSeconds * 1000);
+            routeEta.textContent = `ETA: ${etaTime.toLocaleTimeString()}`;
+            if (remainingDistance < 50) {
                 clearInterval(routeUpdateInterval);
-                showToast('success', 'Destination Reached', 'You have arrived at your destination');
+                showToast('success', 'Arrived', 'You have reached your destination');
                 routeProgress.style.display = 'none';
             }
         });
     }, 5000);
 }
-
 function clearRoute() {
     directionsRenderer.setDirections(null);
-    originMarker.setVisible(false);
-    destinationMarker.setVisible(false);
+    originMarker?.setMap(null);
+    destinationMarker?.setMap(null);
     originSearchInput.value = '';
     destinationSearchInput.value = '';
     currentRoute = null;
     alternativeRoutesData = [];
-    routeDetailsContent.innerHTML = '';
     routeAlternativesContainer.innerHTML = '';
-    routeProgress.style.display = 'none';
     alternativeRoutes.style.display = 'none';
+    routeProgress.style.display = 'none';
     clearInterval(routeUpdateInterval);
+    locationInfo.classList.add('collapsed');
 }
-
 auth.onAuthStateChanged(async user => {
     if (user) {
         currentUser = user;
@@ -1257,83 +1088,99 @@ auth.onAuthStateChanged(async user => {
         guardianKeyDisplay.textContent = userData.guardianKey;
         renderContacts(userData.emergencyContacts);
         showPage('home');
-        listenForSOSAlerts();
+        db.collection('users').doc(user.uid).collection('notifications').onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const notif = change.doc.data();
+                    if (notif.type === 'sos' && !firstSosReceived[notif.sosId]) {
+                        showEmergencyNotification(notif.message, notif.location);
+                        firstSosReceived[notif.sosId] = true;
+                    }
+                }
+            });
+        });
+        db.collection('sos_alerts').where('userId', '==', user.uid).where('active', '==', true).onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    activeSosId = change.doc.id;
+                    sosButton.style.backgroundColor = '#4CAF50';
+                    sosIcon.textContent = 'stop';
+                } else if (change.type === 'modified' && !change.doc.data().active) {
+                    activeSosId = null;
+                    sosButton.style.backgroundColor = '#F44336';
+                    sosIcon.textContent = 'emergency';
+                }
+            });
+        });
     } else {
         currentUser = null;
         showPage('login');
     }
 });
-
 loginForm.addEventListener('submit', async e => {
     e.preventDefault();
     try {
         await loginUser(loginEmail.value, loginPassword.value);
+        showToast('success', 'Login Successful', 'Welcome back!');
     } catch (error) {
         showToast('error', 'Login Failed', error.message);
     }
 });
-
 signupForm.addEventListener('submit', async e => {
     e.preventDefault();
     try {
         await registerUser(signupEmail.value, signupPassword.value, signupFullName.value, signupPhone.value);
+        showToast('success', 'Signup Successful', 'Account created successfully!');
         showPage('home');
     } catch (error) {
         showToast('error', 'Signup Failed', error.message);
     }
 });
-
 goToSignupBtn.addEventListener('click', e => {
     e.preventDefault();
     showPage('signup');
 });
-
 goToLoginBtn.addEventListener('click', e => {
     e.preventDefault();
     showPage('login');
 });
-
 navItems.forEach(item => {
     item.addEventListener('click', e => {
         e.preventDefault();
-        if (item.dataset.page === 'sos') return;
-        showPage(item.dataset.page);
+        const page = item.dataset.page;
+        if (page === 'sos') return;
+        showPage(page);
     });
 });
-
 copyKeyBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(guardianKeyDisplay.textContent);
     showToast('success', 'Copied', 'Guardian Key copied to clipboard');
 });
-
 addContactBtn.addEventListener('click', () => showModal(addContactModal));
 addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
 closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
 cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-
 addContactForm.addEventListener('submit', async e => {
     e.preventDefault();
     try {
-        await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
+        const contact = await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
         const userData = await getUserData(currentUser.uid);
         renderContacts(userData.emergencyContacts);
         hideModal(addContactModal);
-        showToast('success', 'Contact Added', 'Emergency contact added successfully');
-        contactGuardianKey.value = '';
-        contactRelation.value = '';
+        addContactForm.reset();
+        showToast('success', 'Contact Added', `${contact.name} added as an emergency contact`);
     } catch (error) {
         showToast('error', 'Error', error.message);
     }
 });
-
 logoutBtn.addEventListener('click', async () => {
     try {
         await logoutUser();
+        showToast('success', 'Logged Out', 'You have been logged out successfully');
     } catch (error) {
         showToast('error', 'Logout Failed', error.message);
     }
 });
-
 sosButton.addEventListener('click', () => {
     if (activeSosId) {
         showModal(sosEndModal);
@@ -1341,136 +1188,151 @@ sosButton.addEventListener('click', () => {
         showModal(sosConfirmModal);
         sosCountdown = 10;
         document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-        sosTimer = setInterval(() => {
+        sosInterval = setInterval(() => {
             sosCountdown--;
             document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
             if (sosCountdown <= 0) {
-                clearInterval(sosTimer);
+                clearInterval(sosInterval);
                 confirmSosBtn.click();
             }
         }, 1000);
     }
 });
-
 closeSosConfirmBtn.addEventListener('click', () => {
-    clearInterval(sosTimer);
+    clearInterval(sosInterval);
     hideModal(sosConfirmModal);
 });
-
 cancelSosBtn.addEventListener('click', () => {
     const password = document.getElementById('sos-password').value;
     if (password === sosPassword) {
-        clearInterval(sosTimer);
+        clearInterval(sosInterval);
         hideModal(sosConfirmModal);
+        showToast('info', 'SOS Cancelled', 'SOS alert cancelled');
     } else {
-        showToast('error', 'Invalid Password', 'Incorrect password to cancel SOS');
+        showToast('error', 'Invalid Password', 'Incorrect password');
     }
 });
-
 confirmSosBtn.addEventListener('click', async () => {
-    clearInterval(sosTimer);
+    clearInterval(sosInterval);
     hideModal(sosConfirmModal);
     try {
-        const location = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }), reject);
-        });
-        await sendSOSAlert(location);
+        const { sosId, location, address } = await sendSosAlert();
+        activeSosId = sosId;
+        sosButton.style.backgroundColor = '#4CAF50';
+        sosIcon.textContent = 'stop';
+        showModal(sosSuccessModal);
+        showToast('success', 'SOS Sent', 'Emergency contacts notified');
     } catch (error) {
         showToast('error', 'SOS Failed', error.message);
     }
 });
-
 closeSosEndBtn.addEventListener('click', () => hideModal(sosEndModal));
 cancelEndSosBtn.addEventListener('click', () => hideModal(sosEndModal));
-
 confirmEndSosBtn.addEventListener('click', async () => {
     const password = document.getElementById('sos-end-password').value;
     if (password === sosPassword) {
-        await endSOSAlert();
-        hideModal(sosEndModal);
+        try {
+            await endSosAlert(activeSosId);
+            activeSosId = null;
+            sosButton.style.backgroundColor = '#F44336';
+            sosIcon.textContent = 'emergency';
+            hideModal(sosEndModal);
+            showToast('success', 'SOS Ended', 'SOS alert has been ended');
+        } catch (error) {
+            showToast('error', 'Error', error.message);
+        }
     } else {
-        showToast('error', 'Invalid Password', 'Incorrect password to end SOS');
+        showToast('error', 'Invalid Password', 'Incorrect password');
     }
 });
-
 closeSosSuccessBtn.addEventListener('click', () => hideModal(sosSuccessModal));
-
 navigateToBtn.addEventListener('click', () => {
-    if (lastSosLocation) navigateToSosLocation(lastSosLocation);
-    emergencyNotification.classList.remove('active');
+    if (lastSosLocation) {
+        originSearchInput.value = '';
+        destinationSearchInput.value = `Lat: ${lastSosLocation.lat}, Lng: ${lastSosLocation.lng}`;
+        calculateRoute();
+        emergencyNotification.classList.remove('active');
+        showPage('home');
+    }
 });
-
-closeEmergencyNotificationBtn.addEventListener('click', () => {
-    emergencyNotification.classList.remove('active');
+closeEmergencyNotificationBtn.addEventListener('click', () => emergencyNotification.classList.remove('active'));
+currentLocationOriginBtn.addEventListener('click', () => {
+    if (currentLocation) {
+        originSearchInput.value = `${currentLocation.lat}, ${currentLocation.lng}`;
+        originMarker?.setMap(null);
+        originMarker = new google.maps.Marker({
+            position: currentLocation,
+            map,
+            title: 'Origin',
+            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+        });
+        map.panTo(currentLocation);
+    }
 });
-
-currentLocationOriginBtn.addEventListener('click', () => getCurrentLocation());
 currentLocationDestBtn.addEventListener('click', () => {
-    navigator.geolocation.getCurrentPosition(position => {
-        const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        destinationSearchInput.value = 'Current Location';
-        if (originMarker.getVisible()) calculateRoute();
-    });
+    if (currentLocation) {
+        destinationSearchInput.value = `${currentLocation.lat}, ${currentLocation.lng}`;
+        destinationMarker?.setMap(null);
+        destinationMarker = new google.maps.Marker({
+            position: currentLocation,
+            map,
+            title: 'Destination',
+            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+        });
+        map.panTo(currentLocation);
+    }
 });
-
 swapLocationsBtn.addEventListener('click', () => {
-    const originPos = originMarker.getPosition();
-    const destPos = destinationMarker.getPosition();
-    const originValue = originSearchInput.value;
-    const destValue = destinationSearchInput.value;
-    originMarker.setPosition(destPos);
-    destinationMarker.setPosition(originPos);
-    originSearchInput.value = destValue;
-    destinationSearchInput.value = originValue;
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
+    const temp = originSearchInput.value;
+    originSearchInput.value = destinationSearchInput.value;
+    destinationSearchInput.value = temp;
+    const tempMarker = originMarker;
+    originMarker = destinationMarker;
+    destinationMarker = tempMarker;
+    if (originMarker) originMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' });
+    if (destinationMarker) destinationMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' });
 });
-
 locationInfoHeader.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
 locationHandle.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
-
 shareLocationBtn.addEventListener('click', () => {
     if (currentLocation) {
-        const text = `My location: ${locationName.textContent} (${locationAddress.textContent}) - https://maps.google.com/?q=${currentLocation.lat},${currentLocation.lng}`;
-        navigator.clipboard.writeText(text);
-        showToast('success', 'Location Copied', 'Location details copied to clipboard');
+        const locationText = `My location: https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+        navigator.clipboard.writeText(locationText);
+        showToast('success', 'Location Shared', 'Location copied to clipboard');
     }
 });
-
 navigateBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentLocation.lat},${currentLocation.lng}`, '_blank');
-    }
+    if (currentRoute) startRouteTracking();
+    else showToast('error', 'Navigation Error', 'Please calculate a route first');
 });
-
-routeDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.toggle('visible'));
 closeRouteDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.remove('visible'));
-
+routeDetailsBtn.addEventListener('click', () => {
+    if (currentRoute) routeDetailsPanel.classList.toggle('visible');
+    else showToast('error', 'No Route', 'Calculate a route first');
+});
 drivingModeBtn.addEventListener('click', () => {
     routeMode = 'DRIVING';
     drivingModeBtn.classList.add('active');
     walkingModeBtn.classList.remove('active');
     transitModeBtn.classList.remove('active');
-    if (currentRoute) calculateRoute();
+    if (originSearchInput.value && destinationSearchInput.value) calculateRoute();
 });
 walkingModeBtn.addEventListener('click', () => {
     routeMode = 'WALKING';
     walkingModeBtn.classList.add('active');
     drivingModeBtn.classList.remove('active');
     transitModeBtn.classList.remove('active');
-    if (currentRoute) calculateRoute();
+    if (originSearchInput.value && destinationSearchInput.value) calculateRoute();
 });
 transitModeBtn.addEventListener('click', () => {
     routeMode = 'TRANSIT';
     transitModeBtn.classList.add('active');
     drivingModeBtn.classList.remove('active');
     walkingModeBtn.classList.remove('active');
-    if (currentRoute) calculateRoute();
+    if (originSearchInput.value && destinationSearchInput.value) calculateRoute();
 });
-
-startRouteBtn.addEventListener('click', () => startRouteTracking());
-clearRouteBtn.addEventListener('click', () => clearRoute());
+startRouteBtn.addEventListener('click', startRouteTracking);
+clearRouteBtn.addEventListener('click', clearRoute);
     </script>
-    </body>
+</body>
 </html>
