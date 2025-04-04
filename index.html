@@ -140,11 +140,11 @@
             position: fixed;
             left: 0;
             right: 0;
-            bottom: 70px;
+            bottom: 90px;
             background-color: #808080;
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
-            padding: 20px 16px;
+            padding: 20px 16px 40px 16px;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             z-index: 101;
             height: auto;
@@ -514,7 +514,7 @@
                 <div class="warning-icon mb-4"><span class="material-icons">warning</span></div>
                 <p id="sos-timer">Time remaining: 10s</p>
                 <p class="mt-2">Enter password to cancel SOS alert:</p>
-                <input type="password" id="sos-password" class="form-input mt-2" placeholder="Enter password">
+                <input type="password" id="sos-password" class="form-input mt-2" placeholder="Enter password" autocomplete="off">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-sos">Cancel SOS</button>
@@ -531,7 +531,7 @@
             <div class="modal-body">
                 <div class="warning-icon mb-4"><span class="material-icons">stop</span></div>
                 <p class="mt-2">Enter password to end SOS alert:</p>
-                <input type="password" id="sos-end-password" class="form-input mt-2" placeholder="Enter password">
+                <input type="password" id="sos-end-password" class="form-input mt-2" placeholder="Enter password" autocomplete="off">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-end-sos">Cancel</button>
@@ -669,6 +669,7 @@ let activeSosId = null;
 let lastSosLocation = null;
 let firstSosReceived = {};
 const sosPassword = "stop123";
+
 function showPage(pageId) {
     pages.forEach(page => page.classList.remove('active'));
     const page = document.getElementById(pageId + '-page');
@@ -694,10 +695,7 @@ function showPage(pageId) {
     if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
     else if (currentUser) bottomNav.classList.remove('hidden');
 }
-routeSearchBtn.addEventListener('click', () => {
-    calculateRoute();
-    locationInfo.classList.remove('collapsed');
-});
+
 function showToast(type, title, message, duration = 3000) {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -712,191 +710,15 @@ function showToast(type, title, message, duration = 3000) {
         setTimeout(() => toastContainer.removeChild(toast), 300);
     }, duration);
 }
+
 function showModal(modal) {
     modal.classList.add('active');
 }
+
 function hideModal(modal) {
     modal.classList.remove('active');
 }
-function showEmergencyNotification(message, location) {
-    sosNotificationMessage.textContent = message;
-    emergencyNotification.classList.add('active');
-    lastSosLocation = location;
-    setTimeout(() => {
-        emergencyNotification.classList.remove('active');
-    }, 10000);
-}
-function generateGuardianKey() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let key = '';
-    for (let group = 0; group < 3; group++) {
-        for (let i = 0; i < 4; i++) key += chars[Math.floor(Math.random() * chars.length)];
-        if (group < 2) key += '-';
-    }
-    return key;
-}
-async function registerUser(email, password, fullName, phone) {
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        const guardianKey = generateGuardianKey();
-        await db.collection('users').doc(user.uid).set({
-            fullName,
-            email,
-            phone,
-            guardianKey,
-            emergencyContacts: [],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return user;
-    } catch (error) {
-        throw error;
-    }
-}
-async function loginUser(email, password) {
-    try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        return userCredential.user;
-    } catch (error) {
-        throw error;
-    }
-}
-async function logoutUser() {
-    try {
-        await auth.signOut();
-        bottomNav.classList.add('hidden');
-        showPage('login');
-    } catch (error) {
-        throw error;
-    }
-}
-async function getUserData(userId) {
-    try {
-        const doc = await db.collection('users').doc(userId).get();
-        if (doc.exists) return doc.data();
-        throw new Error('No user data found in Firestore');
-    } catch (error) {
-        throw error;
-    }
-}
-async function addEmergencyContact(guardianKey, relation) {
-    try {
-        const querySnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).limit(1).get();
-        if (querySnapshot.empty) throw new Error('No user found with that Guardian Key');
-        const contactDoc = querySnapshot.docs[0];
-        const contactData = contactDoc.data();
-        const userData = await getUserData(currentUser.uid);
-        if (userData.emergencyContacts.some(contact => contact.id === contactDoc.id)) throw new Error('This contact is already in your emergency contacts');
-        const contactToAdd = {
-            id: contactDoc.id,
-            name: contactData.fullName,
-            phone: contactData.phone,
-            guardianKey: contactData.guardianKey,
-            relation,
-            addedAt: new Date().toISOString()
-        };
-        await db.collection('users').doc(currentUser.uid).update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayUnion(contactToAdd)
-        });
-        return contactToAdd;
-    } catch (error) {
-        throw error;
-    }
-}
-async function removeEmergencyContact(contactId) {
-    try {
-        const userData = await getUserData(currentUser.uid);
-        const contactToRemove = userData.emergencyContacts.find(contact => contact.id === contactId);
-        if (!contactToRemove) throw new Error('Contact not found');
-        await db.collection('users').doc(currentUser.uid).update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
-        });
-        return contactToRemove;
-    } catch (error) {
-        throw error;
-    }
-}
-function renderContacts(contacts) {
-    if (contacts.length === 0) {
-        emptyContacts.style.display = 'block';
-        contactsList.innerHTML = '';
-        return;
-    }
-    emptyContacts.style.display = 'none';
-    contactsList.innerHTML = contacts.map(contact => `<div class="contact-item" data-id="${contact.id}"><div class="contact-info"><div class="contact-avatar"><span class="material-icons">person</span></div><div class="contact-details"><h4>${contact.name}</h4><p class="contact-relation">${contact.relation} - ${contact.phone}</p></div></div><div class="contact-actions"><button class="btn-icon remove-contact-btn" title="Remove Contact"><span class="material-icons">delete</span></button></div></div>`).join('');
-    document.querySelectorAll('.remove-contact-btn').forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true));
-    });
-    document.querySelectorAll('.remove-contact-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const contactItem = btn.closest('.contact-item');
-            const contactId = contactItem.dataset.id;
-            try {
-                await removeEmergencyContact(contactId);
-                contactItem.classList.add('slide-out');
-                setTimeout(() => contactItem.remove(), 300);
-                const userData = await getUserData(currentUser.uid);
-                renderContacts(userData.emergencyContacts);
-                showToast('success', 'Contact Removed', 'Emergency contact removed successfully');
-            } catch (error) {
-                showToast('error', 'Error', error.message);
-            }
-        });
-    });
-}
-async function sendSosAlert() {
-    try {
-        if (!navigator.geolocation) throw new Error('Geolocation not supported');
-        const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));
-        const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-        const geocoder = new google.maps.Geocoder();
-        const geocodeResult = await new Promise((resolve, reject) => {
-            geocoder.geocode({ location }, (results, status) => {
-                if (status === 'OK' && results[0]) resolve(results[0].formatted_address);
-                else reject(new Error('Unable to get address'));
-            });
-        });
-        const sosData = {
-            userId: currentUser.uid,
-            location,
-            address: geocodeResult,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            active: true
-        };
-        const sosRef = await db.collection('sos_alerts').add(sosData);
-        const userData = await getUserData(currentUser.uid);
-        userData.emergencyContacts.forEach(contact => {
-            db.collection('users').doc(contact.id).collection('notifications').add({
-                type: 'sos',
-                message: `${userData.fullName} has initiated an SOS alert at ${geocodeResult}`,
-                location,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                read: false,
-                sosId: sosRef.id
-            });
-        });
-        return { sosId: sosRef.id, location, address: geocodeResult };
-    } catch (error) {
-        throw error;
-    }
-}
-async function endSosAlert(sosId) {
-    try {
-        await db.collection('sos_alerts').doc(sosId).update({ active: false });
-        const userData = await getUserData(currentUser.uid);
-        userData.emergencyContacts.forEach(contact => {
-            db.collection('users').doc(contact.id).collection('notifications').add({
-                type: 'sos_end',
-                message: `${userData.fullName}'s SOS alert has ended`,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                read: false,
-                sosId
-            });
-        });
-    } catch (error) {
-        throw error;
-    }
-}
+
 function initMap() {
     const mapStyle = [
         {"featureType": "all", "elementType": "geometry.fill", "stylers": [{"weight": "2.00"}]},
@@ -922,7 +744,7 @@ function initMap() {
         zoom: 14,
         disableDefaultUI: true,
         gestureHandling: 'greedy',
-        styles: mapStyle // Apply the custom map style here
+        styles: mapStyle
     });
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
@@ -979,208 +801,388 @@ function initMap() {
     }, () => {
         showToast('error', 'Location Error', 'Unable to retrieve your location');
     });
+
+    map.addListener('drag', () => {
+        locationInfo.classList.add('collapsed');
+    });
+
+    map.addListener('click', (event) => {
+        if (!locationInfo.contains(event.domEvent.target)) {
+            locationInfo.classList.add('collapsed');
+        }
+    });
 }
+
+loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
+        .then(cred => {
+            currentUser = cred.user;
+            showPage('home');
+            loadUserProfile();
+        })
+        .catch(err => showToast('error', 'Login Failed', err.message));
+});
+
+signupForm.addEventListener('submit', e => {
+    e.preventDefault();
+    auth.createUserWithEmailAndPassword(signupEmail.value, signupPassword.value)
+        .then(cred => {
+            currentUser = cred.user;
+            return db.collection('users').doc(currentUser.uid).set({
+                fullName: signupFullName.value,
+                email: signupEmail.value,
+                phone: signupPhone.value,
+                guardianKey: generateGuardianKey(),
+                contacts: []
+            });
+        })
+        .then(() => {
+            showPage('home');
+            loadUserProfile();
+        })
+        .catch(err => showToast('error', 'Signup Failed', err.message));
+});
+
+goToSignupBtn.addEventListener('click', e => {
+    e.preventDefault();
+    showPage('signup');
+});
+
+goToLoginBtn.addEventListener('click', e => {
+    e.preventDefault();
+    showPage('login');
+});
+
+navItems.forEach(item => {
+    item.addEventListener('click', e => {
+        e.preventDefault();
+        if (item.dataset.page === 'sos') return;
+        showPage(item.dataset.page);
+    });
+});
+
+logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => {
+        currentUser = null;
+        showPage('login');
+        bottomNav.classList.add('hidden');
+    });
+});
+
+function generateGuardianKey() {
+    return 'G' + Math.random().toString(36).substr(2, 9).toUpperCase();
+}
+
+function loadUserProfile() {
+    if (!currentUser) return;
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            profileName.textContent = data.fullName;
+            profileEmail.textContent = data.email;
+            guardianKeyDisplay.textContent = data.guardianKey;
+            loadContacts(data.contacts);
+        }
+    });
+    listenForSosAlerts();
+}
+
+copyKeyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(guardianKeyDisplay.textContent).then(() => {
+        showToast('success', 'Key Copied', 'Guardian key copied to clipboard');
+    });
+});
+
+addContactBtn.addEventListener('click', () => showModal(addContactModal));
+addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
+closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
+cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
+
+addContactForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const key = contactGuardianKey.value.trim();
+    const relation = contactRelation.value;
+    db.collection('users').where('guardianKey', '==', key).get().then(querySnapshot => {
+        if (querySnapshot.empty) {
+            showToast('error', 'Invalid Key', 'No user found with this Guardian Key');
+            return;
+        }
+        const contactUser = querySnapshot.docs[0].data();
+        const contactData = {
+            uid: querySnapshot.docs[0].id,
+            fullName: contactUser.fullName,
+            email: contactUser.email,
+            phone: contactUser.phone,
+            relation: relation,
+            guardianKey: key
+        };
+        db.collection('users').doc(currentUser.uid).update({
+            contacts: firebase.firestore.FieldValue.arrayUnion(contactData)
+        }).then(() => {
+            hideModal(addContactModal);
+            showToast('success', 'Contact Added', `${contactUser.fullName} added as ${relation}`);
+            loadContacts([...(doc.data().contacts || []), contactData]);
+        });
+    }).catch(err => showToast('error', 'Error', err.message));
+});
+
+function loadContacts(contacts) {
+    contactsList.innerHTML = '';
+    if (contacts.length === 0) {
+        emptyContacts.classList.remove('hidden');
+    } else {
+        emptyContacts.classList.add('hidden');
+        contacts.forEach((contact, index) => {
+            const contactItem = document.createElement('div');
+            contactItem.className = 'contact-item';
+            contactItem.innerHTML = `
+                <div class="contact-info">
+                    <div class="contact-avatar"><span class="material-icons">person</span></div>
+                    <div class="contact-details">
+                        <h4>${contact.fullName}</h4>
+                        <div class="contact-relation">${contact.relation} • ${contact.phone}</div>
+                    </div>
+                </div>
+                <div class="contact-actions">
+                    <button class="btn-icon delete-contact" data-index="${index}">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
+            `;
+            contactsList.appendChild(contactItem);
+        });
+        document.querySelectorAll('.delete-contact').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const index = parseInt(e.currentTarget.dataset.index);
+                const contactToRemove = contacts[index];
+                db.collection('users').doc(currentUser.uid).update({
+                    contacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
+                }).then(() => {
+                    contacts.splice(index, 1);
+                    loadContacts(contacts);
+                    showToast('success', 'Contact Removed', `${contactToRemove.fullName} removed`);
+                });
+            });
+        });
+    }
+}
+
+currentLocationOriginBtn.addEventListener('click', () => {
+    if (currentLocation) {
+        originSearchInput.value = 'Current Location';
+        originMarker?.setMap(null);
+        originMarker = new google.maps.Marker({
+            position: currentLocation,
+            map,
+            title: 'Origin',
+            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+        });
+        map.panTo(currentLocation);
+    }
+});
+
+currentLocationDestBtn.addEventListener('click', () => {
+    if (currentLocation) {
+        destinationSearchInput.value = 'Current Location';
+        destinationMarker?.setMap(null);
+        destinationMarker = new google.maps.Marker({
+            position: currentLocation,
+            map,
+            title: 'Destination',
+            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+        });
+        map.panTo(currentLocation);
+    }
+});
+
+swapLocationsBtn.addEventListener('click', () => {
+    const temp = originSearchInput.value;
+    originSearchInput.value = destinationSearchInput.value;
+    destinationSearchInput.value = temp;
+    const tempMarker = originMarker;
+    originMarker = destinationMarker;
+    destinationMarker = tempMarker;
+    if (originMarker) originMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' });
+    if (destinationMarker) destinationMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' });
+});
+
+routeSearchBtn.addEventListener('click', () => {
+    calculateRoute();
+    locationInfo.classList.remove('collapsed');
+});
+
+drivingModeBtn.addEventListener('click', () => setRouteMode('DRIVING'));
+walkingModeBtn.addEventListener('click', () => setRouteMode('WALKING'));
+transitModeBtn.addEventListener('click', () => setRouteMode('TRANSIT'));
+
+function setRouteMode(mode) {
+    routeMode = mode;
+    [drivingModeBtn, walkingModeBtn, transitModeBtn].forEach(btn => btn.classList.remove('active'));
+    if (mode === 'DRIVING') drivingModeBtn.classList.add('active');
+    else if (mode === 'WALKING') walkingModeBtn.classList.add('active');
+    else if (mode === 'TRANSIT') transitModeBtn.classList.add('active');
+    if (originMarker && destinationMarker) calculateRoute();
+}
+
 function calculateRoute() {
-    const origin = originSearchInput.value;
-    const destination = destinationSearchInput.value;
-    if (!origin || !destination) {
-        showToast('error', 'Input Error', 'Please enter both origin and destination');
+    if (!originMarker || !destinationMarker) {
+        showToast('error', 'Route Error', 'Please set both origin and destination');
         return;
     }
-    directionsService.route({
-        origin,
-        destination,
+    const request = {
+        origin: originMarker.getPosition(),
+        destination: destinationMarker.getPosition(),
         travelMode: routeMode,
         provideRouteAlternatives: true
-    }, (response, status) => {
+    };
+    directionsService.route(request, (result, status) => {
         if (status === 'OK') {
-            directionsRenderer.setDirections(response);
-            currentRoute = response.routes[0];
-            alternativeRoutesData = response.routes;
+            currentRoute = result;
+            directionsRenderer.setDirections(result);
             selectedRouteIndex = 0;
-            displayRouteDetails(currentRoute);
-            renderAlternativeRoutes(alternativeRoutesData);
-            locationInfo.classList.remove('collapsed');
+            alternativeRoutesData = result.routes;
+            displayAlternativeRoutes();
+            updateRouteProgress();
+            routeProgress.style.display = 'block';
             alternativeRoutes.style.display = 'block';
-            map.fitBounds(currentRoute.bounds);
+            locationInfo.classList.remove('collapsed');
         } else {
             showToast('error', 'Route Error', 'Unable to calculate route');
         }
     });
 }
-function displayRouteDetails(route) {
-    const distance = route.legs[0].distance.text;
-    const duration = route.legs[0].duration.text;
-    locationName.textContent = `Route to ${destinationSearchInput.value}`;
-    locationAddress.textContent = `${distance} - ${duration}`;
-    routeDetailsContent.innerHTML = route.legs[0].steps.map((step, index) => `<div class="step-item"><div class="step-number">${index + 1}</div><div class="step-content">${step.instructions}</div></div>`).join('');
-}
-function renderAlternativeRoutes(routes) {
-    routeAlternativesContainer.innerHTML = routes.map((route, index) => {
-        const distance = route.legs[0].distance.text;
-        const duration = route.legs[0].duration.text;
-        return `<div class="route-option ${index === selectedRouteIndex ? 'active' : ''}" data-index="${index}"><div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div><div class="route-option-info"><div class="route-option-title">Route ${index + 1}</div><div class="route-option-details">${distance} - ${duration}</div></div></div>`;
-    }).join('');
-    document.querySelectorAll('.route-option').forEach(option => {
-        option.addEventListener('click', () => {
-            const index = parseInt(option.dataset.index);
-            directionsRenderer.setRouteIndex(index);
+
+function displayAlternativeRoutes() {
+    routeAlternativesContainer.innerHTML = '';
+    alternativeRoutesData.forEach((route, index) => {
+        const routeOption = document.createElement('div');
+        routeOption.className = `route-option ${index === selectedRouteIndex ? 'active' : ''}`;
+        routeOption.innerHTML = `
+            <div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div>
+            <div class="route-option-info">
+                <div class="route-option-title">${route.summary || 'Route ' + (index + 1)}</div>
+                <div class="route-option-details">${route.legs[0].distance.text} • ${route.legs[0].duration.text}</div>
+            </div>
+        `;
+        routeOption.addEventListener('click', () => {
             selectedRouteIndex = index;
-            currentRoute = alternativeRoutesData[index];
-            displayRouteDetails(currentRoute);
+            directionsRenderer.setRouteIndex(index);
             document.querySelectorAll('.route-option').forEach(opt => opt.classList.remove('active'));
-            option.classList.add('active');
+            routeOption.classList.add('active');
+            updateRouteProgress();
         });
+        routeAlternativesContainer.appendChild(routeOption);
     });
 }
-function startRouteTracking() {
-    if (!currentRoute) {
-        showToast('error', 'Route Error', 'No route selected');
-        return;
-    }
-    routeProgress.style.display = 'block';
-    const totalDistance = currentRoute.legs[0].distance.value;
-    routeUpdateInterval = setInterval(() => {
-        navigator.geolocation.getCurrentPosition(position => {
-            const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
-            userMarker.setPosition(userLocation);
-            const nearestPoint = google.maps.geometry.spherical.interpolate(
-                currentRoute.legs[0].start_location,
-                currentRoute.legs[0].end_location,
-                0.5
-            );
-            const distanceTravelled = google.maps.geometry.spherical.computeDistanceBetween(userLocation, currentRoute.legs[0].start_location);
-            const remainingDistance = google.maps.geometry.spherical.computeDistanceBetween(userLocation, currentRoute.legs[0].end_location);
-            const progress = Math.min((distanceTravelled / totalDistance) * 100, 100);
-            routeProgressBar.style.width = `${progress}%`;
-            routeCurrentTime.textContent = new Date().toLocaleTimeString();
-            const etaSeconds = (remainingDistance / 500) * 60;
-            const etaTime = new Date(Date.now() + etaSeconds * 1000);
-            routeEta.textContent = `ETA: ${etaTime.toLocaleTimeString()}`;
-            if (remainingDistance < 50) {
-                clearInterval(routeUpdateInterval);
-                showToast('success', 'Arrived', 'You have reached your destination');
-                routeProgress.style.display = 'none';
+
+function updateRouteProgress() {
+    if (!currentRoute || !currentRoute.routes[selectedRouteIndex]) return;
+    const route = currentRoute.routes[selectedRouteIndex];
+    const leg = route.legs[0];
+    navigator.geolocation.getCurrentPosition(position => {
+        const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+        userMarker.setPosition(currentPos);
+        const totalDistance = leg.distance.value;
+        const path = google.maps.geometry.encoding.decodePath(route.overview_polyline);
+        let distanceTravelled = 0;
+        for (let i = 0; i < path.length - 1; i++) {
+            if (google.maps.geometry.spherical.computeDistanceBetween(currentPos, path[i]) < 50) {
+                distanceTravelled = google.maps.geometry.spherical.computeDistanceBetween(path[0], path[i]);
+                break;
             }
-        });
-    }, 5000);
+        }
+        const progress = Math.min((distanceTravelled / totalDistance) * 100, 100);
+        routeProgressBar.style.width = `${progress}%`;
+        routeCurrentTime.textContent = `Travelled: ${Math.round(distanceTravelled / 1000)} km`;
+        routeEta.textContent = `ETA: ${leg.duration.text}`;
+    });
 }
-function clearRoute() {
-    directionsRenderer.setDirections(null);
+
+startRouteBtn.addEventListener('click', () => {
+    if (currentRoute) {
+        routeUpdateInterval = setInterval(updateRouteProgress, 10000);
+        showToast('success', 'Route Started', 'Navigation has begun');
+    } else {
+        showToast('error', 'No Route', 'Calculate a route first');
+    }
+});
+
+clearRouteBtn.addEventListener('click', () => {
+    directionsRenderer.setDirections({ routes: [] });
     originMarker?.setMap(null);
     destinationMarker?.setMap(null);
     originSearchInput.value = '';
     destinationSearchInput.value = '';
     currentRoute = null;
-    alternativeRoutesData = [];
-    routeAlternativesContainer.innerHTML = '';
-    alternativeRoutes.style.display = 'none';
     routeProgress.style.display = 'none';
+    alternativeRoutes.style.display = 'none';
     clearInterval(routeUpdateInterval);
-    locationInfo.classList.add('collapsed');
-}
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        currentUser = user;
-        const userData = await getUserData(user.uid);
-        profileName.textContent = userData.fullName;
-        profileEmail.textContent = userData.email;
-        guardianKeyDisplay.textContent = userData.guardianKey;
-        renderContacts(userData.emergencyContacts);
-        showPage('home');
-        db.collection('users').doc(user.uid).collection('notifications').onSnapshot(snapshot => {
-            snapshot.docChanges().forEach(change => {
-                if (change.type === 'added') {
-                    const notif = change.doc.data();
-                    if (notif.type === 'sos' && !firstSosReceived[notif.sosId]) {
-                        showEmergencyNotification(notif.message, notif.location);
-                        firstSosReceived[notif.sosId] = true;
-                    }
-                }
-            });
-        });
-        db.collection('sos_alerts').where('userId', '==', user.uid).where('active', '==', true).onSnapshot(snapshot => {
-            snapshot.docChanges().forEach(change => {
-                if (change.type === 'added') {
-                    activeSosId = change.doc.id;
-                    sosButton.style.backgroundColor = '#4CAF50';
-                    sosIcon.textContent = 'stop';
-                } else if (change.type === 'modified' && !change.doc.data().active) {
-                    activeSosId = null;
-                    sosButton.style.backgroundColor = '#F44336';
-                    sosIcon.textContent = 'emergency';
-                }
-            });
-        });
+    routeDetailsPanel.classList.remove('visible');
+});
+
+routeDetailsBtn.addEventListener('click', () => {
+    if (currentRoute) {
+        routeDetailsPanel.classList.toggle('visible');
+        if (routeDetailsPanel.classList.contains('visible')) {
+            displayRouteDetails(currentRoute);
+        }
     } else {
-        currentUser = null;
-        showPage('login');
+        showToast('error', 'No Route', 'Calculate a route first');
     }
 });
-loginForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await loginUser(loginEmail.value, loginPassword.value);
-        showToast('success', 'Login Successful', 'Welcome back!');
-    } catch (error) {
-        showToast('error', 'Login Failed', error.message);
-    }
+
+closeRouteDetailsBtn.addEventListener('click', () => {
+    routeDetailsPanel.classList.remove('visible');
 });
-signupForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await registerUser(signupEmail.value, signupPassword.value, signupFullName.value, signupPhone.value);
-        showToast('success', 'Signup Successful', 'Account created successfully!');
-        showPage('home');
-    } catch (error) {
-        showToast('error', 'Signup Failed', error.message);
-    }
-});
-goToSignupBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('signup');
-});
-goToLoginBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('login');
-});
-navItems.forEach(item => {
-    item.addEventListener('click', e => {
-        e.preventDefault();
-        const page = item.dataset.page;
-        if (page === 'sos') return;
-        showPage(page);
+
+function displayRouteDetails(route) {
+    routeDetailsContent.innerHTML = '';
+    const steps = route.routes[selectedRouteIndex].legs[0].steps;
+    steps.forEach((step, index) => {
+        const stepItem = document.createElement('div');
+        stepItem.className = 'step-item';
+        stepItem.innerHTML = `
+            <div class="step-number">${index + 1}</div>
+            <div class="step-content">${step.instructions}</div>
+        `;
+        routeDetailsContent.appendChild(stepItem);
     });
-});
-copyKeyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(guardianKeyDisplay.textContent);
-    showToast('success', 'Copied', 'Guardian Key copied to clipboard');
-});
-addContactBtn.addEventListener('click', () => showModal(addContactModal));
-addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
-closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-addContactForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        const contact = await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
-        const userData = await getUserData(currentUser.uid);
-        renderContacts(userData.emergencyContacts);
-        hideModal(addContactModal);
-        addContactForm.reset();
-        showToast('success', 'Contact Added', `${contact.name} added as an emergency contact`);
-    } catch (error) {
-        showToast('error', 'Error', error.message);
+}
+
+shareLocationBtn.addEventListener('click', () => {
+    if (currentLocation) {
+        const locationUrl = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+        navigator.clipboard.writeText(locationUrl).then(() => {
+            showToast('success', 'Location Copied', 'Location URL copied to clipboard');
+        });
     }
 });
-logoutBtn.addEventListener('click', async () => {
-    try {
-        await logoutUser();
-        showToast('success', 'Logged Out', 'You have been logged out successfully');
-    } catch (error) {
-        showToast('error', 'Logout Failed', error.message);
+
+navigateBtn.addEventListener('click', () => {
+    if (currentLocation && destinationMarker) {
+        originSearchInput.value = 'Current Location';
+        originMarker?.setMap(null);
+        originMarker = new google.maps.Marker({
+            position: currentLocation,
+            map,
+            title: 'Origin',
+            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+        });
+        calculateRoute();
+    } else {
+        showToast('error', 'Navigation Error', 'Set a destination first');
     }
 });
+
+locationHandle.addEventListener('click', () => {
+    locationInfo.classList.toggle('collapsed');
+});
+
+locationInfoHeader.addEventListener('click', () => {
+    locationInfo.classList.toggle('collapsed');
+});
+
 sosButton.addEventListener('click', () => {
     if (activeSosId) {
         showModal(sosEndModal);
@@ -1193,146 +1195,165 @@ sosButton.addEventListener('click', () => {
             document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
             if (sosCountdown <= 0) {
                 clearInterval(sosInterval);
-                confirmSosBtn.click();
+                sendSosAlert();
             }
         }, 1000);
     }
 });
-closeSosConfirmBtn.addEventListener('click', () => {
-    clearInterval(sosInterval);
-    hideModal(sosConfirmModal);
-});
+
 cancelSosBtn.addEventListener('click', () => {
     const password = document.getElementById('sos-password').value;
     if (password === sosPassword) {
         clearInterval(sosInterval);
         hideModal(sosConfirmModal);
-        showToast('info', 'SOS Cancelled', 'SOS alert cancelled');
+        document.getElementById('sos-password').value = '';
     } else {
-        showToast('error', 'Invalid Password', 'Incorrect password');
+        showToast('error', 'Invalid Password', 'Please enter the correct password');
     }
 });
-confirmSosBtn.addEventListener('click', async () => {
+
+closeSosConfirmBtn.addEventListener('click', () => {
+    const password = document.getElementById('sos-password').value;
+    if (password === sosPassword) {
+        clearInterval(sosInterval);
+        hideModal(sosConfirmModal);
+        document.getElementById('sos-password').value = '';
+    } else {
+        showToast('error', 'Invalid Password', 'Password required to close');
+    }
+});
+
+confirmSosBtn.addEventListener('click', () => {
     clearInterval(sosInterval);
-    hideModal(sosConfirmModal);
-    try {
-        const { sosId, location, address } = await sendSosAlert();
-        activeSosId = sosId;
-        sosButton.style.backgroundColor = '#4CAF50';
-        sosIcon.textContent = 'stop';
-        showModal(sosSuccessModal);
-        showToast('success', 'SOS Sent', 'Emergency contacts notified');
-    } catch (error) {
-        showToast('error', 'SOS Failed', error.message);
-    }
+    sendSosAlert();
 });
-closeSosEndBtn.addEventListener('click', () => hideModal(sosEndModal));
-cancelEndSosBtn.addEventListener('click', () => hideModal(sosEndModal));
-confirmEndSosBtn.addEventListener('click', async () => {
+
+function sendSosAlert() {
+    if (!currentLocation) {
+        showToast('error', 'Location Error', 'Unable to get your location');
+        return;
+    }
+    const sosData = {
+        userId: currentUser.uid,
+        location: new firebase.firestore.GeoPoint(currentLocation.lat, currentLocation.lng),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        active: true
+    };
+    db.collection('sos_alerts').add(sosData).then(docRef => {
+        activeSosId = docRef.id;
+        lastSosLocation = currentLocation;
+        hideModal(sosConfirmModal);
+        showModal(sosSuccessModal);
+        sosIcon.textContent = 'sos';
+        notifyEmergencyContacts();
+    }).catch(err => showToast('error', 'SOS Error', err.message));
+}
+
+closeSosSuccessBtn.addEventListener('click', () => {
+    hideModal(sosSuccessModal);
+});
+
+cancelEndSosBtn.addEventListener('click', () => {
+    hideModal(sosEndModal);
+    document.getElementById('sos-end-password').value = '';
+});
+
+closeSosEndBtn.addEventListener('click', () => {
     const password = document.getElementById('sos-end-password').value;
     if (password === sosPassword) {
-        try {
-            await endSosAlert(activeSosId);
+        hideModal(sosEndModal);
+        document.getElementById('sos-end-password').value = '';
+    } else {
+        showToast('error', 'Invalid Password', 'Password required to close');
+    }
+});
+
+confirmEndSosBtn.addEventListener('click', () => {
+    const password = document.getElementById('sos-end-password').value;
+    if (password === sosPassword) {
+        db.collection('sos_alerts').doc(activeSosId).update({ active: false }).then(() => {
             activeSosId = null;
-            sosButton.style.backgroundColor = '#F44336';
             sosIcon.textContent = 'emergency';
             hideModal(sosEndModal);
-            showToast('success', 'SOS Ended', 'SOS alert has been ended');
-        } catch (error) {
-            showToast('error', 'Error', error.message);
-        }
+            showToast('success', 'SOS Ended', 'SOS alert has been deactivated');
+            document.getElementById('sos-end-password').value = '';
+        });
     } else {
-        showToast('error', 'Invalid Password', 'Incorrect password');
+        showToast('error', 'Invalid Password', 'Please enter the correct password');
     }
 });
-closeSosSuccessBtn.addEventListener('click', () => hideModal(sosSuccessModal));
-navigateToBtn.addEventListener('click', () => {
-    if (lastSosLocation) {
-        originSearchInput.value = '';
-        destinationSearchInput.value = `Lat: ${lastSosLocation.lat}, Lng: ${lastSosLocation.lng}`;
-        calculateRoute();
-        emergencyNotification.classList.remove('active');
+
+function notifyEmergencyContacts() {
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const contacts = doc.data().contacts || [];
+        contacts.forEach(contact => {
+            db.collection('users').doc(contact.uid).collection('notifications').add({
+                type: 'sos',
+                from: currentUser.uid,
+                fullName: doc.data().fullName,
+                location: new firebase.firestore.GeoPoint(currentLocation.lat, currentLocation.lng),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false
+            });
+        });
+    });
+}
+
+function listenForSosAlerts() {
+    db.collection('users').doc(currentUser.uid).collection('notifications')
+        .where('type', '==', 'sos')
+        .where('read', '==', false)
+        .onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const data = change.doc.data();
+                    const loc = data.location;
+                    if (!firstSosReceived[data.from]) {
+                        firstSosReceived[data.from] = true;
+                        sosNotificationMessage.textContent = `${data.fullName} has sent an SOS alert from their location!`;
+                        emergencyNotification.classList.add('active');
+                        navigateToBtn.onclick = () => {
+                            originSearchInput.value = 'Current Location';
+                            destinationSearchInput.value = `${loc.latitude}, ${loc.longitude}`;
+                            originMarker?.setMap(null);
+                            originMarker = new google.maps.Marker({
+                                position: currentLocation,
+                                map,
+                                title: 'Origin',
+                                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+                            });
+                            destinationMarker?.setMap(null);
+                            destinationMarker = new google.maps.Marker({
+                                position: { lat: loc.latitude, lng: loc.longitude },
+                                map,
+                                title: 'SOS Location',
+                                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+                            });
+                            calculateRoute();
+                            showPage('home');
+                            emergencyNotification.classList.remove('active');
+                            change.doc.ref.update({ read: true });
+                        };
+                        closeEmergencyNotificationBtn.onclick = () => {
+                            emergencyNotification.classList.remove('active');
+                            change.doc.ref.update({ read: true });
+                        };
+                    }
+                }
+            });
+        });
+}
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        currentUser = user;
         showPage('home');
+        loadUserProfile();
+    } else {
+        showPage('login');
     }
 });
-closeEmergencyNotificationBtn.addEventListener('click', () => emergencyNotification.classList.remove('active'));
-currentLocationOriginBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        originSearchInput.value = `${currentLocation.lat}, ${currentLocation.lng}`;
-        originMarker?.setMap(null);
-        originMarker = new google.maps.Marker({
-            position: currentLocation,
-            map,
-            title: 'Origin',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
-        });
-        map.panTo(currentLocation);
-    }
-});
-currentLocationDestBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        destinationSearchInput.value = `${currentLocation.lat}, ${currentLocation.lng}`;
-        destinationMarker?.setMap(null);
-        destinationMarker = new google.maps.Marker({
-            position: currentLocation,
-            map,
-            title: 'Destination',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
-        });
-        map.panTo(currentLocation);
-    }
-});
-swapLocationsBtn.addEventListener('click', () => {
-    const temp = originSearchInput.value;
-    originSearchInput.value = destinationSearchInput.value;
-    destinationSearchInput.value = temp;
-    const tempMarker = originMarker;
-    originMarker = destinationMarker;
-    destinationMarker = tempMarker;
-    if (originMarker) originMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' });
-    if (destinationMarker) destinationMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' });
-});
-locationInfoHeader.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
-locationHandle.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
-shareLocationBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        const locationText = `My location: https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
-        navigator.clipboard.writeText(locationText);
-        showToast('success', 'Location Shared', 'Location copied to clipboard');
-    }
-});
-navigateBtn.addEventListener('click', () => {
-    if (currentRoute) startRouteTracking();
-    else showToast('error', 'Navigation Error', 'Please calculate a route first');
-});
-closeRouteDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.remove('visible'));
-routeDetailsBtn.addEventListener('click', () => {
-    if (currentRoute) routeDetailsPanel.classList.toggle('visible');
-    else showToast('error', 'No Route', 'Calculate a route first');
-});
-drivingModeBtn.addEventListener('click', () => {
-    routeMode = 'DRIVING';
-    drivingModeBtn.classList.add('active');
-    walkingModeBtn.classList.remove('active');
-    transitModeBtn.classList.remove('active');
-    if (originSearchInput.value && destinationSearchInput.value) calculateRoute();
-});
-walkingModeBtn.addEventListener('click', () => {
-    routeMode = 'WALKING';
-    walkingModeBtn.classList.add('active');
-    drivingModeBtn.classList.remove('active');
-    transitModeBtn.classList.remove('active');
-    if (originSearchInput.value && destinationSearchInput.value) calculateRoute();
-});
-transitModeBtn.addEventListener('click', () => {
-    routeMode = 'TRANSIT';
-    transitModeBtn.classList.add('active');
-    drivingModeBtn.classList.remove('active');
-    walkingModeBtn.classList.remove('active');
-    if (originSearchInput.value && destinationSearchInput.value) calculateRoute();
-});
-startRouteBtn.addEventListener('click', startRouteTracking);
-clearRouteBtn.addEventListener('click', clearRoute);
+</script>
     </script>
 </body>
 </html>
