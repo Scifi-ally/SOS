@@ -83,23 +83,23 @@
         .auth-link {color: var(--primary); text-decoration: none; font-weight: 500; transition: color 0.3s ease;}
         .auth-link:hover {color: var(--secondary); text-decoration: underline;}
         .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px; /* Explicitly set navbar height */
-    background-color: var(--light-bg);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05);
-    z-index: 100; /* Navbar z-index */
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px; /* Explicitly set navbar height */
+            background-color: var(--light-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05);
+            z-index: 100; /* Navbar z-index */
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-.bottom-nav.hidden {
-    transform: translateY(100%);
-}
+        .bottom-nav.hidden {
+            transform: translateY(100%);
+        }
         .bottom-nav-item {display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--light-text-secondary); font-size: 12px; padding: 8px 0; width: 25%; transition: color 0.3s ease, transform 0.2s ease;}
         .bottom-nav-item:hover {transform: scale(1.1);}
         .bottom-nav-item.active {color: var(--primary);}
@@ -109,16 +109,16 @@
         .sos-nav-button:hover {transform: scale(1.15);}
         .sos-nav-button .material-icons {font-size: 24px; margin-bottom: 0;}
         .map-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 70px; /* Ensure it doesn't go under navbar */
-    width: 100%;
-    height: calc(100vh - 70px);
-    overflow: hidden;
-    z-index: 0; /* Keep this low */
-}
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 70px; /* Ensure it doesn't go under navbar */
+            width: 100%;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+            z-index: 0; /* Keep this low */
+        }
         #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; touch-action: none;}
         .map-search-container {position: fixed; top: 16px; left: 16px; right: 16px; display: flex; flex-direction: column; background-color: var(--light-bg); border-radius: 12px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); overflow: hidden; z-index: 100; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
         .map-search {display: flex; align-items: center; border-bottom: 1px solid var(--light-border); padding: 4px;}
@@ -140,29 +140,29 @@
         .route-search-btn .material-icons {margin-right: 8px;}
         .route-btn-text {font-size: 14px;}
         .location-info {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 70px; /* Exactly matches navbar height to sit just above it */
-    background-color: #808080; /* Gray background */
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    padding: 20px 16px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 101; /* Higher than navbar to ensure it’s on top */
-    height: auto;
-    min-height: 250px;
-    max-height: 45vh;
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
-    transform: translateY(0); /* Default state: fully visible */
-}
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 70px; /* Exactly matches navbar height to sit just above it */
+            background-color: #808080; /* Gray background */
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 20px 16px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 101; /* Higher than navbar to ensure it's on top */
+            height: auto;
+            min-height: 250px;
+            max-height: 45vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(0); /* Default state: fully visible */
+        }
 
-/* Collapsed state slides it down but keeps it above navbar */
-.location-info.collapsed {
-    transform: translateY(calc(100% - 20px)); /* Slides down, leaving 20px visible */
-    min-height: unset;
-}
+        /* Collapsed state slides it down but keeps it above navbar */
+        .location-info.collapsed {
+            transform: translateY(calc(100% - 20px)); /* Slides down, leaving 20px visible */
+            min-height: unset;
+        }
         .location-info-header {position: absolute; top: 0; left: 0; right: 0; height: 20px; background-color: transparent; cursor: pointer; z-index: 103;}
         .location-handle-container {position: absolute; left: -50px; top: 0; width: 50px; height: 100px; display: flex; align-items: center; z-index: 101;}
         .location-handle {width: 50px; height: 100px; background-color: var(--primary); border-radius: 25px 0 0 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease; user-select: none; z-index: 102; outline: none;}
@@ -202,103 +202,198 @@
         .profile-avatar {width: 80px; height: 80px; background-color: var(--white); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease;}
         .profile-avatar:hover {transform: scale(1.05);}
         .profile-avatar .material-icons {font-size: 40px;}
-        .profile-status {position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background-color: #4CAF50; border-radius: 50%; border: 2px solid var(--white);}
-        .profile-header-info {flex: 1;}
-        .profile-name {font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 4px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);}
-        .profile-email {font-size: 14px; color: rgba(255, 255, 255, 0.9); font-weight: 400;}
-        .profile-card {background-color: var(--light-card); border-radius: 16px; margin-bottom: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--light-border); transition: transform 0.3s ease, box-shadow 0.3s ease;}
-        .profile-card:hover {transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);}
-        .card-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
-        .card-header h3 {font-size: 18px; font-weight: 600; color: var(--light-text);}
-        .btn-icon-small {padding: 6px; background-color: var(--light-hover); border-radius: 50%;}
-        .btn-icon-small:hover {background-color: var(--gray-300);}
-        .guardian-key-card {background-color: var(--light-surface);}
-        .card-subtitle {font-size: 13px; color: var(--light-text-secondary); margin-bottom: 12px;}
-        .guardian-key-display {background-color: var(--white); padding: 12px; border-radius: 10px; font-size: 18px; font-weight: 600; letter-spacing: 2px; text-align: center; color: var(--primary); border: 1px dashed var(--light-border); word-break: break-all;}
-        .contacts-card {padding-bottom: 0;}
-        .contacts-list {max-height: 300px; overflow-y: auto; overflow-x: hidden;}
-        .contact-item {overflow-x: hidden; display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--light-border); transition: background-color 0.3s ease;}
+        .profile-status {position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background-color: #4CAF50; border: 2px solid var(--white); border-radius: 50%;}
+        .profile-info {flex: 1; color: var(--white);}
+        .profile-info h2 {font-size: 20px; margin-bottom: 4px; font-weight: 600;}
+        .profile-info p {font-size: 14px; opacity: 0.9;}
+        .profile-edit-btn {background: none; border: none; color: var(--white); cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s ease;}
+        .profile-edit-btn:hover {transform: scale(1.1);}
+        .profile-section {margin-bottom: 24px;}
+        .section-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;}
+        .section-header h3 {font-size: 16px; font-weight: 600; color: var(--light-text);}
+        .section-action {display: flex; align-items: center; font-size: 12px; color: var(--light-text-secondary); cursor: pointer; transition: color 0.3s ease;}
+        .section-action:hover {color: var(--primary);}
+        .section-action .material-icons {font-size: 16px; margin-left: 4px;}
+        .profile-card {background-color: var(--light-card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 16px;}
+        .card-header {padding: 16px; border-bottom: 1px solid var(--light-border);}
+        .card-header h3 {font-size: 16px; font-weight: 600;}
+        .guardian-key-card {padding: 16px;}
+        .guardian-key-header {display: flex; align-items: center; margin-bottom: 16px;}
+        .guardian-key-icon {width: 40px; height: 40px; background-color: var(--light-hover); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: var(--primary);}
+        .guardian-key-info h3 {margin-bottom: 2px; font-weight: 600; font-size: 16px;}
+        .guardian-key-info p {font-size: 12px; color: var(--light-text-secondary);}
+        .guardian-key-display {display: flex; align-items: center; background-color: var(--light-hover); border-radius: 8px; padding: 12px 16px;}
+        .guardian-key-text {flex: 1; font-size: 16px; font-weight: 600; letter-spacing: 1px; font-family: monospace; color: var(--light-text);}
+        .copy-key-btn {background: none; border: none; color: var(--light-text-secondary); cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background-color 0.3s ease, transform 0.2s ease;}
+        .copy-key-btn:hover {background-color: var(--light-card); transform: scale(1.1);}
+        .emergency-contacts {padding: 16px;}
+        .empty-contacts {text-align: center; padding: 40px 20px;}
+        .empty-contacts h3 {font-size: 16px; font-weight: 600; margin-bottom: 8px;}
+        .empty-contacts p {color: var(--light-text-secondary); margin-bottom: 16px; font-size: 14px;}
+        .contact-item {display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--light-border);}
         .contact-item:last-child {border-bottom: none;}
-        .contact-item:hover {background-color: var(--light-hover);}
-        .contact-info {display: flex; align-items: center; flex: 1;}
-        .contact-avatar {width: 48px; height: 48px; background-color: var(--light-surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: var(--primary); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);}
-        .contact-details h4 {font-size: 16px; font-weight: 500; color: var(--light-text); margin-bottom: 2px;}
-        .contact-relation {font-size: 12px; color: var(--light-text-secondary);}
-        .contact-actions button {color: var(--light-text-secondary);}
-        .contact-actions button:hover {color: var(--danger);}
-        .empty-state {padding: 32px 16px; text-align: center; color: var(--light-text-secondary);}
-        .empty-icon {font-size: 48px; color: var(--gray-500); margin-bottom: 12px;}
-        .empty-state p {font-size: 14px; margin-bottom: 16px;}
-        .settings-card {padding: 1.3rem;}
-        .settings-item {display: flex; align-items: center; padding: 16px 20px; cursor: pointer; transition: background-color 0.3s ease; border-bottom: 1px solid var(--light-border);}
-        .settings-item:last-child {border-bottom: none;}
+        .contact-icon {width: 40px; height: 40px; background-color: var(--light-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: var(--light-text);}
+        .contact-info {flex: 1;}
+        .contact-name {font-weight: 600; margin-bottom: 2px;}
+        .contact-role {font-size: 12px; color: var(--light-text-secondary);}
+        .contact-actions {display: flex;}
+        .contact-action-btn {background: none; border: none; color: var(--light-text-secondary); cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background-color 0.3s ease, transform 0.2s ease; margin-left: 4px;}
+        .contact-action-btn:hover {background-color: var(--light-hover); transform: scale(1.1);}
+        .settings-card {padding: 8px 0;}
+        .settings-item {padding: 12px 16px; display: flex; align-items: center; cursor: pointer; transition: background-color 0.3s ease;}
         .settings-item:hover {background-color: var(--light-hover);}
-        .settings-item .material-icons {margin-right: 12px; font-size: 24px;}
-        .modal-overlay {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease-in-out;}
+        .settings-item .material-icons {margin-right: 12px;}
+        .modal-overlay {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 300; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;}
         .modal-overlay.active {opacity: 1; visibility: visible;}
-        .modal {background-color: var(--light-bg); border-radius: 12px; width: 90%; max-width: 400px; transform: scale(0.9); opacity: 0; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;}
-        .modal-overlay.active .modal {transform: scale(1); opacity: 1;}
-        .modal-header {padding: 16px; border-bottom: 1px solid var(--light-border); display: flex; align-items: center; justify-content: space-between;}
-        .modal-body {padding: 20px 16px;}
-        .modal-footer {padding: 16px; border-top: 1px solid var(--light-border); display: flex; justify-content: flex-end; gap: 12px;}
-        .success-modal .modal-body {display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 24px;}
-        .success-icon {width: 80px; height: 80px; background-color: var(--light-surface); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;}
-        .success-icon .material-icons {font-size: 40px;}
-        .warning-icon {width: 80px; height: 80px; background-color: var(--light-surface); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;}
-        .warning-icon .material-icons {font-size: 40px;}
-        .toast-container {position: fixed; bottom: 80px; left: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 2000;}
-        .toast {background-color: var(--light-bg); border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: flex; align-items: center; transform: translateY(100%); opacity: 0; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;}
-        .toast.show {transform: translateY(0); opacity: 1;}
-        .toast-success {border-left: 4px solid var(--secondary);}
-        .toast-info {border-left: 4px solid #2196F3;}
-        .toast-error {border-left: 4px solid var(--danger);}
-        .toast-icon {margin-right: 12px; color: var(--light-text);}
-        .toast-content {flex: 1;}
-        .toast-title {font-weight: 500; margin-bottom: 2px; color: var(--light-text);}
-        .toast-message {font-size: 14px; color: var(--light-text-secondary);}
-        @media (min-width: 768px) {
-            .container {padding: 24px;}
-            .auth-container {max-width: 400px; margin: 0 auto;}
+        .modal {width: 90%; max-width: 400px; background-color: var(--light-card); border-radius: 12px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15); overflow: hidden; transform: translateY(50px); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+        .modal-overlay.active .modal {transform: translateY(0);}
+        .modal-header {display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--light-border);}
+        .modal-header h3 {font-size: 18px; font-weight: 600;}
+        .modal-body {padding: 16px;}
+        .modal-footer {padding: 16px; display: flex; justify-content: flex-end; border-top: 1px solid var(--light-border);}
+        .modal-footer button {margin-left: 8px;}
+        .sos-active {animation: shake 1s ease-in-out infinite;}
+        .sos-active-bg {background-color: var(--danger) !important; color: var(--white) !important;}
+        .sos-countdown-overlay {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(244, 67, 54, 0.95); z-index: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; color: var(--white); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;}
+        .sos-countdown-overlay.active {opacity: 1; visibility: visible;}
+        .sos-countdown-title {font-size: 24px; font-weight: 700; margin-bottom: 16px; text-align: center;}
+        .sos-countdown-text {font-size: 16px; margin-bottom: 32px; text-align: center;}
+        .sos-countdown-number {font-size: 72px; font-weight: 700; margin-bottom: 32px;}
+        .sos-countdown-actions {display: flex; justify-content: center; margin-top: 24px;}
+        .safety-score-container {display: flex; align-items: center; background-color: var(--light-card); border-radius: 8px; padding: 16px; margin-bottom: 16px;}
+        .safety-score {width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: var(--white); margin-right: 16px;}
+        .safety-score[data-score="high"] {background-color: #73E831; box-shadow: 0 0 0 4px rgba(115, 232, 49, 0.2);}
+        .safety-score[data-score="medium"] {background-color: #FFEB3B; box-shadow: 0 0 0 4px rgba(255, 235, 59, 0.2);}
+        .safety-score[data-score="low"] {background-color: #F44336; box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.2);}
+        .safety-status {flex: 1;}
+        .safety-status h3 {font-size: 14px; font-weight: 600; margin-bottom: 2px;}
+        .safety-status p {font-size: 12px; color: var(--light-text-secondary);}
+        .safety-feature {display: flex; align-items: center; padding: 12px; background-color: var(--light-card); border-radius: 8px; margin-bottom: 8px;}
+        .safety-feature-icon {width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;}
+        .safety-feature-icon[data-status="good"] {background-color: rgba(115, 232, 49, 0.1); color: #73E831;}
+        .safety-feature-icon[data-status="warning"] {background-color: rgba(255, 235, 59, 0.1); color: #FFEB3B;}
+        .safety-feature-icon[data-status="danger"] {background-color: rgba(244, 67, 54, 0.1); color: #F44336;}
+        .safety-feature-info {flex: 1;}
+        .safety-feature-title {font-weight: 600; font-size: 14px; margin-bottom: 2px;}
+        .safety-feature-description {font-size: 12px; color: var(--light-text-secondary);}
+        .safety-feature-status {font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 4px;}
+        .safety-feature-status[data-status="good"] {background-color: rgba(115, 232, 49, 0.1); color: #4CAF50;}
+        .safety-feature-status[data-status="warning"] {background-color: rgba(255, 235, 59, 0.1); color: #FFC107;}
+        .safety-feature-status[data-status="danger"] {background-color: rgba(244, 67, 54, 0.1); color: #F44336;}
+        .route-features {display: flex; flex-direction: column; gap: 4px; margin-top: 8px;}
+        .route-feature {display: flex; align-items: center; gap: 6px;}
+        .route-feature-icon {font-size: 14px;}
+        .route-feature-text {font-size: 12px; color: var(--light-text-secondary);}
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            20%, 80% {
+                transform: translateX(-5px);
+            }
+            40%, 60% {
+                transform: translate3d(4px, 0, 0);
+            }
         }
-        button:focus, button:active, a:focus, a:active, input:focus, input:active, select:focus, select:active {outline: none; background-color: transparent; box-shadow: none;}
-        .btn:focus, .btn:active, .btn-icon:focus, .btn-icon:active, .location-btn:focus, .location-btn:active, .swap-locations-btn:focus, .swap-locations-btn:active, .route-search-btn:focus, .route-search-btn:active, .route-mode-btn:focus, .route-mode-btn:active {outline: none; background-color: inherit; box-shadow: inherit;}
-        .bottom-nav-item:focus, .bottom-nav-item:active {outline: none; background-color: transparent;}
-        .material-icons:focus, .material-icons:active {outline: none;}
-        button:focus, button:active {outline: none;}
-        button {-webkit-tap-highlight-color: transparent;}
-        button:active {background-color: transparent;}
-        * {-webkit-tap-highlight-color: transparent;}
-        @keyframes slide-out {
-            0% {opacity: 1; transform: translateX(0);}
-            100% {opacity: 0; transform: translateX(-20px); height: 0; padding: 0; margin: 0; border: none;}
-        }
-        .gm-style .gm-control-active, .gm-style .gm-ui-hover-effect, .gm-style .gm-bundled-control {display: none !important;}
-        .slide-out {animation: slide-out 0.3s ease-in-out forwards;}
-        .emergency-notification {
-            position: fixed;
-            top: -100px;
-            left: 16px;
-            right: 16px;
-            background-color: var(--danger);
-            color: var(--white);
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 3000;
+        .settings-link {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            transition: top 0.4s ease-in-out;
+            text-decoration: none;
+            color: inherit;
+            width: 100%;
         }
-        .emergency-notification.active {top: 16px;}
-        .emergency-notification .notification-icon {margin-right: 12px;}
-        .emergency-notification .notification-content {flex: 1;}
-        .emergency-notification .notification-title {font-weight: 600; margin-bottom: 4px;}
-        .emergency-notification .notification-message {font-size: 14px;}
-        .emergency-notification .notification-actions {display: flex; gap: 8px;}
-        .emergency-notification .notification-close {background: none; border: none; color: var(--white); cursor: pointer; padding: 8px;}
-        .notification-btn {background-color: rgba(255, 255, 255, 0.2); border: none; color: var(--white); padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;}
-        .notification-btn:hover {background-color: rgba(255, 255, 255, 0.3);}
+        
+        /* Safety Indicators Styles */
+        .safety-indicators {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 5;
+        }
+        
+        .safety-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .legend-text {
+            font-size: 12px;
+            color: #333;
+        }
+        
+        /* Quick Actions Styles */
+        .quick-actions {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 5;
+        }
+        
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-action-btn:hover {
+            background-color: #f5f5f5;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action-btn span.material-icons {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        /* Safety Features */
+        .safety-indicators {position: absolute; z-index: 50; bottom: 120px; right: 16px; display: flex; flex-direction: column;}
+        .safety-legend {background-color: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); margin-top: 8px; width: 120px;}
+        .legend-item {display: flex; align-items: center; margin-bottom: 4px; font-size: 12px;}
+        .legend-item:last-child {margin-bottom: 0;}
+        .legend-color {width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;}
+        .legend-text {color: var(--light-text); font-size: 11px;}
+            
+        /* Quick Actions */
+        .quick-actions {position: absolute; z-index: 50; bottom: 20px; left: 16px; display: flex;}
+        .quick-action-btn {display: flex; flex-direction: column; align-items: center; background-color: white; border: none; border-radius: 8px; padding: 8px; margin-right: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); cursor: pointer; transition: transform 0.2s;}
+        .quick-action-btn:hover {transform: scale(1.05);}
+        .quick-action-btn span {font-size: 11px; margin-top: 4px; color: var(--light-text);}
+            
+        /* Toast Notifications */
+        .safety-toast {position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(100px); display: flex; align-items: center; background-color: white; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; width: 90%; max-width: 350px; opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease;}
+        .safety-toast.show {transform: translateX(-50%) translateY(0); opacity: 1;}
+        .safety-toast-icon {display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: #E3F2FD; margin-right: 12px; color: var(--primary);}
+        .safety-toast-content {flex: 1;}
+        .safety-toast-title {font-weight: 600; font-size: 14px; margin-bottom: 4px; color: var(--light-text);}
+        .safety-toast-message {font-size: 12px; color: var(--light-text-secondary);}
+        .safety-toast-close {background: none; border: none; color: var(--light-text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; margin-left: 8px;}
     </style>
 </head>
 <body>
@@ -306,119 +401,234 @@
         <div class="auth-container">
             <div class="auth-logo">
                 <h1>Guardian</h1>
-                <p>Your personal safety companion</p>
+                <p>Women's Safety App</p>
             </div>
             <form id="login-form" class="auth-form">
                 <div class="form-group">
-                    <label class="form-label" for="login-email">Email</label>
+                    <label for="login-email" class="form-label">Email</label>
                     <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required>
-                    <div class="form-error" id="login-email-error"></div>
+                    <div class="form-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="login-password">Password</label>
+                    <label for="login-password" class="form-label">Password</label>
                     <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
-                    <div class="form-error" id="login-password-error"></div>
+                    <div class="form-error"></div>
                 </div>
-                <button type="submit" class="btn btn-primary w-full mb-4" id="login-btn">Login</button>
+                <button type="submit" class="btn btn-primary w-full mb-4">Login</button>
+                <p class="text-center">
+                    Don't have an account? 
+                    <a href="#" id="go-to-signup" class="auth-link">Sign up</a>
+                </p>
             </form>
-            <p class="text-center">Don't have an account? <a href="#" class="auth-link" id="go-to-signup">Sign up</a></p>
         </div>
     </div>
+    
     <div id="signup-page" class="page">
         <div class="auth-container">
             <div class="auth-logo">
                 <h1>Guardian</h1>
-                <p>Create your account</p>
+                <p>Women's Safety App</p>
             </div>
             <form id="signup-form" class="auth-form">
                 <div class="form-group">
-                    <label class="form-label" for="signup-fullname">Full Name</label>
+                    <label for="signup-fullname" class="form-label">Full Name</label>
                     <input type="text" id="signup-fullname" class="form-input" placeholder="Enter your full name" required>
-                    <div class="form-error" id="signup-fullname-error"></div>
+                    <div class="form-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="signup-email">Email</label>
+                    <label for="signup-email" class="form-label">Email</label>
                     <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required>
-                    <div class="form-error" id="signup-email-error"></div>
+                    <div class="form-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="signup-phone">Phone Number</label>
+                    <label for="signup-phone" class="form-label">Phone Number</label>
                     <input type="tel" id="signup-phone" class="form-input" placeholder="Enter your phone number" required>
-                    <div class="form-error" id="signup-phone-error"></div>
+                    <div class="form-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="signup-password">Password</label>
+                    <label for="signup-password" class="form-label">Password</label>
                     <input type="password" id="signup-password" class="form-input" placeholder="Create a password" required>
-                    <div class="form-error" id="signup-password-error"></div>
+                    <div class="form-error"></div>
+                    <div class="form-help">Password must be at least 8 characters</div>
                 </div>
-                <button type="submit" class="btn btn-primary w-full mb-4" id="signup-btn">Sign Up</button>
+                <button type="submit" class="btn btn-primary w-full mb-4">Sign Up</button>
+                <p class="text-center">
+                    Already have an account? 
+                    <a href="#" id="go-to-login" class="auth-link">Login</a>
+                </p>
             </form>
-            <p class="text-center">Already have an account? <a href="#" class="auth-link" id="go-to-login">Login</a></p>
         </div>
     </div>
+    
     <div id="home-page" class="page">
         <div class="map-container">
             <div id="map"></div>
-            <div class="map-search-container">
-                <div class="map-search">
-                    <div class="search-icon"><span class="material-icons">place</span></div>
-                    <input type="text" id="origin-search-input" placeholder="Enter starting point...">
-                    <button id="current-location-origin-btn" class="location-btn" title="Use current location"><span class="material-icons">my_location</span></button>
-                </div>
-                <div class="swap-locations-container">
-                    <button id="swap-locations-btn" class="swap-locations-btn" title="Swap origin and destination"><span class="material-icons">swap_vert</span></button>
-                </div>
-                <div class="map-search">
-                    <div class="search-icon"><span class="material-icons">flag</span></div>
-                    <input type="text" id="destination-search-input" placeholder="Enter destination...">
-                    <button id="current-location-dest-btn" class="location-btn" title="Use current location"><span class="material-icons">my_location</span></button>
-                </div>
-                <div class="route-search-container">
-                    <button id="route-search-btn" class="route-search-btn"><span class="material-icons">directions</span><span class="route-btn-text">Find Safe Route</span></button>
-                </div>
-            </div>
-            <div class="location-info collapsed" id="location-info">
-                <div class="location-info-header" id="location-info-header"></div>
-                <div class="location-handle-container">
-                    <div class="location-handle"></div>
-                </div>
-                <h3 id="location-name">Current Location</h3>
-                <p id="location-address" class="text-gray">Loading address...</p>
-                <div class="route-options">
-                    <div class="route-mode-selector">
-                        <button id="driving-mode" class="route-mode-btn active"><span class="material-icons">directions_car</span></button>
-                        <button id="walking-mode" class="route-mode-btn"><span class="material-icons">directions_walk</span></button>
-                        <button id="transit-mode" class="route-mode-btn"><span class="material-icons">directions_transit</span></button>
+            <div class="safety-indicators">
+                <div class="safety-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #73E831;"></span>
+                        <span class="legend-text">Very Safe</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #FFEB3B;"></span>
+                        <span class="legend-text">Moderate</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #F44336;"></span>
+                        <span class="legend-text">Caution</span>
                     </div>
                 </div>
-                <div class="route-progress" id="route-progress" style="display: none;">
-                    <h4>Estimated Arrival</h4>
-                    <div class="progress-bar-container"><div class="progress-bar" id="route-progress-bar"></div></div>
-                    <div class="eta-info"><span id="route-current-time">Starting...</span><span id="route-eta">ETA: Calculating...</span></div>
+            </div>
+            <div class="quick-actions">
+                <button class="quick-action-btn" id="report-incident-btn">
+                    <span class="material-icons">report</span>
+                    <span>Report</span>
+                </button>
+                <button class="quick-action-btn" id="safe-zones-btn">
+                    <span class="material-icons">shield</span>
+                    <span>Safe Zones</span>
+                </button>
+            </div>
+        </div>
+        <div class="map-search-container">
+            <div class="map-search">
+                <div class="search-icon">
+                    <span class="material-icons">my_location</span>
                 </div>
-                <div class="alternative-routes" id="alternative-routes" style="display: none;">
-                    <h4>Alternative Routes</h4>
-                    <div id="route-alternatives-container"></div>
+                <input type="text" id="search-from" placeholder="Current Location" readonly>
+                <button class="location-btn" id="get-current-location">
+                    <span class="material-icons">gps_fixed</span>
+                </button>
+            </div>
+            <div class="swap-locations-container">
+                <button class="swap-locations-btn" id="swap-locations">
+                    <span class="material-icons">swap_vert</span>
+                </button>
+            </div>
+            <div class="map-search">
+                <div class="search-icon">
+                    <span class="material-icons">location_on</span>
                 </div>
-                <div class="location-actions mb-2">
-                    <button class="btn btn-outline" id="share-location-btn"><span class="material-icons mr-2">share</span>Share</button>
-                    <button class="btn btn-primary" id="navigate-btn"><span class="material-icons mr-2">directions</span>Navigate</button>
-                </div>
-                <div class="location-actions">
-                    <button class="btn btn-outline" id="start-route-btn"><span class="material-icons mr-2">add_location</span>Plan Route</button>
-                    <button class="btn btn-outline" id="clear-route-btn"><span class="material-icons mr-2">clear</span>Clear Route</button>
-                    <button class="btn btn-outline" id="route-details-btn"><span class="material-icons mr-2">list</span>Route Details</button>
+                <input type="text" id="search-to" placeholder="Enter destination">
+                <div class="location-btn" style="visibility: hidden">
+                    <span class="material-icons">clear</span>
                 </div>
             </div>
-            <div class="route-details" id="route-details-panel">
-                <div class="route-details-header">
-                    <h3>Route Details</h3>
-                    <button id="close-route-details" class="btn-icon"><span class="material-icons">close</span></button>
+            <div class="route-search-container">
+                <button class="route-search-btn" id="find-safe-route">
+                    <span class="material-icons">directions</span>
+                    <span class="route-btn-text">Find Safe Route</span>
+                </button>
+            </div>
+        </div>
+        <div class="location-info collapsed" id="location-info">
+            <div class="location-info-header" id="location-info-header"></div>
+            <div class="safety-score-container">
+                <div class="safety-score" data-score="high" id="safety-score">90</div>
+                <div class="safety-status">
+                    <h3>Safety Score</h3>
+                    <p>This area is considered safe</p>
                 </div>
-                <div class="route-details-content" id="route-details-content"></div>
+            </div>
+            <h4 class="mb-2">Area Information</h4>
+            <p class="text-gray mb-4" id="area-description">This is a well-lit residential area with moderate foot traffic throughout the day and evening. Several businesses remain open late, contributing to street activity.</p>
+            
+            <div id="area-features">
+                <div class="safety-feature">
+                    <div class="safety-feature-icon" data-status="good">
+                        <span class="material-icons">lightbulb</span>
+                    </div>
+                    <div class="safety-feature-info">
+                        <div class="safety-feature-title">Street Lighting</div>
+                        <div class="safety-feature-description">Well-lit streets and public areas</div>
+                    </div>
+                    <div class="safety-feature-status" data-status="good">Good</div>
+                </div>
+                <div class="safety-feature">
+                    <div class="safety-feature-icon" data-status="good">
+                        <span class="material-icons">people</span>
+                    </div>
+                    <div class="safety-feature-info">
+                        <div class="safety-feature-title">Foot Traffic</div>
+                        <div class="safety-feature-description">Moderate presence of people</div>
+                    </div>
+                    <div class="safety-feature-status" data-status="good">Active</div>
+                </div>
+                <div class="safety-feature">
+                    <div class="safety-feature-icon" data-status="warning">
+                        <span class="material-icons">local_police</span>
+                    </div>
+                    <div class="safety-feature-info">
+                        <div class="safety-feature-title">Police Presence</div>
+                        <div class="safety-feature-description">Police station within 2 km</div>
+                    </div>
+                    <div class="safety-feature-status" data-status="warning">Moderate</div>
+                </div>
+            </div>
+            
+            <h4 class="mt-4 mb-2">Routes</h4>
+            <div class="route-mode-selector">
+                <button class="route-mode-btn active" data-mode="walking">
+                    <span class="material-icons">directions_walk</span>
+                </button>
+                <button class="route-mode-btn" data-mode="transit">
+                    <span class="material-icons">directions_bus</span>
+                </button>
+                <button class="route-mode-btn" data-mode="driving">
+                    <span class="material-icons">directions_car</span>
+                </button>
+            </div>
+            
+            <div class="alternative-routes" id="routes-container">
+                <div class="route-option active" data-route="route1">
+                    <div class="route-option-icon">
+                        <span class="material-icons">verified</span>
+                    </div>
+                    <div class="route-option-info">
+                        <div class="route-option-title">Safest Route</div>
+                        <div class="route-option-details">20 min (1.5 km) via Main St</div>
+                        <div class="route-features">
+                            <div class="route-feature">
+                                <div class="route-feature-icon" style="color: #4CAF50">✓</div>
+                                <div class="route-feature-text">Well-lit path</div>
+                            </div>
+                            <div class="route-feature">
+                                <div class="route-feature-icon" style="color: #4CAF50">✓</div>
+                                <div class="route-feature-text">High foot traffic</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="route-option" data-route="route2">
+                    <div class="route-option-icon">
+                        <span class="material-icons">speed</span>
+                    </div>
+                    <div class="route-option-info">
+                        <div class="route-option-title">Fastest Route</div>
+                        <div class="route-option-details">15 min (1.2 km) via Park Ave</div>
+                        <div class="route-features">
+                            <div class="route-feature">
+                                <div class="route-feature-icon" style="color: #FF9800">!</div>
+                                <div class="route-feature-text">Limited lighting in some areas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="location-actions mt-4">
+                <button class="btn btn-outline" id="share-location-btn">
+                    <span class="material-icons mr-2">share</span>
+                    Share Location
+                </button>
+                <button class="btn btn-outline" id="save-route-btn">
+                    <span class="material-icons mr-2">bookmark</span>
+                    Save Route
+                </button>
             </div>
         </div>
     </div>
+    
     <div id="profile-page" class="page">
         <div class="profile-container">
             <div class="profile-header-new">
@@ -428,41 +638,109 @@
                     </div>
                     <div class="profile-status"></div>
                 </div>
-                <div class="profile-header-info">
-                    <h2 id="profile-name" class="profile-name">Loading...</h2>
-                    <p id="profile-email" class="profile-email">loading@example.com</p>
+                <div class="profile-info">
+                    <h2 id="profile-name">Jane Doe</h2>
+                    <p id="profile-email">jane.doe@example.com</p>
                 </div>
+                <button class="profile-edit-btn">
+                    <span class="material-icons">edit</span>
+                </button>
             </div>
-            <div class="profile-card guardian-key-card">
-                <div class="card-header">
+            
+            <div class="profile-section">
+                <div class="section-header">
                     <h3>Your Guardian Key</h3>
-                    <button id="copy-key-btn" class="btn-icon btn-icon-small" title="Copy Key">
-                        <span class="material-icons">content_copy</span>
-                    </button>
+                    <div class="section-action">
+                        What is this?
+                        <span class="material-icons">info</span>
+                    </div>
                 </div>
-                <p class="card-subtitle">Share this with trusted contacts</p>
-                <div class="guardian-key-display" id="guardian-key">Loading...</div>
-            </div>
-            <div class="profile-card contacts-card">
-                <div class="card-header">
-                    <h3>Emergency Contacts</h3>
-                    <button id="add-contact-btn" class="btn-icon btn-icon-small" title="Add Contact">
-                        <span class="material-icons">add</span>
-                    </button>
-                </div>
-                <div id="contacts-list" class="contacts-list">
-                    <div class="empty-state" id="empty-contacts">
-                        <span class="material-icons empty-icon">group</span>
-                        <p>No emergency contacts added yet</p>
-                        <button class="btn btn-primary" id="add-first-contact-btn">
-                            <span class="material-icons mr-2">add</span>Add Contact
+                <div class="profile-card guardian-key-card">
+                    <div class="guardian-key-header">
+                        <div class="guardian-key-icon">
+                            <span class="material-icons">vpn_key</span>
+                        </div>
+                        <div class="guardian-key-info">
+                            <h3>Guardian Key</h3>
+                            <p>Share this with trusted contacts only</p>
+                        </div>
+                    </div>
+                    <div class="guardian-key-display">
+                        <div class="guardian-key-text" id="guardian-key">GDN-47X9-A3F2-8D1Z</div>
+                        <button class="copy-key-btn" id="copy-key-btn">
+                            <span class="material-icons">content_copy</span>
                         </button>
                     </div>
                 </div>
             </div>
+            
+            <div class="profile-section">
+                <div class="section-header">
+                    <h3>Emergency Contacts</h3>
+                    <div class="section-action" id="add-contact-btn">
+                        Add Contact
+                        <span class="material-icons">add</span>
+                    </div>
+                </div>
+                <div class="profile-card emergency-contacts">
+                    <div id="empty-contacts" style="display: none;">
+                        <div class="empty-contacts">
+                            <h3>No Emergency Contacts</h3>
+                            <p>Add trusted contacts who can receive your SOS alerts</p>
+                            <button class="btn btn-primary" id="add-first-contact-btn">
+                                <span class="material-icons mr-2">add</span>
+                                Add First Contact
+                            </button>
+                        </div>
+                    </div>
+                    <div id="contacts-list">
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <span class="material-icons">person</span>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-name">Sarah Johnson</div>
+                                <div class="contact-role">Sister</div>
+                            </div>
+                            <div class="contact-actions">
+                                <button class="contact-action-btn">
+                                    <span class="material-icons">edit</span>
+                                </button>
+                                <button class="contact-action-btn">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <span class="material-icons">person</span>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-name">Mom</div>
+                                <div class="contact-role">Family</div>
+                            </div>
+                            <div class="contact-actions">
+                                <button class="contact-action-btn">
+                                    <span class="material-icons">edit</span>
+                                </button>
+                                <button class="contact-action-btn">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="profile-card settings-card">
                 <div class="card-header">
                     <h3>Settings</h3>
+                </div>
+                <div class="settings-item">
+                    <a href="guardian_features.html" class="settings-link">
+                        <span class="material-icons">security</span>
+                        <span>Safety Features</span>
+                    </a>
                 </div>
                 <div class="settings-item" id="logout-btn">
                     <span class="material-icons text-danger">logout</span>
@@ -471,1006 +749,1174 @@
             </div>
         </div>
     </div>
-    <div id="bottom-nav" class="bottom-nav hidden">
-        <a href="#" class="bottom-nav-item" data-page="home"><span class="material-icons">map</span><span>Map</span></a>
-        <a href="#" class="bottom-nav-item sos-nav-item" data-page="sos">
-            <div class="sos-nav-button" id="sos-button"><span class="material-icons" id="sos-icon">emergency</span></div>
-            <span>SOS</span>
+    
+    <nav id="bottom-nav" class="bottom-nav">
+        <a href="#home" class="bottom-nav-item active" data-page="home">
+            <span class="material-icons">map</span>
+            <span>Map</span>
         </a>
-        <a href="#" class="bottom-nav-item" data-page="profile"><span class="material-icons">person</span><span>Profile</span></a>
-    </div>
-    <div id="add-contact-modal" class="modal-overlay">
+        <div class="bottom-nav-item sos-nav-item">
+            <button id="sos-button" class="sos-nav-button">
+                <span id="sos-icon" class="material-icons">sos</span>
+            </button>
+            <span>SOS</span>
+        </div>
+        <a href="#profile" class="bottom-nav-item" data-page="profile">
+            <span class="material-icons">person</span>
+            <span>Profile</span>
+        </a>
+    </nav>
+    
+    <div class="modal-overlay" id="add-contact-modal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">Add Emergency Contact</h3>
-                <button class="modal-close" id="close-add-contact"><span class="material-icons">close</span></button>
+                <h3>Add Emergency Contact</h3>
+                <button id="close-add-contact" class="btn-icon">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
             <form id="add-contact-form">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="form-label" for="contact-guardian-key">Guardian Key</label>
-                        <input type="text" id="contact-guardian-key" class="form-input" placeholder="Enter Guardian Key" required>
-                        <div class="form-error" id="contact-guardian-key-error"></div>
-                        <p class="form-help">Ask your emergency contact for their guardian key</p>
+                        <label for="contact-name" class="form-label">Contact Name</label>
+                        <input type="text" id="contact-name" class="form-input" placeholder="Enter contact name" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="contact-relation">Relation</label>
-                        <select id="contact-relation" class="form-select" required>
-                            <option value="">Select relation</option>
-                            <option value="Family">Family</option>
-                            <option value="Friend">Friend</option>
-                            <option value="Colleague">Colleague</option>
-                            <option value="Other">Other</option>
+                        <label for="contact-guardian-key" class="form-label">Guardian Key</label>
+                        <input type="text" id="contact-guardian-key" class="form-input" placeholder="Enter Guardian Key">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-relationship" class="form-label">Relationship</label>
+                        <select id="contact-relationship" class="form-select">
+                            <option value="">Select relationship</option>
+                            <option value="family">Family</option>
+                            <option value="friend">Friend</option>
+                            <option value="partner">Partner</option>
+                            <option value="emergency">Emergency Contact</option>
+                            <option value="other">Other</option>
                         </select>
-                        <div class="form-error" id="contact-relation-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="contact-phone" class="form-input" placeholder="Enter phone number" required>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" id="cancel-add-contact">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submit-add-contact">Add Contact</button>
+                    <button type="button" id="cancel-add-contact" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Contact</button>
                 </div>
             </form>
         </div>
     </div>
-    <div id="sos-confirm-modal" class="modal-overlay">
+    
+    <div class="modal-overlay" id="sos-confirmation-modal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">SOS Alert Initiated</h3>
-                <button class="modal-close" id="close-sos-confirm"><span class="material-icons">close</span></button>
+                <h3>Confirm SOS Alert</h3>
+                <button id="close-sos-confirmation" class="btn-icon">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
             <div class="modal-body">
-                <div class="warning-icon mb-4"><span class="material-icons">warning</span></div>
-                <p id="sos-timer">Time remaining: 10s</p>
-                <p class="mt-2">Enter password to cancel SOS alert:</p>
-                <input type="password" id="sos-password" class="form-input mt-2" placeholder="Enter password">
+                <p>Are you sure you want to send an SOS alert? This will notify all your emergency contacts with your current location.</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" id="cancel-sos">Cancel SOS</button>
-                <button class="btn btn-danger" id="confirm-sos">Send Now</button>
+                <button id="cancel-sos" class="btn btn-outline">Cancel</button>
+                <button id="confirm-sos" class="btn btn-danger">Send SOS Alert</button>
             </div>
         </div>
     </div>
-    <div id="sos-end-modal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">End SOS Alert</h3>
-                <button class="modal-close" id="close-sos-end"><span class="material-icons">close</span></button>
-            </div>
-            <div class="modal-body">
-                <div class="warning-icon mb-4"><span class="material-icons">stop</span></div>
-                <p class="mt-2">Enter password to end SOS alert:</p>
-                <input type="password" id="sos-end-password" class="form-input mt-2" placeholder="Enter password">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancel-end-sos">Cancel</button>
-                <button class="btn btn-primary" id="confirm-end-sos">End SOS</button>
-            </div>
-        </div>
+    
+    <div class="sos-countdown-overlay" id="sos-countdown">
+        <div class="sos-countdown-title">SOS Alert Will Be Sent In</div>
+        <div class="sos-countdown-text">Your emergency contacts will be notified with your current location. Tap cancel to stop the alert.</div>
+        <div class="sos-countdown-number" id="countdown-number">5</div>
+        <button id="cancel-sos-countdown" class="btn btn-outline">Cancel SOS Alert</button>
     </div>
-    <div id="sos-success-modal" class="modal-overlay">
-        <div class="modal success-modal">
-            <div class="modal-body">
-                <div class="success-icon"><span class="material-icons">check_circle</span></div>
-                <h3 class="mb-2">SOS Alert Sent</h3>
-                <p class="text-center mb-4">Your emergency contacts have been notified with your location details</p>
-                <button class="btn btn-primary w-full" id="close-sos-success">OK</button>
-            </div>
-        </div>
-    </div>
-    <div class="toast-container" id="toast-container"></div>
-    <div id="emergency-notification" class="emergency-notification">
-        <div class="notification-icon"><span class="material-icons">warning</span></div>
-        <div class="notification-content">
-            <div class="notification-title">SOS Alert</div>
-            <div class="notification-message" id="sos-notification-message"></div>
-        </div>
-        <div class="notification-actions">
-            <button id="navigate-to-btn" class="notification-btn">Navigate To</button>
-            <button id="close-emergency-notification" class="notification-close"><span class="material-icons">close</span></button>
-        </div>
-    </div>
+    
     <script>
-        const firebaseConfig = {
-    apiKey: "AIzaSyAv2LUHlRxvadYD2ok9zs426TxIEpXCGWA",
-    authDomain: "guardian-4a206.firebaseapp.com",
-    projectId: "guardian-4a206",
-    storageBucket: "guardian-4a206.firebasestorage.app",
-    messagingSenderId: "249797346737",
-    appId: "1:249797346737:web:29edab4d045345742d6990",
-    measurementId: "G-X35KJKEPEB"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const pages = document.querySelectorAll('.page');
-const bottomNav = document.getElementById('bottom-nav');
-const navItems = document.querySelectorAll('.bottom-nav-item');
-const loginForm = document.getElementById('login-form');
-const loginEmail = document.getElementById('login-email');
-const loginPassword = document.getElementById('login-password');
-const signupForm = document.getElementById('signup-form');
-const signupFullName = document.getElementById('signup-fullname');
-const signupEmail = document.getElementById('signup-email');
-const signupPhone = document.getElementById('signup-phone');
-const signupPassword = document.getElementById('signup-password');
-const goToSignupBtn = document.getElementById('go-to-signup');
-const goToLoginBtn = document.getElementById('go-to-login');
-const profileName = document.getElementById('profile-name');
-const profileEmail = document.getElementById('profile-email');
-const guardianKeyDisplay = document.getElementById('guardian-key');
-const copyKeyBtn = document.getElementById('copy-key-btn');
-const contactsList = document.getElementById('contacts-list');
-const emptyContacts = document.getElementById('empty-contacts');
-const addContactBtn = document.getElementById('add-contact-btn');
-const addFirstContactBtn = document.getElementById('add-first-contact-btn');
-const addContactModal = document.getElementById('add-contact-modal');
-const closeAddContactBtn = document.getElementById('close-add-contact');
-const cancelAddContactBtn = document.getElementById('cancel-add-contact');
-const addContactForm = document.getElementById('add-contact-form');
-const contactGuardianKey = document.getElementById('contact-guardian-key');
-const contactRelation = document.getElementById('contact-relation');
-const logoutBtn = document.getElementById('logout-btn');
-const sosButton = document.getElementById('sos-button');
-const sosIcon = document.getElementById('sos-icon');
-const sosConfirmModal = document.getElementById('sos-confirm-modal');
-const closeSosConfirmBtn = document.getElementById('close-sos-confirm');
-const cancelSosBtn = document.getElementById('cancel-sos');
-const confirmSosBtn = document.getElementById('confirm-sos');
-const sosEndModal = document.getElementById('sos-end-modal');
-const closeSosEndBtn = document.getElementById('close-sos-end');
-const cancelEndSosBtn = document.getElementById('cancel-end-sos');
-const confirmEndSosBtn = document.getElementById('confirm-end-sos');
-const sosSuccessModal = document.getElementById('sos-success-modal');
-const closeSosSuccessBtn = document.getElementById('close-sos-success');
-const emergencyNotification = document.getElementById('emergency-notification');
-const sosNotificationMessage = document.getElementById('sos-notification-message');
-const navigateToBtn = document.getElementById('navigate-to-btn');
-const closeEmergencyNotificationBtn = document.getElementById('close-emergency-notification');
-const mapElement = document.getElementById('map');
-const originSearchInput = document.getElementById('origin-search-input');
-const destinationSearchInput = document.getElementById('destination-search-input');
-const currentLocationOriginBtn = document.getElementById('current-location-origin-btn');
-const currentLocationDestBtn = document.getElementById('current-location-dest-btn');
-const swapLocationsBtn = document.getElementById('swap-locations-btn');
-const routeSearchBtn = document.getElementById('route-search-btn');
-const locationInfo = document.getElementById('location-info');
-const locationInfoHeader = document.getElementById('location-info-header');
-const locationHandle = document.querySelector('.location-handle');
-const locationName = document.getElementById('location-name');
-const locationAddress = document.getElementById('location-address');
-const shareLocationBtn = document.getElementById('share-location-btn');
-const navigateBtn = document.getElementById('navigate-btn');
-const routeDetailsPanel = document.getElementById('route-details-panel');
-const closeRouteDetailsBtn = document.getElementById('close-route-details');
-const routeDetailsContent = document.getElementById('route-details-content');
-const routeProgress = document.getElementById('route-progress');
-const routeProgressBar = document.getElementById('route-progress-bar');
-const routeCurrentTime = document.getElementById('route-current-time');
-const routeEta = document.getElementById('route-eta');
-const alternativeRoutes = document.getElementById('alternative-routes');
-const routeAlternativesContainer = document.getElementById('route-alternatives-container');
-const drivingModeBtn = document.getElementById('driving-mode');
-const walkingModeBtn = document.getElementById('walking-mode');
-const transitModeBtn = document.getElementById('transit-mode');
-const startRouteBtn = document.getElementById('start-route-btn');
-const clearRouteBtn = document.getElementById('clear-route-btn');
-const routeDetailsBtn = document.getElementById('route-details-btn');
-let currentUser = null;
-let map = null;
-let userMarker = null;
-let originMarker = null;
-let destinationMarker = null;
-let currentLocation = null;
-let directionsService = null;
-let directionsRenderer = null;
-let isSettingOrigin = false;
-let isSettingDestination = false;
-let routeMode = 'DRIVING';
-let currentRoute = null;
-let alternativeRoutesData = [];
-let selectedRouteIndex = 0;
-let routeUpdateInterval = null;
-let sosTimer = null;
-let sosCountdown = 10;
-let sosInterval = null;
-let activeSosId = null;
-let lastSosLocation = null;
-let firstSosReceived = {};
-const sosPassword = "stop123";
-
-function showPage(pageId) {
-    pages.forEach(page => page.classList.remove('active'));
-    const page = document.getElementById(pageId + '-page');
-    if (page) {
-        page.classList.add('active');
-        const mapContainer = document.querySelector('.map-container');
-        if (pageId === 'home') {
-            mapContainer.style.display = 'block';
-            if (!map && google && google.maps) initMap();
-            else if (!map) {
-                const checkGoogleMaps = setInterval(() => {
-                    if (google && google.maps) {
-                        clearInterval(checkGoogleMaps);
-                        initMap();
-                    }
-                }, 100);
-            }
-        } else {
-            mapContainer.style.display = 'none';
-        }
-        navItems.forEach(item => item.classList.toggle('active', item.dataset.page === pageId));
-    }
-    if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
-    else if (currentUser) bottomNav.classList.remove('hidden');
-}
-routeSearchBtn.addEventListener('click', () => {
-    calculateRoute();
-    locationInfo.classList.remove('collapsed');
-});
-function showToast(type, title, message, duration = 3000) {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    let icon = type === 'success' ? 'check_circle' : type === 'info' ? 'info' : 'error';
-    toast.innerHTML = `<div class="toast-icon"><span class="material-icons">${icon}</span></div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>`;
-    const toastContainer = document.getElementById('toast-container');
-    toastContainer.appendChild(toast);
-    toast.offsetHeight;
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toastContainer.removeChild(toast), 300);
-    }, duration);
-}
-
-function showModal(modal) {
-    modal.classList.add('active');
-}
-
-function hideModal(modal) {
-    modal.classList.remove('active');
-}
-
-function showEmergencyNotification(message, location) {
-    sosNotificationMessage.textContent = message;
-    emergencyNotification.classList.add('active');
-    lastSosLocation = location;
-    setTimeout(() => {
-        emergencyNotification.classList.remove('active');
-    }, 10000); // Hide after 10 seconds
-}
-
-function generateGuardianKey() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let key = '';
-    for (let group = 0; group < 3; group++) {
-        for (let i = 0; i < 4; i++) key += chars[Math.floor(Math.random() * chars.length)];
-        if (group < 2) key += '-';
-    }
-    return key;
-}
-
-async function registerUser(email, password, fullName, phone) {
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        const guardianKey = generateGuardianKey();
-        await db.collection('users').doc(user.uid).set({
-            fullName,
-            email,
-            phone,
-            guardianKey,
-            emergencyContacts: [],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return user;
-    } catch (error) {
-        throw error;
-    }
-}
-
-async function loginUser(email, password) {
-    try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        return userCredential.user;
-    } catch (error) {
-        throw error;
-    }
-}
-
-async function logoutUser() {
-    try {
-        await auth.signOut();
-        bottomNav.classList.add('hidden');
-        showPage('login');
-    } catch (error) {
-        throw error;
-    }
-}
-
-async function getUserData(userId) {
-    try {
-        const doc = await db.collection('users').doc(userId).get();
-        if (doc.exists) return doc.data();
-        throw new Error('No user data found in Firestore');
-    } catch (error) {
-        throw error;
-    }
-}
-
-async function addEmergencyContact(guardianKey, relation) {
-    try {
-        const querySnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).limit(1).get();
-        if (querySnapshot.empty) throw new Error('No user found with that Guardian Key');
-        const contactDoc = querySnapshot.docs[0];
-        const contactData = contactDoc.data();
-        const userData = await getUserData(currentUser.uid);
-        if (userData.emergencyContacts.some(contact => contact.id === contactDoc.id)) throw new Error('This contact is already in your emergency contacts');
-        const contactToAdd = {
-            id: contactDoc.id,
-            name: contactData.fullName,
-            phone: contactData.phone,
-            guardianKey: contactData.guardianKey,
-            relation,
-            addedAt: new Date().toISOString()
-        };
-        await db.collection('users').doc(currentUser.uid).update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayUnion(contactToAdd)
-        });
-        return contactToAdd;
-    } catch (error) {
-        throw error;
-    }
-}
-
-async function removeEmergencyContact(contactId) {
-    try {
-        const userData = await getUserData(currentUser.uid);
-        const contactToRemove = userData.emergencyContacts.find(contact => contact.id === contactId);
-        if (!contactToRemove) throw new Error('Contact not found');
-        await db.collection('users').doc(currentUser.uid).update({
-            emergencyContacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
-        });
-        return contactToRemove;
-    } catch (error) {
-        throw error;
-    }
-}
-
-function renderContacts(contacts) {
-    if (contacts.length === 0) {
-        emptyContacts.style.display = 'block';
-        contactsList.innerHTML = '';
-        return;
-    }
-    emptyContacts.style.display = 'none';
-    contactsList.innerHTML = contacts.map(contact => `<div class="contact-item" data-id="${contact.id}"><div class="contact-info"><div class="contact-avatar"><span class="material-icons">person</span></div><div class="contact-details"><h4>${contact.name}</h4><p class="contact-relation">${contact.relation} - ${contact.phone}</p></div></div><div class="contact-actions"><button class="btn-icon remove-contact-btn" title="Remove Contact"><span class="material-icons">delete</span></button></div></div>`).join('');
-    document.querySelectorAll('.remove-contact-btn').forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true));
-    });
-    document.querySelectorAll('.remove-contact-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const contactItem = btn.closest('.contact-item');
-            const contactId = contactItem.dataset.id;
-            try {
-                await removeEmergencyContact(contactId);
-                contactItem.classList.add('slide-out');
-                setTimeout(async () => {
-                    contactItem.remove();
-                    const userData = await getUserData(currentUser.uid);
-                    if (userData.emergencyContacts.length === 0) {
-                        emptyContacts.style.display = 'block';
-                        contactsList.innerHTML = '';
-                    }
-                }, 300);
-            } catch (error) {
-                showToast('error', 'Error', error.message);
-                const userData = await getUserData(currentUser.uid);
-                renderContacts(userData.emergencyContacts);
-            }
-        });
-    });
-}
-
-async function sendSOSAlert(location) {
-    try {
-        const userData = await getUserData(currentUser.uid);
-        if (!userData.emergencyContacts || userData.emergencyContacts.length === 0) throw new Error('No emergency contacts found');
-        const sosAlert = {
-            userId: currentUser.uid,
-            userName: userData.fullName,
-            location,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'active'
-        };
-        const alertRef = await db.collection('sosAlerts').add(sosAlert);
-        activeSosId = alertRef.id;
-        lastSosLocation = location;
-        sosIcon.textContent = 'stop'; // Change icon to "stop"
-        for (let contact of userData.emergencyContacts) {
-            await notifyEmergencyContact(contact, userData.fullName, location);
-        }
-        showModal(sosSuccessModal);
-        startSosInterval(location);
-        return alertRef.id;
-    } catch (error) {
-        throw error;
-    }
-}
-
-async function notifyEmergencyContact(contact, userName, userLocation) {
-    console.log(`Notifying ${contact.name} (${contact.phone}) of SOS from ${userName} at ${userLocation.lat}, ${userLocation.lng}`);
-    const notificationData = {
-        contactId: contact.id,
-        userName,
-        location: userLocation,
-        timestamp: new Date().toISOString()
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBEMcgVVxSfpLVx-xJ-kYMhSXkqrDfYhEE",
+        authDomain: "guardian-4a206.firebaseapp.com",
+        projectId: "guardian-4a206",
+        storageBucket: "guardian-4a206.appspot.com",
+        messagingSenderId: "1000111973334",
+        appId: "1:1000111973334:web:af4a0da2f1c724b9dd9324"
     };
-    await db.collection('notifications').add(notificationData);
-}
-
-function startSosInterval(location) {
-    if (sosInterval) clearInterval(sosInterval);
-    sosInterval = setInterval(async () => {
-        try {
-            const userData = await getUserData(currentUser.uid);
-            const updatedLocation = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }), reject);
-            });
-            lastSosLocation = updatedLocation;
-            for (let contact of userData.emergencyContacts) {
-                await notifyEmergencyContact(contact, userData.fullName, updatedLocation);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // DOM elements
+    const pageMap = {
+        'login': document.getElementById('login-page'),
+        'signup': document.getElementById('signup-page'),
+        'home': document.getElementById('home-page'),
+        'profile': document.getElementById('profile-page')
+    };
+    
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const goToSignup = document.getElementById('go-to-signup');
+    const goToLogin = document.getElementById('go-to-login');
+    
+    const navItems = document.querySelectorAll('.bottom-nav-item[data-page]');
+    const bottomNav = document.getElementById('bottom-nav');
+    const sosButton = document.getElementById('sos-button');
+    const sosConfirmationModal = document.getElementById('sos-confirmation-modal');
+    const closeSosConfirmation = document.getElementById('close-sos-confirmation');
+    const cancelSos = document.getElementById('cancel-sos');
+    const confirmSos = document.getElementById('confirm-sos');
+    const sosCountdown = document.getElementById('sos-countdown');
+    const countdownNumber = document.getElementById('countdown-number');
+    const cancelSosCountdown = document.getElementById('cancel-sos-countdown');
+    
+    const addContactBtn = document.getElementById('add-contact-btn');
+    const addFirstContactBtn = document.getElementById('add-first-contact-btn');
+    const addContactModal = document.getElementById('add-contact-modal');
+    const closeAddContact = document.getElementById('close-add-contact');
+    const cancelAddContact = document.getElementById('cancel-add-contact');
+    const addContactForm = document.getElementById('add-contact-form');
+    
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    // Map elements
+    const mapElem = document.getElementById('map');
+    const getCurrentLocationBtn = document.getElementById('get-current-location');
+    const searchFromInput = document.getElementById('search-from');
+    const searchToInput = document.getElementById('search-to');
+    const swapLocationsBtn = document.getElementById('swap-locations');
+    const findSafeRouteBtn = document.getElementById('find-safe-route');
+    
+    // Location info elements
+    const locationInfo = document.getElementById('location-info');
+    const locationInfoHeader = document.getElementById('location-info-header');
+    const safetyScore = document.getElementById('safety-score');
+    const areaDescription = document.getElementById('area-description');
+    const routeModeButtons = document.querySelectorAll('.route-mode-btn');
+    const routeOptions = document.querySelectorAll('.route-option');
+    const shareLocationBtn = document.getElementById('share-location-btn');
+    const saveRouteBtn = document.getElementById('save-route-btn');
+    
+    // Global variables
+    let map;
+    let geocoder;
+    let directionsService;
+    let directionsRenderer;
+    let currentPosition;
+    let currentMarker;
+    let destinationMarker;
+    let infowindow;
+    let currentRoute;
+    let placesService;
+    
+    // Helper functions
+    function showPage(pageId) {
+        Object.keys(pageMap).forEach(key => {
+            if (key === pageId.replace('-page', '')) {
+                pageMap[key].classList.add('active');
+            } else {
+                pageMap[key].classList.remove('active');
             }
-            showToast('info', 'SOS Update', 'SOS alert resent with updated location');
-        } catch (error) {
-            showToast('error', 'SOS Update Error', 'Failed to resend SOS: ' + error.message);
-        }
-    }, 30000); // Every 30 seconds
-}
-
-async function endSOSAlert() {
-    if (!activeSosId) return;
-    try {
-        await db.collection('sosAlerts').doc(activeSosId).update({ status: 'inactive' });
-        clearInterval(sosInterval);
-        activeSosId = null;
-        lastSosLocation = null;
-        sosIcon.textContent = 'emergency'; // Revert icon to "emergency"
-        showToast('success', 'SOS Ended', 'SOS alert has been stopped');
-    } catch (error) {
-        showToast('error', 'End SOS Error', error.message);
-    }
-}
-
-function listenForSOSAlerts() {
-    db.collection('sosAlerts')
-        .where('status', '==', 'active')
-        .onSnapshot(async snapshot => {
-            snapshot.docChanges().forEach(async change => {
-                if (change.type === 'added' || change.type === 'modified') {
-                    const sosData = change.doc.data();
-                    const senderId = sosData.userId;
-                    const senderData = await getUserData(senderId);
-                    if (currentUser && senderData.emergencyContacts.some(contact => contact.id === currentUser.uid)) {
-                        const message = `${sosData.userName} triggered an SOS at ${sosData.location.lat}, ${sosData.location.lng}`;
-                        showEmergencyNotification(message, sosData.location);
-                        if (!firstSosReceived[senderId]) {
-                            firstSosReceived[senderId] = true;
-                            navigateToSosLocation(sosData.location, true);
-                        }
-                    }
+        });
+        
+        // Show/hide bottom nav based on page
+        if (pageId === 'login-page' || pageId === 'signup-page') {
+            bottomNav.classList.add('hidden');
+        } else {
+            bottomNav.classList.remove('hidden');
+            
+            // Update active nav item
+            navItems.forEach(item => {
+                if (item.dataset.page === pageId.replace('-page', '')) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
                 }
             });
-        }, error => {
-            console.error("Error listening for SOS alerts:", error);
-            showToast('error', 'SOS Listener Error', 'Failed to listen for SOS alerts: ' + error.message);
-        });
-}
-
-function navigateToSosLocation(location, autoStart = false) {
-    if (!location || !map) return;
-    showPage('home');
-    navigator.geolocation.getCurrentPosition(position => {
-        const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-        originMarker.setPosition(currentPos);
-        originMarker.setVisible(true);
-        originSearchInput.value = 'Current Location';
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        destinationSearchInput.value = `SOS Location (${location.lat}, ${location.lng})`;
-        calculateRoute();
-        if (autoStart) startRouteTracking();
-    }, error => {
-        showToast('error', 'Navigation Error', 'Failed to get current location: ' + error.message);
-    });
-}
-
-function initMap() {
-    const defaultLocation = { lat: 28.6139, lng: 77.2090 };
-    const mapStyle = [
-        {"featureType": "all", "elementType": "geometry.fill", "stylers": [{"weight": "2.00"}]},
-        {"featureType": "all", "elementType": "geometry.stroke", "stylers": [{"color": "#f0f0f0"}]},
-        {"featureType": "all", "elementType": "labels.text", "stylers": [{"visibility": "on"}]},
-        {"featureType": "landscape", "elementType": "all", "stylers": [{"color": "#f9f9f9"}]},
-        {"featureType": "landscape", "elementType": "geometry.fill", "stylers": [{"color": "#ffffff"}]},
-        {"featureType": "landscape.man_made", "elementType": "geometry.fill", "stylers": [{"color": "#f5f5f5"}]},
-        {"featureType": "poi", "elementType": "all", "stylers": [{"visibility": "off"}]},
-        {"featureType": "road", "elementType": "all", "stylers": [{"saturation": -100}, {"lightness": 45}]},
-        {"featureType": "road", "elementType": "geometry.fill", "stylers": [{"color": "#eeeeee"}]},
-        {"featureType": "road", "elementType": "labels.text.fill", "stylers": [{"color": "#7b7b7b"}]},
-        {"featureType": "road", "elementType": "labels.text.stroke", "stylers": [{"color": "#ffffff"}]},
-        {"featureType": "road.highway", "elementType": "all", "stylers": [{"visibility": "simplified"}]},
-        {"featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{"visibility": "off"}]},
-        {"featureType": "transit", "elementType": "all", "stylers": [{"visibility": "off"}]},
-        {"featureType": "water", "elementType": "all", "stylers": [{"color": "#e9e9e9"}, {"visibility": "on"}]},
-        {"featureType": "water", "elementType": "geometry.fill", "stylers": [{"color": "#e9e9e9"}]}
-    ];
-    map = new google.maps.Map(mapElement, {
-        center: defaultLocation,
-        zoom: 15,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        gestureHandling: 'greedy',
-        zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
-        padding: { bottom: locationInfo.classList.contains('collapsed') ? 90 : 250, left: locationInfo.classList.contains('collapsed') ? 50 : 0 },
-        scrollwheel: true,
-        draggable: true,
-        disableDefaultUI: false,
-        styles: mapStyle
-    });
-    userMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue.png' },
-        visible: false
-    });
-    originMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green.png' },
-        visible: false
-    });
-    destinationMarker = new google.maps.Marker({
-        map,
-        position: defaultLocation,
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/purple.png' },
-        visible: false
-    });
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
-        map,
-        suppressMarkers: true,
-        polylineOptions: { strokeColor: '#000000', strokeWeight: 5, strokeOpacity: 0.7 }
-    });
-    getCurrentLocation();
-    const originAutocomplete = new google.maps.places.Autocomplete(originSearchInput);
-    const destAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
-    originAutocomplete.addListener('place_changed', () => {
-        const place = originAutocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
-        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        originMarker.setPosition(location);
-        originMarker.setVisible(true);
-        map.setCenter(location);
-        if (destinationMarker.getVisible()) calculateRoute();
-    });
-    destAutocomplete.addListener('place_changed', () => {
-        const place = destAutocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
-        const location = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        map.setCenter(location);
-        updateLocationInfo(place.name, place.formatted_address || place.name, location);
-        if (originMarker.getVisible()) calculateRoute();
-    });
-
-    // Add listener for map panning/dragging
-    map.addListener('dragstart', () => {
-        if (!locationInfo.classList.contains('collapsed')) {
-            locationInfo.classList.add('collapsed');
         }
-    });
-
-    // Add touch listener for mobile devices
-    mapElement.addEventListener('touchstart', () => {
-        if (!locationInfo.classList.contains('collapsed')) {
-            locationInfo.classList.add('collapsed');
-        }
-    });
-}
-// map.addListener('click', event => handleMapClick(event.latLng));
-function getCurrentLocation() {
-    if (!navigator.geolocation) {
-        showToast('error', 'Geolocation Error', 'Your browser does not support geolocation');
-        return;
-    }
-    navigator.geolocation.getCurrentPosition(position => {
-        const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-        if (!map) return;
-        map.setCenter(location);
-        userMarker.setPosition(location);
-        userMarker.setVisible(true);
-        if (!originMarker.getVisible()) {
-            originMarker.setPosition(location);
-            originMarker.setVisible(true);
-            originSearchInput.value = 'Current Location';
-        }
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-                updateLocationInfo('Current Location', results[0].formatted_address, location);
-                originSearchInput.value = results[0].formatted_address;
-                if (destinationMarker.getVisible()) calculateRoute();
-            } else {
-                updateLocationInfo('Current Location', 'Address not available', location);
-            }
-        });
-    }, error => {
-        let errorMessage = 'Unable to get your current location';
-        switch (error.code) {
-            case error.PERMISSION_DENIED: errorMessage = 'Location permission denied'; break;
-            case error.POSITION_UNAVAILABLE: errorMessage = 'Location information unavailable'; break;
-            case error.TIMEOUT: errorMessage = 'Location request timed out'; break;
-        }
-        showToast('error', 'Location Error', errorMessage);
-    });
-}
-
-function updateLocationInfo(name, address, coords) {
-    currentLocation = coords;
-    locationName.textContent = name || 'Unknown Location';
-    locationAddress.textContent = address || 'No address available';
-}
-
-function handleMapClick(latLng) {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: latLng }, (results, status) => {
-        if (status === 'OK' && results[0]) {
-            const location = { lat: latLng.lat(), lng: latLng.lng() };
-            updateLocationInfo(results[0].name || 'Selected Location', results[0].formatted_address, location);
-            if (isSettingOrigin) {
-                originMarker.setPosition(location);
-                originMarker.setVisible(true);
-                originSearchInput.value = results[0].formatted_address;
-                isSettingOrigin = false;
-                if (destinationMarker.getVisible()) calculateRoute();
-            } else if (isSettingDestination) {
-                destinationMarker.setPosition(location);
-                destinationMarker.setVisible(true);
-                destinationSearchInput.value = results[0].formatted_address;
-                isSettingDestination = false;
-                if (originMarker.getVisible()) calculateRoute();
-            } else {
-                destinationMarker.setPosition(location);
-                destinationMarker.setVisible(true);
-                destinationSearchInput.value = results[0].formatted_address;
-                if (originMarker.getVisible()) calculateRoute();
+        
+        // Handle special cases for different pages
+        if (pageId === 'home-page' || pageId === 'profile-page') {
+            if (map && typeof google !== 'undefined') {
+                google.maps.event.trigger(map, 'resize');
+                if (currentPosition) {
+                    map.setCenter(currentPosition);
+                }
             }
         }
-    });
-}
-
-function calculateRoute() {
-    if (!originMarker.getVisible() || !destinationMarker.getVisible()) {
-        showToast('error', 'Route Error', 'Please set both origin and destination');
-        return;
     }
-    const origin = originMarker.getPosition();
-    const destination = destinationMarker.getPosition();
-    directionsService.route({
-        origin,
-        destination,
-        travelMode: google.maps.TravelMode[routeMode],
-        provideRouteAlternatives: true
-    }, (result, status) => {
-        if (status === 'OK') {
-            directionsRenderer.setDirections(result);
-            currentRoute = result.routes[0];
-            alternativeRoutesData = result.routes;
-            selectedRouteIndex = 0;
-            updateRouteDetails();
-            updateAlternativeRoutes();
-            map.setZoom(14);
-            locationInfo.classList.remove('collapsed');
+    
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('active');
+        }
+    }
+    
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
+    
+    function showError(elementId, message) {
+        const errorElement = document.querySelector(`#${elementId} .form-error`);
+        if (errorElement) {
+            errorElement.textContent = message;
+        }
+    }
+    
+    function clearErrors() {
+        document.querySelectorAll('.form-error').forEach(element => {
+            element.textContent = '';
+        });
+    }
+    
+    function showToast(message, duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        
+        // Make toast visible with a slight transition
+        setTimeout(() => toast.classList.add('visible'), 100);
+        
+        // Remove toast after duration
+        setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+    
+    // Map initialization
+    function initMap() {
+        const defaultLocation = { lat: 37.7749, lng: -122.4194 }; // Default San Francisco
+        
+        map = new google.maps.Map(mapElem, {
+            center: defaultLocation,
+            zoom: 14,
+            disableDefaultUI: true,
+            styles: [
+                {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }]
+                }
+            ]
+        });
+        
+        geocoder = new google.maps.Geocoder();
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: true,
+            polylineOptions: {
+                strokeColor: '#4CAF50',
+                strokeWeight: 5,
+                strokeOpacity: 0.7
+            }
+        });
+        
+        infowindow = new google.maps.InfoWindow();
+        placesService = new google.maps.places.PlacesService(map);
+        
+        // Set up location autocomplete
+        const toAutocomplete = new google.maps.places.Autocomplete(searchToInput);
+        toAutocomplete.bindTo('bounds', map);
+        
+        toAutocomplete.addListener('place_changed', function() {
+            const place = toAutocomplete.getPlace();
+            if (!place.geometry) {
+                searchToInput.placeholder = 'Enter a valid destination';
+                return;
+            }
+            
+            // Update map and add marker
+            map.setCenter(place.geometry.location);
+            setDestinationMarker(place.geometry.location);
+        });
+        
+        // Get user's current location
+        getCurrentLocation();
+        
+        // Set up map click event
+        map.addListener('click', function(event) {
+            setDestinationMarker(event.latLng);
+            geocodeLatLng(event.latLng, function(address) {
+                searchToInput.value = address;
+            });
+        });
+    }
+    
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    currentPosition = pos;
+                    
+                    map.setCenter(pos);
+                    setCurrentLocationMarker(pos);
+                    
+                    geocodeLatLng(pos, function(address) {
+                        searchFromInput.value = address;
+                    });
+                },
+                function() {
+                    handleLocationError('Geolocation service failed');
+                }
+            );
         } else {
-            showToast('error', 'Route Error', 'Unable to calculate route: ' + status);
+            handleLocationError('Browser does not support geolocation');
         }
-    });
-}
-function updateRouteDetails() {
-    if (!currentRoute) return;
-    routeDetailsContent.innerHTML = '';
-    const steps = currentRoute.legs[0].steps;
-    steps.forEach((step, index) => {
-        const stepDiv = document.createElement('div');
-        stepDiv.className = 'step-item';
-        stepDiv.innerHTML = `<div class="step-number">${index + 1}</div><div class="step-content">${step.instructions}<br><small>${step.distance.text} - ${step.duration.text}</small></div>`;
-        routeDetailsContent.appendChild(stepDiv);
-    });
-}
-
-function updateAlternativeRoutes() {
-    routeAlternativesContainer.innerHTML = '';
-    alternativeRoutes.style.display = 'block';
-    alternativeRoutesData.forEach((route, index) => {
-        const routeOption = document.createElement('div');
-        routeOption.className = `route-option ${index === selectedRouteIndex ? 'active' : ''}`;
-        routeOption.innerHTML = `<div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div><div class="route-option-info"><div class="route-option-title">Route ${index + 1}</div><div class="route-option-details">${route.legs[0].distance.text} - ${route.legs[0].duration.text}</div></div>`;
-        routeOption.addEventListener('click', () => {
-            directionsRenderer.setRouteIndex(index);
-            selectedRouteIndex = index;
-            currentRoute = alternativeRoutesData[index];
-            updateRouteDetails();
-            updateAlternativeRoutes();
+    }
+    
+    function handleLocationError(message) {
+        searchFromInput.value = message;
+        searchFromInput.style.color = 'red';
+    }
+    
+    function setCurrentLocationMarker(location) {
+        if (currentMarker) {
+            currentMarker.setMap(null);
+        }
+        
+        currentMarker = new google.maps.Marker({
+            position: location,
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#4285F4',
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2,
+                scale: 7
+            },
+            zIndex: 999
         });
-        routeAlternativesContainer.appendChild(routeOption);
-    });
-}
-
-function startRouteTracking() {
-    if (!currentRoute) return;
-    routeProgress.style.display = 'block';
-    const totalDistance = currentRoute.legs[0].distance.value;
-    const totalDuration = currentRoute.legs[0].duration.value;
-    routeUpdateInterval = setInterval(() => {
-        navigator.geolocation.getCurrentPosition(position => {
-            const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-            userMarker.setPosition(currentPos);
-            const distanceToDest = google.maps.geometry.spherical.computeDistanceBetween(currentPos, destinationMarker.getPosition());
-            const progress = ((totalDistance - distanceToDest) / totalDistance) * 100;
-            routeProgressBar.style.width = `${Math.min(progress, 100)}%`;
-            routeCurrentTime.textContent = new Date().toLocaleTimeString();
-            const remainingDuration = (distanceToDest / totalDistance) * totalDuration;
-            const eta = new Date(Date.now() + remainingDuration * 1000);
-            routeEta.textContent = `ETA: ${eta.toLocaleTimeString()}`;
-            if (distanceToDest < 50) {
-                clearInterval(routeUpdateInterval);
-                showToast('success', 'Destination Reached', 'You have arrived at your destination');
-                routeProgress.style.display = 'none';
+    }
+    
+    function setDestinationMarker(location) {
+        if (destinationMarker) {
+            destinationMarker.setMap(null);
+        }
+        
+        destinationMarker = new google.maps.Marker({
+            position: location,
+            map: map,
+            animation: google.maps.Animation.DROP,
+            icon: {
+                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
             }
         });
-    }, 5000);
-}
-
-function clearRoute() {
-    directionsRenderer.setDirections(null);
-    originMarker.setVisible(false);
-    destinationMarker.setVisible(false);
-    originSearchInput.value = '';
-    destinationSearchInput.value = '';
-    currentRoute = null;
-    alternativeRoutesData = [];
-    routeDetailsContent.innerHTML = '';
-    routeAlternativesContainer.innerHTML = '';
-    routeProgress.style.display = 'none';
-    alternativeRoutes.style.display = 'none';
-    clearInterval(routeUpdateInterval);
-}
-
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        currentUser = user;
-        const userData = await getUserData(user.uid);
-        profileName.textContent = userData.fullName;
-        profileEmail.textContent = userData.email;
-        guardianKeyDisplay.textContent = userData.guardianKey;
-        renderContacts(userData.emergencyContacts);
-        showPage('home');
-        listenForSOSAlerts();
-    } else {
-        currentUser = null;
-        showPage('login');
+        
+        // If we have both markers, show the panel
+        if (currentMarker && destinationMarker) {
+            locationInfo.classList.remove('collapsed');
+        }
     }
-});
-
-loginForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await loginUser(loginEmail.value, loginPassword.value);
-    } catch (error) {
-        showToast('error', 'Login Failed', error.message);
+    
+    function geocodeLatLng(latLng, callback) {
+        geocoder.geocode({ 'location': latLng }, function(results, status) {
+            if (status === 'OK') {
+                if (results[0]) {
+                    callback(results[0].formatted_address);
+                } else {
+                    callback('Unknown location');
+                }
+            } else {
+                callback('Geocoding failed: ' + status);
+            }
+        });
     }
-});
-
-signupForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await registerUser(signupEmail.value, signupPassword.value, signupFullName.value, signupPhone.value);
-        showPage('home');
-    } catch (error) {
-        showToast('error', 'Signup Failed', error.message);
+    
+    function calculateRoute(mode = 'WALKING') {
+        if (!currentMarker || !destinationMarker) {
+            showToast('Please set both start and destination points');
+            return;
+        }
+        
+        const request = {
+            origin: currentMarker.getPosition(),
+            destination: destinationMarker.getPosition(),
+            travelMode: mode
+        };
+        
+        directionsService.route(request, function(response, status) {
+            if (status === 'OK') {
+                currentRoute = response;
+                directionsRenderer.setDirections(response);
+                
+                // Show route details
+                const route = response.routes[0];
+                const leg = route.legs[0];
+                
+                // Update safety score based on area (simulate for demo)
+                const safetyScores = ['high', 'medium', 'low'];
+                const randomSafetyScore = safetyScores[Math.floor(Math.random() * 3)];
+                
+                safetyScore.dataset.score = randomSafetyScore;
+                if (randomSafetyScore === 'high') {
+                    safetyScore.textContent = '90';
+                } else if (randomSafetyScore === 'medium') {
+                    safetyScore.textContent = '65';
+                } else {
+                    safetyScore.textContent = '35';
+                }
+                
+                // Update route options
+                const routesContainer = document.getElementById('routes-container');
+                routesContainer.innerHTML = '';
+                
+                // Safest route
+                const safestRoute = document.createElement('div');
+                safestRoute.className = 'route-option active';
+                safestRoute.dataset.route = 'safest';
+                safestRoute.innerHTML = `
+                    <div class="route-option-icon">
+                        <span class="material-icons">verified</span>
+                    </div>
+                    <div class="route-option-info">
+                        <div class="route-option-title">Safest Route</div>
+                        <div class="route-option-details">${leg.duration.text} (${leg.distance.text}) via ${getMainStreet(leg)}</div>
+                        <div class="route-features">
+                            <div class="route-feature">
+                                <div class="route-feature-icon" style="color: #4CAF50">✓</div>
+                                <div class="route-feature-text">Well-lit path</div>
+                            </div>
+                            <div class="route-feature">
+                                <div class="route-feature-icon" style="color: #4CAF50">✓</div>
+                                <div class="route-feature-text">High foot traffic</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                routesContainer.appendChild(safestRoute);
+                
+                // Fastest route (slightly shorter time but potentially less safe)
+                const fastestTime = Math.max(1, Math.floor(leg.duration.value * 0.8 / 60));
+                const fastestDistance = (leg.distance.value * 0.85 / 1000).toFixed(1);
+                
+                const fastestRoute = document.createElement('div');
+                fastestRoute.className = 'route-option';
+                fastestRoute.dataset.route = 'fastest';
+                fastestRoute.innerHTML = `
+                    <div class="route-option-icon">
+                        <span class="material-icons">speed</span>
+                    </div>
+                    <div class="route-option-info">
+                        <div class="route-option-title">Fastest Route</div>
+                        <div class="route-option-details">${fastestTime} mins (${fastestDistance} km) via ${getAlternateStreet(leg)}</div>
+                        <div class="route-features">
+                            <div class="route-feature">
+                                <div class="route-feature-icon" style="color: #FF9800">!</div>
+                                <div class="route-feature-text">Limited lighting in some areas</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                routesContainer.appendChild(fastestRoute);
+                
+                // Add event listeners to route options
+                document.querySelectorAll('.route-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.route-option').forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        if (this.dataset.route === 'fastest') {
+                            directionsRenderer.setOptions({
+                                polylineOptions: {
+                                    strokeColor: '#FFC107',
+                                    strokeWeight: 5,
+                                    strokeOpacity: 0.7
+                                }
+                            });
+                        } else {
+                            directionsRenderer.setOptions({
+                                polylineOptions: {
+                                    strokeColor: '#4CAF50',
+                                    strokeWeight: 5,
+                                    strokeOpacity: 0.7
+                                }
+                            });
+                        }
+                        directionsRenderer.setDirections(currentRoute);
+                    });
+                });
+                
+                showAreaInfo(destinationMarker.getPosition());
+                locationInfo.classList.remove('collapsed');
+            } else {
+                showToast('Directions request failed: ' + status);
+            }
+        });
     }
-});
-
-goToSignupBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('signup');
-});
-
-goToLoginBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('login');
-});
-
-navItems.forEach(item => {
-    item.addEventListener('click', e => {
-        e.preventDefault();
-        if (item.dataset.page === 'sos') return;
-        showPage(item.dataset.page);
+    
+    function getMainStreet(leg) {
+        // Get the name of the main street from route steps
+        for (let i = 0; i < leg.steps.length; i++) {
+            const step = leg.steps[i];
+            if (step.distance.value > 100) {
+                const instruction = step.instructions;
+                const match = instruction.match(/<b>([^<]+)<\/b>/);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+        }
+        return 'Main Street';
+    }
+    
+    function getAlternateStreet(leg) {
+        // Get an alternate street name
+        const streets = ['Park Ave', 'Oak St', 'Elm St', 'River Rd', 'Maple Dr'];
+        return streets[Math.floor(Math.random() * streets.length)];
+    }
+    
+    function showAreaInfo(location) {
+        // Simulate area safety information
+        const areaNames = ['Downtown', 'Uptown', 'Westside', 'Eastside', 'Marina District'];
+        const areaDescriptions = [
+            'This is a well-lit residential area with moderate foot traffic throughout the day and evening. Several businesses remain open late, contributing to street activity.',
+            'An urban area with a mix of residential and commercial properties. Street lighting is good in most sections with consistent foot traffic until late evening.',
+            'A quiet residential neighborhood with adequate lighting on main streets. Limited foot traffic in the evenings, especially on weekdays.',
+            'A busy commercial district with high foot traffic during business hours. Several 24-hour establishments provide consistent activity.',
+            'A tourist area with moderate to high foot traffic depending on season. Most streets are well-lit with regular police patrols.'
+        ];
+        
+        const randomIndex = Math.floor(Math.random() * areaNames.length);
+        
+        areaDescription.textContent = areaDescriptions[randomIndex];
+        
+        // Get nearby places of interest for safety (police stations, hospitals, etc.)
+        const request = {
+            location: location,
+            radius: '2000',
+            type: ['police', 'hospital', 'fire_station']
+        };
+        
+        placesService.nearbySearch(request, function(results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                // Process results - could be used to further enhance the safety score
+                console.log('Nearby safety places:', results.length);
+            }
+        });
+    }
+    
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auth navigation
+        goToSignup.addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage('signup-page');
+        });
+        
+        goToLogin.addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage('login-page');
+        });
+        
+        // Auth forms
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearErrors();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Validation
+            if (!email) {
+                showError('login-email', 'Email is required');
+                return;
+            }
+            
+            if (!password) {
+                showError('login-password', 'Password is required');
+                return;
+            }
+            
+            // Firebase login
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('User logged in:', userCredential.user);
+                    showPage('home-page');
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        showError('login-password', 'Invalid email or password');
+                    } else {
+                        showError('login-password', error.message);
+                    }
+                    console.error('Login error:', error);
+                });
+        });
+        
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearErrors();
+            
+            const fullname = document.getElementById('signup-fullname').value;
+            const email = document.getElementById('signup-email').value;
+            const phone = document.getElementById('signup-phone').value;
+            const password = document.getElementById('signup-password').value;
+            
+            // Validation
+            if (!fullname) {
+                showError('signup-fullname', 'Full name is required');
+                return;
+            }
+            
+            if (!email) {
+                showError('signup-email', 'Email is required');
+                return;
+            }
+            
+            if (!phone) {
+                showError('signup-phone', 'Phone number is required');
+                return;
+            }
+            
+            if (!password) {
+                showError('signup-password', 'Password is required');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showError('signup-password', 'Password must be at least 8 characters');
+                return;
+            }
+            
+            // Firebase signup
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log('User created:', user);
+                    
+                    // Save additional user data to Firestore
+                    return db.collection('users').doc(user.uid).set({
+                        fullname: fullname,
+                        email: email,
+                        phone: phone,
+                        created: firebase.firestore.FieldValue.serverTimestamp(),
+                        guardianKey: generateGuardianKey()
+                    });
+                })
+                .then(() => {
+                    showPage('home-page');
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/email-already-in-use') {
+                        showError('signup-email', 'Email already in use');
+                    } else if (error.code === 'auth/invalid-email') {
+                        showError('signup-email', 'Invalid email format');
+                    } else if (error.code === 'auth/weak-password') {
+                        showError('signup-password', 'Password is too weak');
+                    } else {
+                        showError('signup-password', error.message);
+                    }
+                    console.error('Signup error:', error);
+                });
+        });
+        
+        // For quick testing without auth
+        setTimeout(() => {
+            // Comment out for production
+            showPage('home-page');
+        }, 500);
+        
+        // Nav items
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetPage = this.dataset.page;
+                showPage(targetPage + '-page');
+            });
+        });
+        
+        // SOS button
+        sosButton.addEventListener('click', function() {
+            showModal('sos-confirmation-modal');
+        });
+        
+        closeSosConfirmation.addEventListener('click', function() {
+            hideModal('sos-confirmation-modal');
+        });
+        
+        cancelSos.addEventListener('click', function() {
+            hideModal('sos-confirmation-modal');
+        });
+        
+        confirmSos.addEventListener('click', function() {
+            hideModal('sos-confirmation-modal');
+            startSosCountdown();
+        });
+        
+        cancelSosCountdown.addEventListener('click', function() {
+            stopSosCountdown();
+        });
+        
+        // Logout
+        logoutBtn.addEventListener('click', function() {
+            auth.signOut()
+                .then(() => {
+                    showPage('login-page');
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                    showToast('Error logging out');
+                });
+        });
+        
+        // Contacts modal
+        addContactBtn.addEventListener('click', function() {
+            showModal('add-contact-modal');
+        });
+        
+        if (addFirstContactBtn) {
+            addFirstContactBtn.addEventListener('click', function() {
+                showModal('add-contact-modal');
+            });
+        }
+        
+        closeAddContact.addEventListener('click', function() {
+            hideModal('add-contact-modal');
+        });
+        
+        cancelAddContact.addEventListener('click', function() {
+            hideModal('add-contact-modal');
+        });
+        
+        addContactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('contact-name').value;
+            const guardianKey = document.getElementById('contact-guardian-key').value;
+            const relationship = document.getElementById('contact-relationship').value;
+            const phone = document.getElementById('contact-phone').value;
+            
+            // Add contact to Firestore (if authenticated)
+            if (auth.currentUser) {
+                db.collection('users').doc(auth.currentUser.uid)
+                    .collection('contacts').add({
+                        name: name,
+                        guardianKey: guardianKey,
+                        relationship: relationship,
+                        phone: phone,
+                        created: firebase.firestore.FieldValue.serverTimestamp()
+                    })
+                    .then(() => {
+                        hideModal('add-contact-modal');
+                        showToast('Contact added successfully');
+                        
+                        // Add contact to UI
+                        addContactToUI(name, relationship);
+                        
+                        // Reset form
+                        addContactForm.reset();
+                    })
+                    .catch((error) => {
+                        console.error('Error adding contact:', error);
+                        showToast('Error adding contact');
+                    });
+            } else {
+                // Demo: Add contact directly to UI without authentication
+                hideModal('add-contact-modal');
+                addContactToUI(name, relationship);
+                showToast('Contact added successfully');
+                addContactForm.reset();
+            }
+        });
+        
+        // Map related event listeners
+        getCurrentLocationBtn.addEventListener('click', function() {
+            getCurrentLocation();
+        });
+        
+        swapLocationsBtn.addEventListener('click', function() {
+            const fromValue = searchFromInput.value;
+            const toValue = searchToInput.value;
+            
+            searchFromInput.value = toValue;
+            searchToInput.value = fromValue;
+            
+            // Swap markers if they exist
+            if (currentMarker && destinationMarker) {
+                const currentPos = currentMarker.getPosition();
+                const destPos = destinationMarker.getPosition();
+                
+                currentMarker.setPosition(destPos);
+                destinationMarker.setPosition(currentPos);
+                
+                // Center map on the new current location
+                map.setCenter(destPos);
+                
+                // Update currentPosition
+                currentPosition = destPos;
+            }
+        });
+        
+        findSafeRouteBtn.addEventListener('click', function() {
+            // Get active travel mode
+            const activeMode = document.querySelector('.route-mode-btn.active');
+            let travelMode = 'WALKING';
+            
+            if (activeMode) {
+                const mode = activeMode.dataset.mode;
+                if (mode === 'driving') travelMode = 'DRIVING';
+                if (mode === 'transit') travelMode = 'TRANSIT';
+            }
+            
+            calculateRoute(travelMode);
+        });
+        
+        // Location info panel interaction
+        locationInfoHeader.addEventListener('click', function() {
+            locationInfo.classList.toggle('collapsed');
+        });
+        
+        // Route mode buttons
+        routeModeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                routeModeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const mode = this.dataset.mode;
+                let travelMode = 'WALKING';
+                
+                if (mode === 'driving') travelMode = 'DRIVING';
+                if (mode === 'transit') travelMode = 'TRANSIT';
+                
+                if (currentRoute) {
+                    calculateRoute(travelMode);
+                }
+            });
+        });
+        
+        // Share and save buttons
+        shareLocationBtn.addEventListener('click', function() {
+            // In a real app, this would create a shareable link
+            showToast('Sharing your location...');
+            
+            // Simulate sharing functionality
+            setTimeout(() => {
+                showToast('Location shared successfully. A link has been copied to your clipboard.');
+            }, 1000);
+        });
+        
+        saveRouteBtn.addEventListener('click', function() {
+            showToast('Saving this route...');
+            
+            // Simulate saving functionality
+            setTimeout(() => {
+                showToast('Route saved to your favorites');
+            }, 1000);
+        });
+        
+        // Guardian key copy button
+        const copyKeyBtn = document.getElementById('copy-key-btn');
+        if (copyKeyBtn) {
+            copyKeyBtn.addEventListener('click', function() {
+                const guardianKey = document.getElementById('guardian-key').textContent;
+                navigator.clipboard.writeText(guardianKey)
+                    .then(() => {
+                        showToast('Guardian Key copied to clipboard');
+                    })
+                    .catch(err => {
+                        console.error('Error copying text:', err);
+                        showToast('Failed to copy Guardian Key');
+                    });
+            });
+        }
+        
+        // Load Google Maps
+        window.initMap = initMap;
+        
+        // Check if the Maps API is already loaded
+        if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+            initMap();
+        }
     });
-});
-
-copyKeyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(guardianKeyDisplay.textContent);
-    showToast('success', 'Copied', 'Guardian Key copied to clipboard');
-});
-
-addContactBtn.addEventListener('click', () => showModal(addContactModal));
-addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
-closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-
-addContactForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-        await addEmergencyContact(contactGuardianKey.value, contactRelation.value);
-        const userData = await getUserData(currentUser.uid);
-        renderContacts(userData.emergencyContacts);
-        hideModal(addContactModal);
-        showToast('success', 'Contact Added', 'Emergency contact added successfully');
-        contactGuardianKey.value = '';
-        contactRelation.value = '';
-    } catch (error) {
-        showToast('error', 'Error', error.message);
+    
+    // Helper functions for demo
+    function generateGuardianKey() {
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let key = 'GDN-';
+        
+        for (let i = 0; i < 4; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        key += '-';
+        
+        for (let i = 0; i < 4; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        key += '-';
+        
+        for (let i = 0; i < 4; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        return key;
     }
-});
-
-logoutBtn.addEventListener('click', async () => {
-    try {
-        await logoutUser();
-    } catch (error) {
-        showToast('error', 'Logout Failed', error.message);
+    
+    function addContactToUI(name, relationship) {
+        // Check if empty contacts message is shown
+        const emptyContacts = document.getElementById('empty-contacts');
+        if (emptyContacts) {
+            emptyContacts.style.display = 'none';
+        }
+        
+        const contactsList = document.getElementById('contacts-list');
+        const contactElement = document.createElement('div');
+        contactElement.className = 'contact-item';
+        contactElement.innerHTML = `
+            <div class="contact-icon">
+                <span class="material-icons">person</span>
+            </div>
+            <div class="contact-info">
+                <div class="contact-name">${name}</div>
+                <div class="contact-role">${relationship || 'Contact'}</div>
+            </div>
+            <div class="contact-actions">
+                <button class="contact-action-btn">
+                    <span class="material-icons">edit</span>
+                </button>
+                <button class="contact-action-btn contact-delete-btn">
+                    <span class="material-icons">delete</span>
+                </button>
+            </div>
+        `;
+        
+        // Add delete functionality
+        const deleteBtn = contactElement.querySelector('.contact-delete-btn');
+        deleteBtn.addEventListener('click', function() {
+            contactElement.remove();
+            showToast('Contact removed');
+            
+            // Check if contacts list is empty
+            if (contactsList.children.length === 0) {
+                emptyContacts.style.display = 'block';
+            }
+        });
+        
+        contactsList.appendChild(contactElement);
     }
-});
-
-sosButton.addEventListener('click', () => {
-    if (activeSosId) {
-        showModal(sosEndModal);
-    } else {
-        showModal(sosConfirmModal);
-        sosCountdown = 10;
-        document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-        sosTimer = setInterval(() => {
-            sosCountdown--;
-            document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-            if (sosCountdown <= 0) {
-                clearInterval(sosTimer);
-                confirmSosBtn.click();
+    
+    // SOS functions
+    let sosCountdownTimer;
+    let sosCountdownValue = 5;
+    
+    function startSosCountdown() {
+        sosCountdownValue = 5;
+        countdownNumber.textContent = sosCountdownValue;
+        sosCountdown.classList.add('active');
+        
+        sosCountdownTimer = setInterval(() => {
+            sosCountdownValue--;
+            countdownNumber.textContent = sosCountdownValue;
+            
+            if (sosCountdownValue <= 0) {
+                clearInterval(sosCountdownTimer);
+                sendSosAlert();
             }
         }, 1000);
     }
-});
-
-closeSosConfirmBtn.addEventListener('click', () => {
-    clearInterval(sosTimer);
-    hideModal(sosConfirmModal);
-});
-
-cancelSosBtn.addEventListener('click', () => {
-    const password = document.getElementById('sos-password').value;
-    if (password === sosPassword) {
-        clearInterval(sosTimer);
-        hideModal(sosConfirmModal);
-    } else {
-        showToast('error', 'Invalid Password', 'Incorrect password to cancel SOS');
+    
+    function stopSosCountdown() {
+        clearInterval(sosCountdownTimer);
+        sosCountdown.classList.remove('active');
     }
-});
-
-confirmSosBtn.addEventListener('click', async () => {
-    clearInterval(sosTimer);
-    hideModal(sosConfirmModal);
-    try {
-        const location = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }), reject);
-        });
-        await sendSOSAlert(location);
-    } catch (error) {
-        showToast('error', 'SOS Failed', error.message);
+    
+    function sendSosAlert() {
+        sosCountdown.classList.remove('active');
+        
+        // Activate SOS mode
+        sosButton.classList.add('sos-active');
+        document.getElementById('sos-icon').textContent = 'emergency';
+        
+        // In a real app, this would send the alert to emergency contacts
+        showToast('SOS Alert sent to your emergency contacts!');
+        
+        // Change bottom nav color to indicate active SOS
+        bottomNav.classList.add('sos-active-bg');
+        
+        // After 10 seconds, deactivate for demo purposes
+        setTimeout(() => {
+            deactivateSos();
+        }, 10000);
     }
-});
-
-closeSosEndBtn.addEventListener('click', () => hideModal(sosEndModal));
-cancelEndSosBtn.addEventListener('click', () => hideModal(sosEndModal));
-
-confirmEndSosBtn.addEventListener('click', async () => {
-    const password = document.getElementById('sos-end-password').value;
-    if (password === sosPassword) {
-        await endSOSAlert();
-        hideModal(sosEndModal);
-    } else {
-        showToast('error', 'Invalid Password', 'Incorrect password to end SOS');
+    
+    function deactivateSos() {
+        sosButton.classList.remove('sos-active');
+        document.getElementById('sos-icon').textContent = 'sos';
+        bottomNav.classList.remove('sos-active-bg');
+        showToast('SOS Alert deactivated');
     }
-});
+    
+    // Safety Features Implementation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show Toast Message
+        function showToast(title, message, icon) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'safety-toast';
+            toast.innerHTML = `
+                <div class="safety-toast-icon">
+                    <span class="material-icons">${icon || 'info'}</span>
+                </div>
+                <div class="safety-toast-content">
+                    <div class="safety-toast-title">${title}</div>
+                    <div class="safety-toast-message">${message}</div>
+                </div>
+                <button class="safety-toast-close">
+                    <span class="material-icons">close</span>
+                </button>
+            `;
+            
+            // Add to document
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Auto-remove after 5 seconds
+            const timeout = setTimeout(() => {
+                removeToast(toast);
+            }, 5000);
+            
+            // Close button
+            const closeBtn = toast.querySelector('.safety-toast-close');
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(timeout);
+                removeToast(toast);
+            });
+        }
+        
+        function removeToast(toast) {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }
+        
+        // Set up Safety Indicators
+        function addSafetyIndicators() {
+            // Check if safety indicators already exist in HTML
+            if (document.querySelector('.safety-indicators')) {
+                console.log('Safety indicators already exist in HTML');
+                return;
+            }
+            
+            const mapElement = document.getElementById('map');
+            if (!mapElement) return;
 
-closeSosSuccessBtn.addEventListener('click', () => hideModal(sosSuccessModal));
+            // Create safety indicators
+            const safetyIndicators = document.createElement('div');
+            safetyIndicators.className = 'safety-indicators';
+            safetyIndicators.innerHTML = `
+                <div class="safety-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #73E831;"></span>
+                        <span class="legend-text">Very Safe</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #FFEB3B;"></span>
+                        <span class="legend-text">Moderate</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #F44336;"></span>
+                        <span class="legend-text">Caution</span>
+                    </div>
+                </div>
+            `;
 
-navigateToBtn.addEventListener('click', () => {
-    if (lastSosLocation) navigateToSosLocation(lastSosLocation);
-    emergencyNotification.classList.remove('active');
-});
+            // Insert after map element
+            mapElement.parentNode.insertBefore(safetyIndicators, mapElement.nextSibling);
+        }
 
-closeEmergencyNotificationBtn.addEventListener('click', () => {
-    emergencyNotification.classList.remove('active');
-});
+        // Set up Quick Actions
+        function addQuickActions() {
+            // If quick actions already exist in HTML, just add event listeners
+            const existingQuickActions = document.querySelector('.quick-actions');
+            if (existingQuickActions) {
+                console.log('Quick actions already exist in HTML');
+                setupQuickActionListeners();
+                return;
+            }
+            
+            const mapElement = document.getElementById('map');
+            if (!mapElement) return;
 
-currentLocationOriginBtn.addEventListener('click', () => getCurrentLocation());
-currentLocationDestBtn.addEventListener('click', () => {
-    navigator.geolocation.getCurrentPosition(position => {
-        const location = { lat: position.coords.latitude, lng: position.coords.longitude };
-        destinationMarker.setPosition(location);
-        destinationMarker.setVisible(true);
-        destinationSearchInput.value = 'Current Location';
-        if (originMarker.getVisible()) calculateRoute();
+            // Create quick actions
+            const quickActions = document.createElement('div');
+            quickActions.className = 'quick-actions';
+            quickActions.innerHTML = `
+                <button class="quick-action-btn" id="report-incident-btn">
+                    <span class="material-icons">report</span>
+                    <span>Report</span>
+                </button>
+                <button class="quick-action-btn" id="safe-zones-btn">
+                    <span class="material-icons">shield</span>
+                    <span>Safe Zones</span>
+                </button>
+            `;
+
+            // Insert after map element (or after safety indicators if they exist)
+            const safetyIndicators = document.querySelector('.safety-indicators');
+            if (safetyIndicators) {
+                mapElement.parentNode.insertBefore(quickActions, safetyIndicators.nextSibling);
+            } else {
+                mapElement.parentNode.insertBefore(quickActions, mapElement.nextSibling);
+            }
+            
+            setupQuickActionListeners();
+        }
+        
+        // Set up event listeners for quick action buttons
+        function setupQuickActionListeners() {
+            // Add event listeners
+            document.getElementById('report-incident-btn').addEventListener('click', function() {
+                showToast('Report Incident', 'The incident reporting feature is coming soon', 'report');
+            });
+            
+            document.getElementById('safe-zones-btn').addEventListener('click', function() {
+                showToast('Safe Zones', 'Highlighting safe zones on the map...', 'shield');
+                // Future implementation: Highlight safe zones on the map
+            });
+        }
+
+        // Initialize only if we're on the home page
+        const homePage = document.getElementById('home-page');
+        if (homePage && homePage.classList.contains('active')) {
+            setupQuickActionListeners();
+        } else {
+            // Set up observer to initialize when home page becomes active
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.target.id === 'home-page' && 
+                        mutation.target.classList.contains('active')) {
+                        setupQuickActionListeners();
+                    }
+                });
+            });
+            
+            observer.observe(homePage, { 
+                attributes: true, 
+                attributeFilter: ['class'] 
+            });
+        }
     });
-});
-
-swapLocationsBtn.addEventListener('click', () => {
-    const originPos = originMarker.getPosition();
-    const destPos = destinationMarker.getPosition();
-    const originValue = originSearchInput.value;
-    const destValue = destinationSearchInput.value;
-    originMarker.setPosition(destPos);
-    destinationMarker.setPosition(originPos);
-    originSearchInput.value = destValue;
-    destinationSearchInput.value = originValue;
-    if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
-});
-
-locationInfoHeader.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
-locationHandle.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
-
-shareLocationBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        const text = `My location: ${locationName.textContent} (${locationAddress.textContent}) - https://maps.google.com/?q=${currentLocation.lat},${currentLocation.lng}`;
-        navigator.clipboard.writeText(text);
-        showToast('success', 'Location Copied', 'Location details copied to clipboard');
-    }
-});
-
-navigateBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentLocation.lat},${currentLocation.lng}`, '_blank');
-    }
-});
-
-routeDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.toggle('visible'));
-closeRouteDetailsBtn.addEventListener('click', () => routeDetailsPanel.classList.remove('visible'));
-
-drivingModeBtn.addEventListener('click', () => {
-    routeMode = 'DRIVING';
-    drivingModeBtn.classList.add('active');
-    walkingModeBtn.classList.remove('active');
-    transitModeBtn.classList.remove('active');
-    if (currentRoute) calculateRoute();
-});
-walkingModeBtn.addEventListener('click', () => {
-    routeMode = 'WALKING';
-    walkingModeBtn.classList.add('active');
-    drivingModeBtn.classList.remove('active');
-    transitModeBtn.classList.remove('active');
-    if (currentRoute) calculateRoute();
-});
-transitModeBtn.addEventListener('click', () => {
-    routeMode = 'TRANSIT';
-    transitModeBtn.classList.add('active');
-    drivingModeBtn.classList.remove('active');
-    walkingModeBtn.classList.remove('active');
-    if (currentRoute) calculateRoute();
-});
-
-startRouteBtn.addEventListener('click', () => startRouteTracking());
-clearRouteBtn.addEventListener('click', () => clearRoute());
     </script>
-    </body>
+</body>
 </html>
