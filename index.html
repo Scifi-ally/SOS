@@ -82,7 +82,20 @@
         .auth-form {margin-bottom: 32px;}
         .auth-link {color: var(--primary); text-decoration: none; font-weight: 500; transition: color 0.3s ease;}
         .auth-link:hover {color: var(--secondary); text-decoration: underline;}
-        .bottom-nav {position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background-color: var(--light-bg); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05); z-index: 100; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+        .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: var(--light-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05);
+    z-index: 100; /* Keep this as is */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
         .bottom-nav.hidden {transform: translateY(100%);}
         .bottom-nav-item {display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--light-text-secondary); font-size: 12px; padding: 8px 0; width: 25%; transition: color 0.3s ease, transform 0.2s ease;}
         .bottom-nav-item:hover {transform: scale(1.1);}
@@ -92,7 +105,17 @@
         .sos-nav-button {background-color: var(--danger); color: var(--white); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3); transition: transform 0.3s ease; padding: 0; overflow: hidden; outline: none;}
         .sos-nav-button:hover {transform: scale(1.15);}
         .sos-nav-button .material-icons {font-size: 24px; margin-bottom: 0;}
-        .map-container {position: fixed; top: 0; left: 0; right: 0; bottom: 70px; width: 100%; height: calc(100vh - 70px); overflow: hidden; z-index: 0;}
+        .map-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 70px; /* Ensure it doesn't go under navbar */
+    width: 100%;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+    z-index: 0; /* Keep this low */
+}
         #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; touch-action: none;}
         .map-search-container {position: fixed; top: 16px; left: 16px; right: 16px; display: flex; flex-direction: column; background-color: var(--light-bg); border-radius: 12px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); overflow: hidden; z-index: 100; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
         .map-search {display: flex; align-items: center; border-bottom: 1px solid var(--light-border); padding: 4px;}
@@ -117,19 +140,19 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 70px; /* Height of the navbar */
+    bottom: 70px; /* Matches navbar height */
     background-color: #808080; /* Gray background */
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
     padding: 20px 16px;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 98;
+    z-index: 101; /* Higher than navbar (100) */
     height: auto;
     min-height: 250px;
     max-height: 45vh;
     overflow-y: auto;
     transition: transform 0.3s ease-in-out;
-    transform: translateY(0); /* Always visible by default */
+    transform: translateY(0);
 }
 
 .location-info.collapsed {
@@ -137,10 +160,11 @@
     min-height: unset;
 }
 
-/* Remove the navbar hidden condition since we want it always above the navbar */
+/* Remove the sibling selector as it's not needed with fixed positioning */
 .bottom-nav.hidden ~ .location-info {
-    bottom: 70px; /* Keep it above the navbar even when navbar is hidden */
-}
+    /* Remove this rule entirely or just keep bottom: 70px if you want to be explicit */
+    bottom: 70px;
+}      
         .location-info-header {position: absolute; top: 0; left: 0; right: 0; height: 20px; background-color: transparent; cursor: pointer; z-index: 103;}
         .location-handle-container {position: absolute; left: -50px; top: 0; width: 50px; height: 100px; display: flex; align-items: center; z-index: 101;}
         .location-handle {width: 50px; height: 100px; background-color: var(--primary); border-radius: 25px 0 0 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease; user-select: none; z-index: 102; outline: none;}
@@ -681,7 +705,10 @@ function showPage(pageId) {
     if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
     else if (currentUser) bottomNav.classList.remove('hidden');
 }
-
+routeSearchBtn.addEventListener('click', () => {
+    calculateRoute();
+    locationInfo.classList.remove('collapsed');
+});
 function showToast(type, title, message, duration = 3000) {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -1039,9 +1066,22 @@ function initMap() {
         updateLocationInfo(place.name, place.formatted_address || place.name, location);
         if (originMarker.getVisible()) calculateRoute();
     });
-    map.addListener('click', event => handleMapClick(event.latLng));
-}
 
+    // Add listener for map panning/dragging
+    map.addListener('dragstart', () => {
+        if (!locationInfo.classList.contains('collapsed')) {
+            locationInfo.classList.add('collapsed');
+        }
+    });
+
+    // Add touch listener for mobile devices
+    mapElement.addEventListener('touchstart', () => {
+        if (!locationInfo.classList.contains('collapsed')) {
+            locationInfo.classList.add('collapsed');
+        }
+    });
+}
+// map.addListener('click', event => handleMapClick(event.latLng));
 function getCurrentLocation() {
     if (!navigator.geolocation) {
         showToast('error', 'Geolocation Error', 'Your browser does not support geolocation');
@@ -1134,12 +1174,12 @@ function calculateRoute() {
             updateRouteDetails();
             updateAlternativeRoutes();
             map.setZoom(14);
+            locationInfo.classList.remove('collapsed');
         } else {
             showToast('error', 'Route Error', 'Unable to calculate route: ' + status);
         }
     });
 }
-
 function updateRouteDetails() {
     if (!currentRoute) return;
     routeDetailsContent.innerHTML = '';
@@ -1388,8 +1428,6 @@ swapLocationsBtn.addEventListener('click', () => {
     destinationSearchInput.value = originValue;
     if (originMarker.getVisible() && destinationMarker.getVisible()) calculateRoute();
 });
-
-routeSearchBtn.addEventListener('click', () => calculateRoute());
 
 locationInfoHeader.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
 locationHandle.addEventListener('click', () => locationInfo.classList.toggle('collapsed'));
