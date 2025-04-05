@@ -9,7 +9,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA41wHVKnsb1RNhcftpHS5qNwvYz59nXIE&libraries=places" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-detection@1.0.1/dist/face-detection.min.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; outline: none; font-family: 'Geist Mono', monospace;}
         :root {
@@ -283,14 +286,80 @@
             transition: top 0.4s ease-in-out;
         }
         .emergency-notification.active {top: 16px;}
-        .emergency-notification .notification-icon {margin-right: 12px;}
-        .emergency-notification .notification-content {flex: 1;}
-        .emergency-notification .notification-title {font-weight: 600; margin-bottom: 4px;}
-        .emergency-notification .notification-message {font-size: 14px;}
-        .emergency-notification .notification-actions {display: flex; gap: 8px;}
-        .emergency-notification .notification-close {background: none; border: none; color: var(--white); cursor: pointer; padding: 8px;}
+        .notification-icon {margin-right: 12px;}
+        .notification-content {flex: 1;}
+        .notification-title {font-weight: 600; margin-bottom: 4px;}
+        .notification-message {font-size: 14px;}
+        .notification-actions {display: flex; gap: 8px;}
+        .notification-close {background: none; border: none; color: var(--white); cursor: pointer; padding: 8px;}
         .notification-btn {background-color: rgba(255, 255, 255, 0.2); border: none; color: var(--white); padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;}
         .notification-btn:hover {background-color: rgba(255, 255, 255, 0.3);}
+        .safety-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: calc(100vh - 70px);
+            background-color: var(--light-bg);
+            z-index: 150;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .safety-panel.active {left: 0;}
+        .safety-panel-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;}
+        .safety-features-list {display: flex; flex-direction: column;}
+        .feature-btn {display: flex; align-items: center; padding: 12px; background: none; border: none; cursor: pointer; text-align: left; border-bottom: 1px solid var(--light-border); transition: background-color 0.3s ease;}
+        .feature-btn:last-child {border-bottom: none;}
+        .feature-btn:hover {background-color: var(--light-hover);}
+        .feature-icon {display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; margin-right: 12px;}
+        .feature-info {flex-grow: 1;}
+        .feature-title {font-weight: 600; font-size: 14px; margin-bottom: 2px;}
+        .feature-desc {font-size: 12px; color: var(--light-text-secondary);}
+        .safety-toggle-btn {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            width: 40px;
+            height: 80px;
+            background-color: var(--primary);
+            color: var(--white);
+            border-radius: 0 20px 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 151;
+            transition: transform 0.3s ease;
+        }
+        .safety-toggle-btn:hover {transform: translateX(5px);}
+        .safety-toggle-btn .material-icons {font-size: 24px;}
+        .shake-icon {background-color: #2196F3;}
+        .dead-switch-icon {background-color: #FFC107;}
+        .transit-icon {background-color: #4CAF50;}
+        .voice-icon {background-color: #000000;}
+        .danger-zone-icon {background-color: #F44336;}
+        .evidence-icon {background-color: #2196F3;}
+        .fake-call-icon {background-color: #4CAF50;}
+        .switch {position: relative; display: inline-block; width: 60px; height: 34px;}
+        .switch input {opacity: 0; width: 0; height: 0;}
+        .slider {position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;}
+        .slider:before {position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;}
+        input:checked + .slider {background-color: var(--primary);}
+        input:checked + .slider:before {transform: translateX(26px);}
+        .timer-display {font-size: 2rem; text-align: center; margin: 16px 0; font-family: monospace; font-weight: 700;}
+        .voice-indicator {width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 16px auto; background-color: #000000; cursor: pointer; transition: all 0.3s ease;}
+        .voice-indicator.listening {background-color: var(--danger); animation: pulse 1.5s infinite;}
+        .voice-indicator .material-icons {font-size: 28px; color: var(--white);}
+        .recording-status {display: none; align-items: center; justify-content: center; margin: 16px 0; color: var(--danger);}
+        .recording-status .material-icons {color: var(--danger); margin-right: 8px; animation: pulse 1.5s infinite;}
+        .sos-recording-btn {margin: 8px 4px;}
+        @keyframes pulse {
+            0% {transform: scale(1);}
+            50% {transform: scale(1.1);}
+            100% {transform: scale(1);}
+        }
     </style>
 </head>
 <body>
@@ -410,6 +479,66 @@
                 <div class="route-details-content" id="route-details-content"></div>
             </div>
         </div>
+        <div class="safety-panel" id="safety-panel">
+            <div class="safety-panel-header">
+                <h3>Safety Features</h3>
+                <button id="close-safety-panel" class="btn-icon"><span class="material-icons">close</span></button>
+            </div>
+            <div class="safety-features-list">
+                <button class="feature-btn" data-feature="shake">
+                    <div class="feature-icon shake-icon"><span class="material-icons">vibration</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Shake to Alert</div>
+                        <div class="feature-desc">Shake phone to trigger SOS</div>
+                    </div>
+                </button>
+                <button class="feature-btn" data-feature="deadSwitch">
+                    <div class="feature-icon dead-switch-icon"><span class="material-icons">timer</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Dead Man's Switch</div>
+                        <div class="feature-desc">Timer triggers SOS if not reset</div>
+                    </div>
+                </button>
+                <button class="feature-btn" data-feature="transitCompanion">
+                    <div class="feature-icon transit-icon"><span class="material-icons">directions_bus</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Transit Companion</div>
+                        <div class="feature-desc">Share transit journey</div>
+                    </div>
+                </button>
+                <button class="feature-btn" data-feature="voiceCommands">
+                    <div class="feature-icon voice-icon"><span class="material-icons">mic</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Voice Commands</div>
+                        <div class="feature-desc">Voice-triggered actions</div>
+                    </div>
+                </button>
+                <button class="feature-btn" data-feature="dangerZones">
+                    <div class="feature-icon danger-zone-icon"><span class="material-icons">location_off</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Danger Zones</div>
+                        <div class="feature-desc">Mark and avoid danger areas</div>
+                    </div>
+                </button>
+                <button class="feature-btn" data-feature="evidence">
+                    <div class="feature-icon evidence-icon"><span class="material-icons">camera_alt</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Evidence Collection</div>
+                        <div class="feature-desc">Record audio/video/photos</div>
+                    </div>
+                </button>
+                <button class="feature-btn" data-feature="fakeCall">
+                    <div class="feature-icon fake-call-icon"><span class="material-icons">call</span></div>
+                    <div class="feature-info">
+                        <div class="feature-title">Fake Call Escape</div>
+                        <div class="feature-desc">Simulate a call to escape</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        <div class="safety-toggle-btn" id="safety-toggle-btn">
+            <span class="material-icons">security</span>
+        </div>
     </div>
     <div id="profile-page" class="page">
         <div class="profile-container">
@@ -515,6 +644,14 @@
                 <p id="sos-timer">Time remaining: 10s</p>
                 <p class="mt-2">Enter password to cancel SOS alert:</p>
                 <input type="password" id="sos-password" class="form-input mt-2" placeholder="Enter password" autocomplete="off">
+                <div class="flex justify-center mt-4">
+                    <button class="btn btn-outline sos-recording-btn" id="sos-audio-btn"><span class="material-icons mr-2">mic</span>Audio</button>
+                    <button class="btn btn-outline sos-recording-btn" id="sos-video-btn"><span class="material-icons mr-2">videocam</span>Video</button>
+                </div>
+                <div class="recording-status" id="sos-recording-status">
+                    <span class="material-icons">fiber_manual_record</span>
+                    <span>Recording in progress</span>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-sos">Cancel SOS</button>
@@ -531,7 +668,7 @@
             <div class="modal-body">
                 <div class="warning-icon mb-4"><span class="material-icons">stop</span></div>
                 <p class="mt-2">Enter password to end SOS alert:</p>
-                <input type="password" id="sos-end-password" class="form-input mt-2" placeholder="Enter password" autocomplete="off">
+                <input type="password" id="sos-end-password" class="form-input mt-2 accumulator: " placeholder="Enter password" autocomplete="off">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-end-sos">Cancel</button>
@@ -561,8 +698,217 @@
             <button id="close-emergency-notification" class="notification-close"><span class="material-icons">close</span></button>
         </div>
     </div>
+    <div id="shake-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Shake to Alert</h3>
+                <button class="modal-close shake-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Shake your phone to trigger an SOS alert when in danger.</p>
+                <div class="form-group">
+                    <label class="form-label">Sensitivity</label>
+                    <input type="range" class="shake-threshold" min="1" max="10" value="5" id="shake-sensitivity">
+                </div>
+                <div class="flex justify-between mb-4">
+                    <span>Low</span>
+                    <span>High</span>
+                </div>
+                <div class="form-group">
+                    <label class="switch">
+                        <input type="checkbox" id="shake-detection-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ml-2">Enable shake detection</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline shake-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="save-shake-settings">Save</button>
+            </div>
+        </div>
+    </div>
+    <div id="deadSwitch-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Dead Man's Switch</h3>
+                <button class="modal-close dead-switch-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Set a timer that triggers an SOS if not reset.</p>
+                <div class="timer-display" id="dead-switch-timer">00:00:00</div>
+                <div class="form-group">
+                    <label class="form-label">Timer Duration</label>
+                    <select class="form-select" id="dead-switch-duration">
+                        <option value="10">10 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message to Send</label>
+                    <textarea class="form-input" id="dead-switch-message" rows="3" placeholder="Custom message if timer expires">I haven't checked in. Please call me immediately.</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline dead-switch-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="start-dead-switch">Start Timer</button>
+            </div>
+        </div>
+    </div>
+    <div id="transitCompanion-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Transit Companion</h3>
+                <button class="modal-close transit-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Share your transit journey with emergency contacts.</p>
+                <div class="form-group">
+                    <label class="form-label">Start Location</label>
+                    <input type="text" class="form-input" id="transit-start" placeholder="Enter starting point">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Destination</label>
+                    <input type="text" class="form-input" id="transit-destination" placeholder="Enter destination">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transport Type</label>
+                    <select class="form-select" id="transit-type">
+                        <option value="bus">Bus</option>
+                        <option value="train">Train</option>
+                        <option value="subway">Subway/Metro</option>
+                        <option value="taxi">Taxi/Rideshare</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expected Arrival Time</label>
+                    <input type="time" class="form-input" id="transit-arrival-time">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline transit-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="share-transit">Share Journey</button>
+            </div>
+        </div>
+    </div>
+    <div id="voiceCommands-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Voice Commands</h3>
+                <button class="modal-close voice-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Use voice commands to trigger actions.</p>
+                <div class="voice-indicator" id="voice-indicator">
+                    <span class="material-icons">mic</span>
+                </div>
+                <p class="text-center">Tap to test voice commands</p>
+                <div class="form-group">
+                    <label class="switch">
+                        <input type="checkbox" id="voice-detection-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ml-2">Enable voice command detection</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline voice-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="save-voice-settings">Save</button>
+            </div>
+        </div>
+    </div>
+    <div id="dangerZones-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Danger Zone Mapping</h3>
+                <button class="modal-close danger-zones-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Mark dangerous areas to avoid.</p>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-input" id="danger-zone-description" placeholder="Why is this area dangerous?">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alert Radius</label>
+                    <select class="form-select" id="danger-zone-radius">
+                        <option value="100">100 meters</option>
+                        <option value="200">200 meters</option>
+                        <option value="500">500 meters</option>
+                        <option value="1000">1 kilometer</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline danger-zones-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="save-danger-zone">Save</button>
+            </div>
+        </div>
+    </div>
+    <div id="evidence-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Evidence Collection</h3>
+                <button class="modal-close evidence-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Capture audio, video, or photos securely.</p>
+                <div class="flex justify-center mb-4">
+                    <button class="btn btn-outline mr-2" id="audio-evidence"><span class="material-icons mr-2">mic</span>Audio</button>
+                    <button class="btn btn-outline mr-2" id="photo-evidence"><span class="material-icons mr-2">photo_camera</span>Photo</button>
+                    <button class="btn btn-outline" id="video-evidence"><span class="material-icons mr-2">videocam</span>Video</button>
+                </div>
+                <div class="recording-status" id="evidence-recording-status">
+                    <span class="material-icons">fiber_manual_record</span>
+                    <span>Recording in progress</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input" id="evidence-description" rows="2" placeholder="Add details about this evidence"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline evidence-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="save-evidence">Save Evidence</button>
+            </div>
+        </div>
+    </div>
+    <div id="fakeCall-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Fake Call Escape</h3>
+                <button class="modal-close fake-call-modal-close"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Set up a fake call to escape situations.</p>
+                <div class="form-group">
+                    <label class="form-label">Caller Name</label>
+                    <input type="text" class="form-input" id="fake-caller-name" value="Mom" placeholder="Enter caller name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Delay Before Call</label>
+                    <select class="form-select" id="fake-call-delay">
+                        <option value="5">5 seconds</option>
+                        <option value="10">10 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">1 minute</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline fake-call-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="start-fake-call">Start Fake Call</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const firebaseConfig = {
+        // Note: In production, move Firebase config to a secure backend
+const firebaseConfig = {
     apiKey: "AIzaSyAv2LUHlRxvadYD2ok9zs426TxIEpXCGWA",
     authDomain: "guardian-4a206.firebaseapp.com",
     projectId: "guardian-4a206",
@@ -571,156 +917,96 @@
     appId: "1:249797346737:web:29edab4d045345742d6990",
     measurementId: "G-X35KJKEPEB"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const pages = document.querySelectorAll('.page');
-const bottomNav = document.getElementById('bottom-nav');
-const navItems = document.querySelectorAll('.bottom-nav-item');
-const loginForm = document.getElementById('login-form');
-const loginEmail = document.getElementById('login-email');
-const loginPassword = document.getElementById('login-password');
-const signupForm = document.getElementById('signup-form');
-const signupFullName = document.getElementById('signup-fullname');
-const signupEmail = document.getElementById('signup-email');
-const signupPhone = document.getElementById('signup-phone');
-const signupPassword = document.getElementById('signup-password');
-const goToSignupBtn = document.getElementById('go-to-signup');
-const goToLoginBtn = document.getElementById('go-to-login');
-const profileName = document.getElementById('profile-name');
-const profileEmail = document.getElementById('profile-email');
-const guardianKeyDisplay = document.getElementById('guardian-key');
-const copyKeyBtn = document.getElementById('copy-key-btn');
-const contactsList = document.getElementById('contacts-list');
-const emptyContacts = document.getElementById('empty-contacts');
-const addContactBtn = document.getElementById('add-contact-btn');
-const addFirstContactBtn = document.getElementById('add-first-contact-btn');
-const addContactModal = document.getElementById('add-contact-modal');
-const closeAddContactBtn = document.getElementById('close-add-contact');
-const cancelAddContactBtn = document.getElementById('cancel-add-contact');
-const addContactForm = document.getElementById('add-contact-form');
-const contactGuardianKey = document.getElementById('contact-guardian-key');
-const contactRelation = document.getElementById('contact-relation');
-const logoutBtn = document.getElementById('logout-btn');
-const sosButton = document.getElementById('sos-button');
-const sosIcon = document.getElementById('sos-icon');
-const sosConfirmModal = document.getElementById('sos-confirm-modal');
-const closeSosConfirmBtn = document.getElementById('close-sos-confirm');
-const cancelSosBtn = document.getElementById('cancel-sos');
-const confirmSosBtn = document.getElementById('confirm-sos');
-const sosEndModal = document.getElementById('sos-end-modal');
-const closeSosEndBtn = document.getElementById('close-sos-end');
-const cancelEndSosBtn = document.getElementById('cancel-end-sos');
-const confirmEndSosBtn = document.getElementById('confirm-end-sos');
-const sosSuccessModal = document.getElementById('sos-success-modal');
-const closeSosSuccessBtn = document.getElementById('close-sos-success');
-const emergencyNotification = document.getElementById('emergency-notification');
-const sosNotificationMessage = document.getElementById('sos-notification-message');
-const navigateToBtn = document.getElementById('navigate-to-btn');
-const closeEmergencyNotificationBtn = document.getElementById('close-emergency-notification');
-const mapElement = document.getElementById('map');
-const originSearchInput = document.getElementById('origin-search-input');
-const destinationSearchInput = document.getElementById('destination-search-input');
-const currentLocationOriginBtn = document.getElementById('current-location-origin-btn');
-const currentLocationDestBtn = document.getElementById('current-location-dest-btn');
-const swapLocationsBtn = document.getElementById('swap-locations-btn');
-const routeSearchBtn = document.getElementById('route-search-btn');
-const locationInfo = document.getElementById('location-info');
-const locationInfoHeader = document.getElementById('location-info-header');
-const locationHandle = document.querySelector('.location-handle');
-const locationName = document.getElementById('location-name');
-const locationAddress = document.getElementById('location-address');
-const shareLocationBtn = document.getElementById('share-location-btn');
-const navigateBtn = document.getElementById('navigate-btn');
-const routeDetailsPanel = document.getElementById('route-details-panel');
-const closeRouteDetailsBtn = document.getElementById('close-route-details');
-const routeDetailsContent = document.getElementById('route-details-content');
-const routeProgress = document.getElementById('route-progress');
-const routeProgressBar = document.getElementById('route-progress-bar');
-const routeCurrentTime = document.getElementById('route-current-time');
-const routeEta = document.getElementById('route-eta');
-const alternativeRoutes = document.getElementById('alternative-routes');
-const routeAlternativesContainer = document.getElementById('route-alternatives-container');
-const drivingModeBtn = document.getElementById('driving-mode');
-const walkingModeBtn = document.getElementById('walking-mode');
-const transitModeBtn = document.getElementById('transit-mode');
-const startRouteBtn = document.getElementById('start-route-btn');
-const clearRouteBtn = document.getElementById('clear-route-btn');
-const routeDetailsBtn = document.getElementById('route-details-btn');
-let currentUser = null;
-let map = null;
-let userMarker = null;
-let originMarker = null;
-let destinationMarker = null;
-let currentLocation = null;
-let directionsService = null;
-let directionsRenderer = null;
-let isSettingOrigin = false;
-let isSettingDestination = false;
-let routeMode = 'DRIVING';
-let currentRoute = null;
-let alternativeRoutesData = [];
-let selectedRouteIndex = 0;
-let routeUpdateInterval = null;
-let sosTimer = null;
-let sosCountdown = 10;
-let sosInterval = null;
-let activeSosId = null;
-let lastSosLocation = null;
-let firstSosReceived = {};
-const sosPassword = "stop123";
+const storage = firebase.storage();
 
+// App state encapsulation
+const appState = {
+    currentUser: null,
+    map: null,
+    userMarker: null,
+    originMarker: null,
+    destinationMarker: null,
+    currentLocation: null,
+    directionsService: null,
+    directionsRenderer: null,
+    shakeDetectionActive: false,
+    deadSwitchActive: false,
+    deadSwitchInterval: null,
+    voiceRecognition: null,
+    isRecording: false,
+    mediaRecorder: null,
+    recordedChunks: [],
+    dangerZones: [],
+    faceDetector: null,
+    sosStream: null,
+    elements: {
+        pages: document.querySelectorAll('.page'),
+        bottomNav: document.getElementById('bottom-nav'),
+        navItems: document.querySelectorAll('.bottom-nav-item'),
+        loginForm: document.getElementById('login-form'),
+        signupForm: document.getElementById('signup-form'),
+        safetyPanel: document.getElementById('safety-panel'),
+        safetyToggleBtn: document.getElementById('safety-toggle-btn'),
+        closeSafetyPanel: document.getElementById('close-safety-panel'),
+    }
+};
+
+// Utility Functions
 function showPage(pageId) {
-    pages.forEach(page => page.classList.remove('active'));
+    appState.elements.pages.forEach(page => page.classList.remove('active'));
     const page = document.getElementById(pageId + '-page');
     if (page) {
         page.classList.add('active');
         const mapContainer = document.querySelector('.map-container');
         if (pageId === 'home') {
             mapContainer.style.display = 'block';
-            if (!map && google && google.maps) initMap();
-            else if (!map) {
-                const checkGoogleMaps = setInterval(() => {
-                    if (google && google.maps) {
-                        clearInterval(checkGoogleMaps);
-                        initMap();
-                    }
-                }, 100);
-            }
+            if (!appState.map && google && google.maps) initMap();
         } else {
             mapContainer.style.display = 'none';
+            appState.elements.safetyPanel.classList.remove('active');
         }
-        navItems.forEach(item => item.classList.toggle('active', item.dataset.page === pageId));
+        appState.elements.navItems.forEach(item => item.classList.toggle('active', item.dataset.page === pageId));
     }
-    if (pageId === 'login' || pageId === 'signup') bottomNav.classList.add('hidden');
-    else if (currentUser) bottomNav.classList.remove('hidden');
+    if (pageId === 'login' || pageId === 'signup') appState.elements.bottomNav.classList.add('hidden');
+    else if (appState.currentUser) appState.elements.bottomNav.classList.remove('hidden');
 }
 
 function showToast(type, title, message, duration = 3000) {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    let icon = type === 'success' ? 'check_circle' : type === 'info' ? 'info' : 'error';
+    const icon = type === 'success' ? 'check_circle' : type === 'info' ? 'info' : 'error';
     toast.innerHTML = `<div class="toast-icon"><span class="material-icons">${icon}</span></div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>`;
-    const toastContainer = document.getElementById('toast-container');
-    toastContainer.appendChild(toast);
+    document.getElementById('toast-container').appendChild(toast);
     toast.offsetHeight;
     toast.classList.add('show');
     setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => toastContainer.removeChild(toast), 300);
+        setTimeout(() => toast.remove(), 300);
     }, duration);
 }
 
-function showModal(modal) {
-    modal.classList.add('active');
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('active');
 }
 
-function hideModal(modal) {
-    modal.classList.remove('active');
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
 }
 
+// Map Functions
 function initMap() {
-    const mapStyle = [
+    appState.map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 37.7749, lng: -122.4194 },
+        zoom: 14,
+        disableDefaultUI: true,
+        gestureHandling: 'greedy',
+        styles:  [
         {"featureType": "all", "elementType": "geometry.fill", "stylers": [{"weight": "2.00"}]},
         {"featureType": "all", "elementType": "geometry.stroke", "stylers": [{"color": "#f0f0f0"}]},
         {"featureType": "all", "elementType": "labels.text", "stylers": [{"visibility": "on"}]},
@@ -737,623 +1023,947 @@ function initMap() {
         {"featureType": "transit", "elementType": "all", "stylers": [{"visibility": "off"}]},
         {"featureType": "water", "elementType": "all", "stylers": [{"color": "#e9e9e9"}, {"visibility": "on"}]},
         {"featureType": "water", "elementType": "geometry.fill", "stylers": [{"color": "#e9e9e9"}]}
-    ];
-
-    map = new google.maps.Map(mapElement, {
-        center: { lat: 37.7749, lng: -122.4194 },
-        zoom: 14,
-        disableDefaultUI: true,
-        gestureHandling: 'greedy',
-        styles: mapStyle
+    ]
     });
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
-        map,
-        suppressMarkers: true,
-        polylineOptions: { strokeColor: '#000000', strokeWeight: 5 }
-    });
-    const originAutocomplete = new google.maps.places.Autocomplete(originSearchInput);
-    const destinationAutocomplete = new google.maps.places.Autocomplete(destinationSearchInput);
-    originAutocomplete.bindTo('bounds', map);
-    destinationAutocomplete.bindTo('bounds', map);
+    appState.directionsService = new google.maps.DirectionsService();
+    appState.directionsRenderer = new google.maps.DirectionsRenderer({ map: appState.map, suppressMarkers: true, polylineOptions: { strokeColor: '#000000', strokeWeight: 5 } });
+    const originAutocomplete = new google.maps.places.Autocomplete(document.getElementById('origin-search-input'));
+    const destinationAutocomplete = new google.maps.places.Autocomplete(document.getElementById('destination-search-input'));
+    originAutocomplete.bindTo('bounds', appState.map);
+    destinationAutocomplete.bindTo('bounds', appState.map);
     originAutocomplete.addListener('place_changed', () => {
         const place = originAutocomplete.getPlace();
         if (place.geometry) {
-            originMarker?.setMap(null);
-            originMarker = new google.maps.Marker({
-                position: place.geometry.location,
-                map,
-                title: 'Origin',
-                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
-            });
-            map.panTo(place.geometry.location);
+            appState.originMarker?.setMap(null);
+            appState.originMarker = new google.maps.Marker({ position: place.geometry.location, map: appState.map, icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' } });
+            appState.map.panTo(place.geometry.location);
         }
     });
     destinationAutocomplete.addListener('place_changed', () => {
         const place = destinationAutocomplete.getPlace();
         if (place.geometry) {
-            destinationMarker?.setMap(null);
-            destinationMarker = new google.maps.Marker({
-                position: place.geometry.location,
-                map,
-                title: 'Destination',
-                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+            appState.destinationMarker?.setMap(null);
+            appState.destinationMarker = new google.maps.Marker({ position: place.geometry.location, map: appState.map, icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' } });
+            appState.map.panTo(place.geometry.location);
+        }
+    });
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            appState.currentLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+            appState.map.setCenter(appState.currentLocation);
+            appState.userMarker = new google.maps.Marker({
+                position: appState.currentLocation,
+                map: appState.map,
+                icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: '#2196F3', fillOpacity: 1, strokeColor: '#FFFFFF', strokeWeight: 2 }
             });
-            map.panTo(place.geometry.location);
-        }
-    });
-    navigator.geolocation.getCurrentPosition(position => {
-        currentLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
-        map.setCenter(currentLocation);
-        userMarker = new google.maps.Marker({
-            position: currentLocation,
-            map,
-            title: 'You',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
-        });
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: currentLocation }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-                locationAddress.textContent = results[0].formatted_address;
-                locationName.textContent = 'Current Location';
-            }
-        });
-    }, () => {
-        showToast('error', 'Location Error', 'Unable to retrieve your location');
-    });
-
-    map.addListener('drag', () => {
-        locationInfo.classList.add('collapsed');
-    });
-
-    map.addListener('click', (event) => {
-        if (!locationInfo.contains(event.domEvent.target)) {
-            locationInfo.classList.add('collapsed');
-        }
-    });
+            updateLocationInfo(appState.currentLocation);
+            startLocationUpdates();
+        },
+        error => showToast('error', 'Location Error', 'Unable to get your location: ' + error.message)
+    );
 }
 
-loginForm.addEventListener('submit', e => {
-    e.preventDefault();
-    auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
-        .then(cred => {
-            currentUser = cred.user;
-            showPage('home');
-            loadUserProfile();
-        })
-        .catch(err => showToast('error', 'Login Failed', err.message));
-});
-
-signupForm.addEventListener('submit', e => {
-    e.preventDefault();
-    auth.createUserWithEmailAndPassword(signupEmail.value, signupPassword.value)
-        .then(cred => {
-            currentUser = cred.user;
-            return db.collection('users').doc(currentUser.uid).set({
-                fullName: signupFullName.value,
-                email: signupEmail.value,
-                phone: signupPhone.value,
-                guardianKey: generateGuardianKey(),
-                contacts: []
-            });
-        })
-        .then(() => {
-            showPage('home');
-            loadUserProfile();
-        })
-        .catch(err => showToast('error', 'Signup Failed', err.message));
-});
-
-goToSignupBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('signup');
-});
-
-goToLoginBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showPage('login');
-});
-
-navItems.forEach(item => {
-    item.addEventListener('click', e => {
-        e.preventDefault();
-        if (item.dataset.page === 'sos') return;
-        showPage(item.dataset.page);
-    });
-});
-
-logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => {
-        currentUser = null;
-        showPage('login');
-        bottomNav.classList.add('hidden');
-    });
-});
-
-function generateGuardianKey() {
-    return 'G' + Math.random().toString(36).substr(2, 9).toUpperCase();
+function startLocationUpdates() {
+    let lastUpdate = 0;
+    const updateInterval = setInterval(() => {
+        const now = Date.now();
+        if (now - lastUpdate < 5000) return; // Throttle to 5 seconds
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const newLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                appState.userMarker.setPosition(newLocation);
+                appState.currentLocation = newLocation;
+                checkDangerZones(newLocation);
+                lastUpdate = now;
+            },
+            error => console.warn('Location update failed:', error)
+        );
+    }, 1000);
+    return () => clearInterval(updateInterval); // Cleanup function
 }
 
-function loadUserProfile() {
-    if (!currentUser) return;
-    db.collection('users').doc(currentUser.uid).get().then(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            profileName.textContent = data.fullName;
-            profileEmail.textContent = data.email;
-            guardianKeyDisplay.textContent = data.guardianKey;
-            loadContacts(data.contacts);
+function updateLocationInfo(location) {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+            document.getElementById('location-name').textContent = 'Current Location';
+            document.getElementById('location-address').textContent = results[0].formatted_address;
         }
     });
-    listenForSosAlerts();
-}
-
-copyKeyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(guardianKeyDisplay.textContent).then(() => {
-        showToast('success', 'Key Copied', 'Guardian key copied to clipboard');
-    });
-});
-
-addContactBtn.addEventListener('click', () => showModal(addContactModal));
-addFirstContactBtn.addEventListener('click', () => showModal(addContactModal));
-closeAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-cancelAddContactBtn.addEventListener('click', () => hideModal(addContactModal));
-
-addContactForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const key = contactGuardianKey.value.trim();
-    const relation = contactRelation.value;
-    db.collection('users').where('guardianKey', '==', key).get().then(querySnapshot => {
-        if (querySnapshot.empty) {
-            showToast('error', 'Invalid Key', 'No user found with this Guardian Key');
-            return;
-        }
-        const contactUser = querySnapshot.docs[0].data();
-        const contactData = {
-            uid: querySnapshot.docs[0].id,
-            fullName: contactUser.fullName,
-            email: contactUser.email,
-            phone: contactUser.phone,
-            relation: relation,
-            guardianKey: key
-        };
-        db.collection('users').doc(currentUser.uid).update({
-            contacts: firebase.firestore.FieldValue.arrayUnion(contactData)
-        }).then(() => {
-            hideModal(addContactModal);
-            showToast('success', 'Contact Added', `${contactUser.fullName} added as ${relation}`);
-            loadContacts([...(doc.data().contacts || []), contactData]);
-        });
-    }).catch(err => showToast('error', 'Error', err.message));
-});
-
-function loadContacts(contacts) {
-    contactsList.innerHTML = '';
-    if (contacts.length === 0) {
-        emptyContacts.classList.remove('hidden');
-    } else {
-        emptyContacts.classList.add('hidden');
-        contacts.forEach((contact, index) => {
-            const contactItem = document.createElement('div');
-            contactItem.className = 'contact-item';
-            contactItem.innerHTML = `
-                <div class="contact-info">
-                    <div class="contact-avatar"><span class="material-icons">person</span></div>
-                    <div class="contact-details">
-                        <h4>${contact.fullName}</h4>
-                        <div class="contact-relation">${contact.relation} • ${contact.phone}</div>
-                    </div>
-                </div>
-                <div class="contact-actions">
-                    <button class="btn-icon delete-contact" data-index="${index}">
-                        <span class="material-icons">delete</span>
-                    </button>
-                </div>
-            `;
-            contactsList.appendChild(contactItem);
-        });
-        document.querySelectorAll('.delete-contact').forEach(btn => {
-            btn.addEventListener('click', e => {
-                const index = parseInt(e.currentTarget.dataset.index);
-                const contactToRemove = contacts[index];
-                db.collection('users').doc(currentUser.uid).update({
-                    contacts: firebase.firestore.FieldValue.arrayRemove(contactToRemove)
-                }).then(() => {
-                    contacts.splice(index, 1);
-                    loadContacts(contacts);
-                    showToast('success', 'Contact Removed', `${contactToRemove.fullName} removed`);
-                });
-            });
-        });
-    }
-}
-
-currentLocationOriginBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        originSearchInput.value = 'Current Location';
-        originMarker?.setMap(null);
-        originMarker = new google.maps.Marker({
-            position: currentLocation,
-            map,
-            title: 'Origin',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
-        });
-        map.panTo(currentLocation);
-    }
-});
-
-currentLocationDestBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        destinationSearchInput.value = 'Current Location';
-        destinationMarker?.setMap(null);
-        destinationMarker = new google.maps.Marker({
-            position: currentLocation,
-            map,
-            title: 'Destination',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
-        });
-        map.panTo(currentLocation);
-    }
-});
-
-swapLocationsBtn.addEventListener('click', () => {
-    const temp = originSearchInput.value;
-    originSearchInput.value = destinationSearchInput.value;
-    destinationSearchInput.value = temp;
-    const tempMarker = originMarker;
-    originMarker = destinationMarker;
-    destinationMarker = tempMarker;
-    if (originMarker) originMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' });
-    if (destinationMarker) destinationMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' });
-});
-
-routeSearchBtn.addEventListener('click', () => {
-    calculateRoute();
-    locationInfo.classList.remove('collapsed');
-});
-
-drivingModeBtn.addEventListener('click', () => setRouteMode('DRIVING'));
-walkingModeBtn.addEventListener('click', () => setRouteMode('WALKING'));
-transitModeBtn.addEventListener('click', () => setRouteMode('TRANSIT'));
-
-function setRouteMode(mode) {
-    routeMode = mode;
-    [drivingModeBtn, walkingModeBtn, transitModeBtn].forEach(btn => btn.classList.remove('active'));
-    if (mode === 'DRIVING') drivingModeBtn.classList.add('active');
-    else if (mode === 'WALKING') walkingModeBtn.classList.add('active');
-    else if (mode === 'TRANSIT') transitModeBtn.classList.add('active');
-    if (originMarker && destinationMarker) calculateRoute();
 }
 
 function calculateRoute() {
-    if (!originMarker || !destinationMarker) {
-        showToast('error', 'Route Error', 'Please set both origin and destination');
+    const origin = document.getElementById('origin-search-input').value;
+    const destination = document.getElementById('destination-search-input').value;
+    if (!origin || !destination) {
+        showToast('error', 'Route Error', 'Please enter both origin and destination.');
         return;
     }
-    const request = {
-        origin: originMarker.getPosition(),
-        destination: destinationMarker.getPosition(),
-        travelMode: routeMode,
+    const travelMode = document.querySelector('.route-mode-btn.active')?.id.replace('-mode', '').toUpperCase() || 'DRIVING';
+    appState.directionsService.route({
+        origin,
+        destination,
+        travelMode: google.maps.TravelMode[travelMode],
         provideRouteAlternatives: true
-    };
-    directionsService.route(request, (result, status) => {
+    }, (result, status) => {
         if (status === 'OK') {
-            currentRoute = result;
-            directionsRenderer.setDirections(result);
-            selectedRouteIndex = 0;
-            alternativeRoutesData = result.routes;
-            displayAlternativeRoutes();
-            updateRouteProgress();
-            routeProgress.style.display = 'block';
-            alternativeRoutes.style.display = 'block';
-            locationInfo.classList.remove('collapsed');
+            appState.directionsRenderer.setDirections(result);
+            document.getElementById('route-progress').style.display = 'block';
+            document.getElementById('alternative-routes').style.display = 'block';
+            const alternativesContainer = document.getElementById('route-alternatives-container');
+            alternativesContainer.innerHTML = '';
+            result.routes.forEach((route, index) => {
+                const routeOption = document.createElement('div');
+                routeOption.className = `route-option ${index === 0 ? 'active' : ''}`;
+                routeOption.dataset.index = index;
+                routeOption.innerHTML = `
+                    <div class="route-option-icon"><span class="material-icons">directions_${travelMode.toLowerCase()}</span></div>
+                    <div class="route-option-info">
+                        <div class="route-option-title">Route ${index + 1}</div>
+                        <div class="route-option-details">${route.summary} - ${route.legs[0].distance.text}, ${route.legs[0].duration.text}</div>
+                    </div>
+                `;
+                routeOption.addEventListener('click', () => {
+                    document.querySelectorAll('.route-option').forEach(opt => opt.classList.remove('active'));
+                    routeOption.classList.add('active');
+                    appState.directionsRenderer.setRouteIndex(index);
+                    displayRouteDetails(result.routes[index]);
+                });
+                alternativesContainer.appendChild(routeOption);
+            });
+            displayRouteDetails(result.routes[0]);
+            document.getElementById('location-info').classList.remove('collapsed');
+            showToast('success', 'Route Found', 'Safe route calculated successfully.');
         } else {
-            showToast('error', 'Route Error', 'Unable to calculate route');
+            showToast('error', 'Route Error', 'Unable to calculate route: ' + status);
         }
     });
 }
-
-function displayAlternativeRoutes() {
-    routeAlternativesContainer.innerHTML = '';
-    alternativeRoutesData.forEach((route, index) => {
-        const routeOption = document.createElement('div');
-        routeOption.className = `route-option ${index === selectedRouteIndex ? 'active' : ''}`;
-        routeOption.innerHTML = `
-            <div class="route-option-icon"><span class="material-icons">${routeMode === 'DRIVING' ? 'directions_car' : routeMode === 'WALKING' ? 'directions_walk' : 'directions_transit'}</span></div>
-            <div class="route-option-info">
-                <div class="route-option-title">${route.summary || 'Route ' + (index + 1)}</div>
-                <div class="route-option-details">${route.legs[0].distance.text} • ${route.legs[0].duration.text}</div>
-            </div>
-        `;
-        routeOption.addEventListener('click', () => {
-            selectedRouteIndex = index;
-            directionsRenderer.setRouteIndex(index);
-            document.querySelectorAll('.route-option').forEach(opt => opt.classList.remove('active'));
-            routeOption.classList.add('active');
-            updateRouteProgress();
-        });
-        routeAlternativesContainer.appendChild(routeOption);
-    });
-}
-
-function updateRouteProgress() {
-    if (!currentRoute || !currentRoute.routes[selectedRouteIndex]) return;
-    const route = currentRoute.routes[selectedRouteIndex];
-    const leg = route.legs[0];
-    navigator.geolocation.getCurrentPosition(position => {
-        const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-        userMarker.setPosition(currentPos);
-        const totalDistance = leg.distance.value;
-        const path = google.maps.geometry.encoding.decodePath(route.overview_polyline);
-        let distanceTravelled = 0;
-        for (let i = 0; i < path.length - 1; i++) {
-            if (google.maps.geometry.spherical.computeDistanceBetween(currentPos, path[i]) < 50) {
-                distanceTravelled = google.maps.geometry.spherical.computeDistanceBetween(path[0], path[i]);
-                break;
-            }
-        }
-        const progress = Math.min((distanceTravelled / totalDistance) * 100, 100);
-        routeProgressBar.style.width = `${progress}%`;
-        routeCurrentTime.textContent = `Travelled: ${Math.round(distanceTravelled / 1000)} km`;
-        routeEta.textContent = `ETA: ${leg.duration.text}`;
-    });
-}
-
-startRouteBtn.addEventListener('click', () => {
-    if (currentRoute) {
-        routeUpdateInterval = setInterval(updateRouteProgress, 10000);
-        showToast('success', 'Route Started', 'Navigation has begun');
-    } else {
-        showToast('error', 'No Route', 'Calculate a route first');
-    }
-});
-
-clearRouteBtn.addEventListener('click', () => {
-    directionsRenderer.setDirections({ routes: [] });
-    originMarker?.setMap(null);
-    destinationMarker?.setMap(null);
-    originSearchInput.value = '';
-    destinationSearchInput.value = '';
-    currentRoute = null;
-    routeProgress.style.display = 'none';
-    alternativeRoutes.style.display = 'none';
-    clearInterval(routeUpdateInterval);
-    routeDetailsPanel.classList.remove('visible');
-});
-
-routeDetailsBtn.addEventListener('click', () => {
-    if (currentRoute) {
-        routeDetailsPanel.classList.toggle('visible');
-        if (routeDetailsPanel.classList.contains('visible')) {
-            displayRouteDetails(currentRoute);
-        }
-    } else {
-        showToast('error', 'No Route', 'Calculate a route first');
-    }
-});
-
-closeRouteDetailsBtn.addEventListener('click', () => {
-    routeDetailsPanel.classList.remove('visible');
-});
 
 function displayRouteDetails(route) {
+    const routeDetailsPanel = document.getElementById('route-details-panel');
+    const routeDetailsContent = document.getElementById('route-details-content');
     routeDetailsContent.innerHTML = '';
-    const steps = route.routes[selectedRouteIndex].legs[0].steps;
-    steps.forEach((step, index) => {
+    route.legs[0].steps.forEach((step, index) => {
         const stepItem = document.createElement('div');
         stepItem.className = 'step-item';
         stepItem.innerHTML = `
             <div class="step-number">${index + 1}</div>
-            <div class="step-content">${step.instructions}</div>
+            <div class="step-content">${step.instructions} (${step.distance.text})</div>
         `;
         routeDetailsContent.appendChild(stepItem);
     });
+    routeDetailsPanel.classList.add('visible');
 }
 
-shareLocationBtn.addEventListener('click', () => {
-    if (currentLocation) {
-        const locationUrl = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
-        navigator.clipboard.writeText(locationUrl).then(() => {
-            showToast('success', 'Location Copied', 'Location URL copied to clipboard');
+function startRouteTracking() {
+    const routeProgressBar = document.getElementById('route-progress-bar');
+    const routeCurrentTime = document.getElementById('route-current-time');
+    const routeEta = document.getElementById('route-eta');
+    let progress = 0;
+    const interval = setInterval(() => {
+        navigator.geolocation.getCurrentPosition(position => {
+            const currentPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+            const route = appState.directionsRenderer.getDirections().routes[appState.directionsRenderer.getRouteIndex()];
+            const totalDistance = route.legs[0].distance.value;
+            const remainingDistance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(currentPos),
+                new google.maps.LatLng(route.legs[0].end_location)
+            );
+            progress = Math.min(100, ((totalDistance - remainingDistance) / totalDistance) * 100);
+            routeProgressBar.style.width = `${progress}%`;
+            routeCurrentTime.textContent = new Date().toLocaleTimeString();
+            const etaTime = new Date(Date.now() + (remainingDistance / 1000) * 1000);
+            routeEta.textContent = `ETA: ${etaTime.toLocaleTimeString()}`;
         });
-    }
-});
+    }, 5000);
+    document.getElementById('start-route-btn').style.display = 'none';
+    return interval;
+}
 
-navigateBtn.addEventListener('click', () => {
-    if (currentLocation && destinationMarker) {
-        originSearchInput.value = 'Current Location';
-        originMarker?.setMap(null);
-        originMarker = new google.maps.Marker({
-            position: currentLocation,
-            map,
-            title: 'Origin',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+// Safety Features
+function startShakeDetection(sensitivity) {
+    const handleShake = e => {
+        if (!appState.shakeDetectionActive) return;
+        const acceleration = e.accelerationIncludingGravity;
+        const totalAcceleration = Math.sqrt(acceleration.x ** 2 + acceleration.y ** 2 + acceleration.z ** 2);
+        if (totalAcceleration > sensitivity * 3) {
+            triggerSOS();
+            appState.shakeDetectionActive = false;
+            window.removeEventListener('devicemotion', handleShake);
+        }
+    };
+    window.addEventListener('devicemotion', handleShake);
+}
+
+function startDeadSwitch(duration, message) {
+    let timeLeft = duration;
+    appState.deadSwitchActive = true;
+    document.getElementById('dead-switch-timer').textContent = formatTime(timeLeft / 1000);
+    appState.deadSwitchInterval = setInterval(() => {
+        timeLeft -= 1000;
+        document.getElementById('dead-switch-timer').textContent = formatTime(timeLeft / 1000);
+        if (timeLeft <= 0) {
+            clearInterval(appState.deadSwitchInterval);
+            triggerSOS(message);
+            appState.deadSwitchActive = false;
+        }
+    }, 1000);
+}
+
+function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+async function shareTransitJourney(transitData) {
+    try {
+        await db.collection('users').doc(appState.currentUser.uid).collection('transitJourneys').add({
+            ...transitData,
+            location: appState.currentLocation,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        calculateRoute();
-    } else {
-        showToast('error', 'Navigation Error', 'Set a destination first');
+        notifyEmergencyContacts(`Transit Journey: ${transitData.start} to ${transitData.destination} via ${transitData.type}. Expected arrival: ${transitData.arrivalTime}`);
+        showToast('success', 'Journey Shared', 'Your transit journey has been shared.');
+    } catch (error) {
+        showToast('error', 'Share Failed', error.message);
     }
-});
+}
 
-locationHandle.addEventListener('click', () => {
-    locationInfo.classList.toggle('collapsed');
-});
-
-locationInfoHeader.addEventListener('click', () => {
-    locationInfo.classList.toggle('collapsed');
-});
-
-sosButton.addEventListener('click', () => {
-    if (activeSosId) {
-        showModal(sosEndModal);
-    } else {
-        showModal(sosConfirmModal);
-        sosCountdown = 10;
-        document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-        sosInterval = setInterval(() => {
-            sosCountdown--;
-            document.getElementById('sos-timer').textContent = `Time remaining: ${sosCountdown}s`;
-            if (sosCountdown <= 0) {
-                clearInterval(sosInterval);
-                sendSosAlert();
-            }
-        }, 1000);
-    }
-});
-
-cancelSosBtn.addEventListener('click', () => {
-    const password = document.getElementById('sos-password').value;
-    if (password === sosPassword) {
-        clearInterval(sosInterval);
-        hideModal(sosConfirmModal);
-        document.getElementById('sos-password').value = '';
-    } else {
-        showToast('error', 'Invalid Password', 'Please enter the correct password');
-    }
-});
-
-closeSosConfirmBtn.addEventListener('click', () => {
-    const password = document.getElementById('sos-password').value;
-    if (password === sosPassword) {
-        clearInterval(sosInterval);
-        hideModal(sosConfirmModal);
-        document.getElementById('sos-password').value = '';
-    } else {
-        showToast('error', 'Invalid Password', 'Password required to close');
-    }
-});
-
-confirmSosBtn.addEventListener('click', () => {
-    clearInterval(sosInterval);
-    sendSosAlert();
-});
-
-function sendSosAlert() {
-    if (!currentLocation) {
-        showToast('error', 'Location Error', 'Unable to get your location');
+function startVoiceRecognition() {
+    if (!('webkitSpeechRecognition' in window)) {
+        showToast('error', 'Voice Error', 'Voice recognition not supported in this browser.');
         return;
     }
-    const sosData = {
-        userId: currentUser.uid,
-        location: new firebase.firestore.GeoPoint(currentLocation.lat, currentLocation.lng),
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        active: true
+    appState.voiceRecognition = new webkitSpeechRecognition();
+    appState.voiceRecognition.continuous = true;
+    appState.voiceRecognition.interimResults = false;
+    appState.voiceRecognition.lang = 'en-US';
+    appState.voiceRecognition.onresult = event => {
+        const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        if (transcript.includes('help') || transcript.includes('sos') || transcript.includes('emergency')) {
+            triggerSOS();
+        }
     };
-    db.collection('sos_alerts').add(sosData).then(docRef => {
-        activeSosId = docRef.id;
-        lastSosLocation = currentLocation;
-        hideModal(sosConfirmModal);
-        showModal(sosSuccessModal);
-        sosIcon.textContent = 'sos';
-        notifyEmergencyContacts();
-    }).catch(err => showToast('error', 'SOS Error', err.message));
+    appState.voiceRecognition.onstart = () => {
+        document.getElementById('voice-indicator').classList.add('listening');
+    };
+    appState.voiceRecognition.onend = () => {
+        document.getElementById('voice-indicator').classList.remove('listening');
+        if (document.getElementById('voice-detection-toggle').checked) appState.voiceRecognition.start();
+    };
+    appState.voiceRecognition.start();
 }
 
-closeSosSuccessBtn.addEventListener('click', () => {
-    hideModal(sosSuccessModal);
-});
-
-cancelEndSosBtn.addEventListener('click', () => {
-    hideModal(sosEndModal);
-    document.getElementById('sos-end-password').value = '';
-});
-
-closeSosEndBtn.addEventListener('click', () => {
-    const password = document.getElementById('sos-end-password').value;
-    if (password === sosPassword) {
-        hideModal(sosEndModal);
-        document.getElementById('sos-end-password').value = '';
-    } else {
-        showToast('error', 'Invalid Password', 'Password required to close');
+function stopVoiceRecognition() {
+    if (appState.voiceRecognition) {
+        appState.voiceRecognition.stop();
+        appState.voiceRecognition = null;
     }
-});
+}
 
-confirmEndSosBtn.addEventListener('click', () => {
-    const password = document.getElementById('sos-end-password').value;
-    if (password === sosPassword) {
-        db.collection('sos_alerts').doc(activeSosId).update({ active: false }).then(() => {
-            activeSosId = null;
-            sosIcon.textContent = 'emergency';
-            hideModal(sosEndModal);
-            showToast('success', 'SOS Ended', 'SOS alert has been deactivated');
-            document.getElementById('sos-end-password').value = '';
+function testVoiceCommand() {
+    if (!appState.voiceRecognition) startVoiceRecognition();
+    setTimeout(() => stopVoiceRecognition(), 5000);
+}
+
+async function saveDangerZone(description, radius) {
+    const dangerZone = {
+        location: appState.currentLocation,
+        description,
+        radius,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+        await db.collection('users').doc(appState.currentUser.uid).collection('dangerZones').add(dangerZone);
+        appState.dangerZones.push(dangerZone);
+        showToast('success', 'Danger Zone Saved', 'Danger zone marked.');
+    } catch (error) {
+        showToast('error', 'Save Failed', error.message);
+    }
+}
+
+function checkDangerZones(location) {
+    appState.dangerZones.forEach(zone => {
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(location),
+            new google.maps.LatLng(zone.location)
+        );
+        if (distance < zone.radius) {
+            showToast('error', 'Danger Zone Alert', `You are near: ${zone.description}`);
+        }
+    });
+}
+
+async function startEvidenceRecording(type) {
+    if (appState.isRecording) {
+        stopRecording('evidence-recording-status');
+        return;
+    }
+    const constraints = type === 'audio' ? { audio: true } : { audio: true, video: true };
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        appState.mediaRecorder = new MediaRecorder(stream);
+        appState.recordedChunks = [];
+        appState.mediaRecorder.ondataavailable = eantics => appState.recordedChunks.push(e.data);
+        appState.mediaRecorder.onstop = () => {
+            const blob = new Blob(appState.recordedChunks, { type: type === 'audio' ? 'audio/webm' : 'video/webm' });
+            stream.getTracks().forEach(track => track.stop());
+            document.getElementById(type === 'audio' ? 'audio-evidence' : 'video-evidence').textContent = 'Start ' + type.charAt(0).toUpperCase() + type.slice(1);
+        };
+        appState.mediaRecorder.start();
+        appState.isRecording = true;
+        document.getElementById('evidence-recording-status').style.display = 'flex';
+        document.getElementById(type === 'audio' ? 'audio-evidence' : 'video-evidence').textContent = 'Stop ' + type.charAt(0).toUpperCase() + type.slice(1);
+        if (type === 'video') detectFaces(stream);
+    } catch (error) {
+        showToast('error', 'Recording Error', error.message);
+    }
+}
+
+async function capturePhoto() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        await new Promise(resolve => video.onloadedmetadata = resolve);
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        appState.recordedChunks = [await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'))];
+        stream.getTracks().forEach(track => track.stop());
+        showToast('success', 'Photo Captured', 'Photo evidence recorded.');
+    } catch (error) {
+        showToast('error', 'Photo Error', error.message);
+    }
+}
+
+async function detectFaces(stream) {
+    if (!appState.faceDetector) await initFaceDetection();
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.play();
+    const interval = setInterval(async () => {
+        const faces = await appState.faceDetector.estimateFaces(video);
+        if (faces.length > 0) {
+            showToast('info', 'Face Detected', `${faces.length} face(s) detected in video.`);
+        }
+    }, 1000);
+    stream.getTracks()[0].onended = () => clearInterval(interval);
+}
+
+async function saveEvidence() {
+    if (appState.recordedChunks.length === 0) {
+        showToast('error', 'No Evidence', 'Please record evidence first.');
+        return;
+    }
+    const blob = new Blob(appState.recordedChunks, { type: appState.recordedChunks[0].type });
+    const description = document.getElementById('evidence-description').value;
+    try {
+        const storageRef = storage.ref(`evidence/${appState.currentUser.uid}/${Date.now()}`);
+        await storageRef.put(blob);
+        const url = await storageRef.getDownloadURL();
+        await db.collection('users').doc(appState.currentUser.uid).collection('evidence').add({
+            url,
+            type: blob.type,
+            description,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-    } else {
-        showToast('error', 'Invalid Password', 'Please enter the correct password');
+        hideModal('evidence-modal');
+        showToast('success', 'Evidence Saved', 'Evidence uploaded securely148.');
+        appState.recordedChunks = [];
+    } catch (error) {
+        showToast('error', 'Save Failed', error.message);
     }
-});
+}
 
-function notifyEmergencyContacts() {
-    db.collection('users').doc(currentUser.uid).get().then(doc => {
-        const contacts = doc.data().contacts || [];
-        contacts.forEach(contact => {
-            db.collection('users').doc(contact.uid).collection('notifications').add({
-                type: 'sos',
-                from: currentUser.uid,
-                fullName: doc.data().fullName,
-                location: new firebase.firestore.GeoPoint(currentLocation.lat, currentLocation.lng),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                read: false
+function startFakeCall(callerName, delay) {
+    setTimeout(() => {
+        const audio = new Audio('https://www.soundjay.com/phone/telephone-ring-01a.mp3');
+        audio.loop = true;
+        audio.play();
+        showToast('info', 'Fake Call', `${callerName} is calling...`, 10000);
+        setTimeout(() => audio.pause(), 10000);
+    }, delay);
+}
+
+function triggerSOS(message = 'Emergency SOS triggered!') {
+    showModal('sos-confirm-modal');
+    let timeLeft = 10;
+    const timerDisplay = document.getElementById('sos-timer');
+    timerDisplay.textContent = `Time remaining: ${timeLeft}s`;
+    const sosInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `Time remaining: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+            clearInterval(sosInterval);
+            sendSOS(message);
+            hideModal('sos-confirm-modal');
+        }
+    }, 1000);
+    return sosInterval; // For potential cleanup
+}
+
+async function startSOSRecording(type) {
+    if (appState.isRecording) {
+        stopRecording('sos-recording-status');
+        return;
+    }
+    const constraints = type === 'audio' ? { audio: true } : { audio: true, video: true };
+    try {
+        appState.sosStream = await navigator.mediaDevices.getUserMedia(constraints);
+        appState.mediaRecorder = new MediaRecorder(appState.sosStream);
+        appState.recordedChunks = [];
+        appState.mediaRecorder.ondataavailable = e => appState.recordedChunks.push(e.data);
+        appState.mediaRecorder.onstop = () => {
+            const blob = new Blob(appState.recordedChunks, { type: type === 'audio' ? 'audio/webm' : 'video/webm' });
+            appState.sosStream.getTracks().forEach(track => track.stop());
+            saveSOSRecording(blob);
+            document.getElementById(type === 'audio' ? 'sos-audio-btn' : 'sos-video-btn').innerHTML = `<span class="material-icons mr-2">${type === 'audio' ? 'mic' : 'videocam'}</span>${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        };
+        appState.mediaRecorder.start();
+        appState.isRecording = true;
+        document.getElementById('sos-recording-status').style.display = 'flex';
+        document.getElementById(type === 'audio' ? 'sos-audio-btn' : 'sos-video-btn').innerHTML = `<span class="material-icons mr-2">stop</span>Stop ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        if (type === 'video') detectFaces(appState.sosStream);
+    } catch (error) {
+        showToast('error', 'Recording Error', error.message);
+    }
+}
+
+function stopRecording(statusId) {
+    if (appState.mediaRecorder && appState.isRecording) {
+        appState.mediaRecorder.stop();
+        appState.isRecording = false;
+        document.getElementById(statusId).style.display = 'none';
+    }
+}
+
+async function saveSOSRecording(blob) {
+    try {
+        const storageRef = storage.ref(`sos/${appState.currentUser.uid}/${Date.now()}`);
+        await storageRef.put(blob);
+        const url = await storageRef.getDownloadURL();
+        await db.collection('users').doc(appState.currentUser.uid).collection('sosRecordings').add({
+            url,
+            type: blob.type,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('success', 'Recording Saved', 'SOS recording uploaded securely.');
+    } catch (error) {
+        showToast('error', 'Save Failed', error.message);
+    }
+}
+
+async function sendSOS(message) {
+    const sosData = {
+        message,
+        location: appState.currentLocation,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+        await db.collection('users').doc(appState.currentUser.uid).collection('sosAlerts').add(sosData);
+        notifyEmergencyContacts(`${appState.currentUser.displayName || 'User'} triggered an SOS: ${message}`, sosData.location);
+        showModal('sos-success-modal');
+    } catch (error) {
+        showToast('error', 'SOS Failed', error.message);
+    }
+}
+
+async function notifyEmergencyContacts(message, location = appState.currentLocation) {
+    if (!appState.currentUser || !appState.currentUser.uid) {
+        console.warn('Cannot notify emergency contacts: No authenticated user.');
+        showToast('error', 'Notification Error', 'Please log in to send notifications.');
+        return;
+    }
+
+    try {
+        const contactsSnapshot = await db.collection('users')
+            .doc(appState.currentUser.uid)
+            .collection('emergencyContacts')
+            .get();
+
+        if (contactsSnapshot.empty) {
+            console.warn('No emergency contacts found.');
+            return;
+        }
+
+        const notificationPromises = contactsSnapshot.docs.map(async (doc) => {
+            const contact = doc.data();
+
+            // Validate guardianKey
+            if (!contact.guardianKey || typeof contact.guardianKey !== 'string') {
+                console.warn(`Skipping contact ${doc.id}: Invalid or missing guardianKey`);
+                return;
+            }
+
+            const contactDoc = await db.collection('users')
+                .where('guardianKey', '==', contact.guardianKey)
+                .get();
+
+            if (!contactDoc.empty) {
+                const contactUid = contactDoc.docs[0].id;
+                await db.collection('users')
+                    .doc(contactUid)
+                    .collection('notifications')
+                    .add({
+                        message,
+                        location,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        from: appState.currentUser.uid
+                    });
+            } else {
+                console.warn(`No user found with guardianKey: ${contact.guardianKey}`);
+            }
+        });
+
+        await Promise.all(notificationPromises);
+        showToast('success', 'Notifications Sent', 'Emergency contacts notified.');
+    } catch (error) {
+        console.warn('Notification failed:', error);
+        showToast('error', 'Notification Failed', error.message);
+    }
+}
+
+// Profile Functions
+async function loadUserProfile() {
+    try {
+        const userDoc = await db.collection('users').doc(appState.currentUser.uid).get();
+        if (userDoc.exists) {
+            const data = userDoc.data();
+            document.getElementById('profile-name').textContent = data.fullname;
+            document.getElementById('profile-email').textContent = data.email;
+            document.getElementById('guardian-key').textContent = data.guardianKey;
+            loadEmergencyContacts();
+        }
+    } catch (error) {
+        showToast('error', 'Profile Load Failed', error.message);
+    }
+}
+
+function generateGuardianKey() {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    return 'G' + Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+async function loadEmergencyContacts() {
+    const contactsList = document.getElementById('contacts-list');
+    contactsList.innerHTML = '';
+    try {
+        const contactsSnapshot = await db.collection('users').doc(appState.currentUser.uid).collection('emergencyContacts').get();
+        if (contactsSnapshot.empty) {
+            contactsList.innerHTML = `
+                <div class="empty-state" id="empty-contacts">
+                    <span class="material-icons empty-icon">group</span>
+                    <p>No emergency contacts added yet</p>
+                    <button class="btn btn-primary" id="add-first-contact-btn">
+                        <span class="material-icons mr-2">add</span>Add Contact
+                    </button>
+                </div>
+            `;
+            document.getElementById('add-first-contact-btn')?.addEventListener('click', () => showModal('add-contact-modal'));
+        } else {
+            contactsSnapshot.forEach(doc => {
+                const contact = doc.data();
+                const contactItem = document.createElement('div');
+                contactItem.className = 'contact-item';
+                contactItem.innerHTML = `
+                    <div class="contact-info">
+                        <div class="contact-avatar"><span class="material-icons">person</span></div>
+                        <div class="contact-details">
+                            <h4>${contact.name || 'Unknown'}</h4>
+                            <div class="contact-relation">${contact.relation}</div>
+                        </div>
+                    </div>
+                    <div class="contact-actions">
+                        <button class="btn-icon delete-contact" data-id="${doc.id}">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                `;
+                contactsList.appendChild(contactItem);
             });
+            document.querySelectorAll('.delete-contact').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    await db.collection('users').doc(appState.currentUser.uid).collection('emergencyContacts').doc(btn.dataset.id).delete();
+                    btn.parentElement.parentElement.classList.add('slide-out');
+                    setTimeout(() => loadEmergencyContacts(), 300);
+                });
+            });
+        }
+    } catch (error) {
+        showToast('error', 'Contacts Load Failed', error.message);
+    }
+}
+
+async function initFaceDetection() {
+    try {
+        const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
+        appState.faceDetector = await faceDetection.createDetector(model, { runtime: 'tfjs', maxFaces: 10 });
+    } catch (error) {
+        console.warn('Face detection initialization failed:', error);
+    }
+}
+
+// Event Listeners Setup
+function setupEventListeners() {
+    auth.onAuthStateChanged(user => {
+        appState.currentUser = user;
+        if (user) {
+            loadUserProfile();
+            showPage('home');
+        } else {
+            showPage('login');
+        }
+    });
+
+    appState.elements.loginForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        try {
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            appState.currentUser = userCredential.user;
+            await loadUserProfile();
+            showPage('home');
+            showToast('success', 'Login Successful', 'Welcome back!');
+        } catch (error) {
+            showToast('error', 'Login Failed', error.message);
+        }
+    });
+
+    appState.elements.signupForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const fullname = document.getElementById('signup-fullname').value;
+        const email = document.getElementById('signup-email').value;
+        const phone = document.getElementById('signup-phone').value;
+        const password = document.getElementById('signup-password').value;
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            appState.currentUser = userCredential.user;
+            const guardianKey = generateGuardianKey();
+            await db.collection('users').doc(appState.currentUser.uid).set({
+                fullname,
+                email,
+                phone,
+                guardianKey,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            await loadUserProfile();
+            showPage('home');
+            showToast('success', 'Signup Successful', 'Welcome to Guardian!');
+        } catch (error) {
+            showToast('error', 'Signup Failed', error.message);
+        }
+    });
+
+    document.getElementById('add-contact-btn')?.addEventListener('click', () => showModal('add-contact-modal'));
+    document.getElementById('add-contact-form')?.addEventListener('submit', async e => {
+        e.preventDefault();
+        const guardianKey = document.getElementById('contact-guardian-key').value;
+        const relation = document.getElementById('contact-relation').value;
+        try {
+            const userSnapshot = await db.collection('users').where('guardianKey', '==', guardianKey).get();
+            if (userSnapshot.empty) {
+                showToast('error', 'Invalid Key', 'No user found with this Guardian Key.');
+                return;
+            }
+            const contactUser = userSnapshot.docs[0].data();
+            await db.collection('users').doc(appState.currentUser.uid).collection('emergencyContacts').add({
+                guardianKey,
+                name: contactUser.fullname,
+                email: contactUser.email,
+                phone: contactUser.phone,
+                relation,
+                addedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            hideModal('add-contact-modal');
+            loadEmergencyContacts();
+            showToast('success', 'Contact Added', 'Emergency contact added successfully.');
+        } catch (error) {
+            showToast('error', 'Error', error.message);
+        }
+    });
+
+    ['close-add-contact', 'cancel-add-contact'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', () => hideModal('add-contact-modal'));
+    });
+
+    document.getElementById('copy-key-btn')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('guardian-key').textContent);
+        showToast('success', 'Key Copied', 'Guardian Key copied to clipboard.');
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        await auth.signOut();
+        appState.currentUser = null;
+        showPage('login');
+        appState.elements.bottomNav.classList.add('hidden');
+        showToast('success', 'Logged Out', 'You have been logged out.');
+    });
+
+    appState.elements.navItems.forEach(item => {
+        item.addEventListener('click', e => {
+            e.preventDefault();
+            if (item.dataset.page === 'sos') {
+                triggerSOS();
+            } else {
+                showPage(item.dataset.page);
+            }
+        });
+    });
+
+    document.getElementById('go-to-signup')?.addEventListener('click', e => {
+        e.preventDefault();
+        showPage('signup');
+    });
+
+    document.getElementById('go-to-login')?.addEventListener('click', e => {
+        e.preventDefault();
+        showPage('login');
+    });
+
+    document.getElementById('current-location-origin-btn')?.addEventListener('click', () => {
+        if (appState.currentLocation) {
+            document.getElementById('origin-search-input').value = 'My Location';
+            appState.originMarker?.setMap(null);
+            appState.originMarker = new google.maps.Marker({
+                position: appState.currentLocation,
+                map: appState.map,
+                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
+            });
+        }
+    });
+
+    document.getElementById('current-location-dest-btn')?.addEventListener('click', () => {
+        if (appState.currentLocation) {
+            document.getElementById('destination-search-input').value = 'My Location';
+            appState.destinationMarker?.setMap(null);
+            appState.destinationMarker = new google.maps.Marker({
+                position: appState.currentLocation,
+                map: appState.map,
+                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+            });
+        }
+    });
+
+    document.getElementById('swap-locations-btn')?.addEventListener('click', () => {
+        const originInput = document.getElementById('origin-search-input');
+        const destInput = document.getElementById('destination-search-input');
+        [originInput.value, destInput.value] = [destInput.value, originInput.value];
+        [appState.originMarker, appState.destinationMarker] = [appState.destinationMarker, appState.originMarker];
+        if (appState.originMarker) appState.originMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' });
+        if (appState.destinationMarker) appState.destinationMarker.setIcon({ url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' });
+    });
+
+    document.getElementById('route-search-btn')?.addEventListener('click', calculateRoute);
+
+    document.querySelectorAll('.route-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.route-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            calculateRoute();
+        });
+    });
+
+    document.getElementById('location-info-header')?.addEventListener('click', () => {
+        document.getElementById('location-info').classList.toggle('collapsed');
+    });
+
+    document.querySelector('.location-handle')?.addEventListener('click', () => {
+        document.getElementById('location-info').classList.toggle('collapsed');
+    });
+
+    document.getElementById('share-location-btn')?.addEventListener('click', async () => {
+        const locationText = `${document.getElementById('location-name').textContent}: ${document.getElementById('location-address').textContent}`;
+        if (navigator.share) {
+            await navigator.share({
+                title: 'My Location',
+                text: locationText,
+                url: `https://maps.google.com/?q=${appState.currentLocation.lat},${appState.currentLocation.lng}`
+            });
+            showToast('success', 'Location Shared', 'Your location has been shared.');
+        } else {
+            navigator.clipboard.writeText(locationText);
+            showToast('success', 'Location Copied', 'Location copied to clipboard.');
+        }
+    });
+
+    document.getElementById('navigate-btn')?.addEventListener('click', () => {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${appState.currentLocation.lat},${appState.currentLocation.lng}`, '_blank');
+    });
+
+    document.getElementById('start-route-btn')?.addEventListener('click', () => {
+        startRouteTracking();
+    });
+
+    document.getElementById('clear-route-btn')?.addEventListener('click', () => {
+        appState.directionsRenderer.setDirections(null);
+        document.getElementById('route-progress').style.display = 'none';
+        document.getElementById('alternative-routes').style.display = 'none';
+        document.getElementById('route-details-panel').classList.remove('visible');
+        appState.originMarker?.setMap(null);
+        appState.destinationMarker?.setMap(null);
+        document.getElementById('origin-search-input').value = '';
+        document.getElementById('destination-search-input').value = '';
+    });
+
+    document.getElementById('route-details-btn')?.addEventListener('click', () => {
+        document.getElementById('route-details-panel').classList.add('visible');
+    });
+
+    document.getElementById('close-route-details')?.addEventListener('click', () => {
+        document.getElementById('route-details-panel').classList.remove('visible');
+    });
+
+    appState.elements.safetyToggleBtn?.addEventListener('click', () => {
+        appState.elements.safetyPanel.classList.toggle('active');
+    });
+
+    appState.elements.closeSafetyPanel?.addEventListener('click', () => {
+        appState.elements.safetyPanel.classList.remove('active');
+    });
+
+    document.querySelectorAll('.feature-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const feature = btn.dataset.feature;
+            showModal(`${feature}-modal`);
+        });
+    });
+
+    document.querySelectorAll('.shake-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('shake-modal'));
+    });
+    document.getElementById('save-shake-settings')?.addEventListener('click', () => {
+        appState.shakeDetectionActive = document.getElementById('shake-detection-toggle').checked;
+        const sensitivity = document.getElementById('shake-sensitivity').value;
+        if (appState.shakeDetectionActive) startShakeDetection(sensitivity);
+        hideModal('shake-modal');
+        showToast('success', 'Settings Saved', 'Shake to Alert settings updated.');
+    });
+
+    document.querySelectorAll('.dead-switch-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('deadSwitch-modal'));
+    });
+    document.getElementById('start-dead-switch')?.addEventListener('click', () => {
+        const duration = parseInt(document.getElementById('dead-switch-duration').value) * 60 * 1000;
+        const message = document.getElementById('dead-switch-message').value;
+        startDeadSwitch(duration, message);
+        hideModal('deadSwitch-modal');
+    });
+
+    document.querySelectorAll('.transit-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('transitCompanion-modal'));
+    });
+    document.getElementById('share-transit')?.addEventListener('click', () => {
+        const transitData = {
+            start: document.getElementById('transit-start').value,
+            destination: document.getElementById('transit-destination').value,
+            type: document.getElementById('transit-type').value,
+            arrivalTime: document.getElementById('transit-arrival-time').value
+        };
+        shareTransitJourney(transitData);
+        hideModal('transitCompanion-modal');
+    });
+
+    document.querySelectorAll('.voice-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('voiceCommands-modal'));
+    });
+    document.getElementById('save-voice-settings')?.addEventListener('click', () => {
+        const voiceEnabled = document.getElementById('voice-detection-toggle').checked;
+        if (voiceEnabled) startVoiceRecognition();
+        else stopVoiceRecognition();
+        hideModal('voiceCommands-modal');
+        showToast('success', 'Settings Saved', 'Voice command settings updated.');
+    });
+    document.getElementById('voice-indicator')?.addEventListener('click', () => {
+        testVoiceCommand();
+    });
+
+    document.querySelectorAll('.danger-zones-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('dangerZones-modal'));
+    });
+    document.getElementById('save-danger-zone')?.addEventListener('click', () => {
+        const description = document.getElementById('danger-zone-description').value;
+        const radius = parseInt(document.getElementById('danger-zone-radius').value);
+        saveDangerZone(description, radius);
+        hideModal('dangerZones-modal');
+    });
+
+    document.querySelectorAll('.evidence-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('evidence-modal'));
+    });
+    document.getElementById('audio-evidence')?.addEventListener('click', () => startEvidenceRecording('audio'));
+    document.getElementById('photo-evidence')?.addEventListener('click', () => capturePhoto());
+    document.getElementById('video-evidence')?.addEventListener('click', () => startEvidenceRecording('video'));
+    document.getElementById('save-evidence')?.addEventListener('click', () => saveEvidence());
+
+    document.querySelectorAll('.fake-call-modal-close').forEach(btn => {
+        btn.addEventListener('click', () => hideModal('fakeCall-modal'));
+    });
+    document.getElementById('start-fake-call')?.addEventListener('click', () => {
+        const callerName = document.getElementById('fake-caller-name').value;
+        const delay = parseInt(document.getElementById('fake-call-delay').value) * 1000;
+        startFakeCall(callerName, delay);
+        hideModal('fakeCall-modal');
+    });
+
+    document.getElementById('cancel-sos')?.addEventListener('click', async () => {
+        const password = document.getElementById('sos-password').value;
+        try {
+            await auth.signInWithEmailAndPassword(appState.currentUser.email, password);
+            stopRecording('sos-recording-status');
+            hideModal('sos-confirm-modal');
+            showToast('success', 'SOS Cancelled', 'SOS alert cancelled.');
+        } catch (error) {
+            showToast('error', 'Invalid Password', 'Incorrect password.');
+        }
+    });
+
+    document.getElementById('confirm-sos')?.addEventListener('click', () => {
+        sendSOS('Emergency SOS triggered!');
+        hideModal('sos-confirm-modal');
+    });
+
+    document.getElementById('close-sos-confirm')?.addEventListener('click', () => {
+        stopRecording('sos-recording-status');
+        hideModal('sos-confirm-modal');
+    });
+
+    document.getElementById('sos-audio-btn')?.addEventListener('click', () => startSOSRecording('audio'));
+    document.getElementById('sos-video-btn')?.addEventListener('click', () => startSOSRecording('video'));
+    document.getElementById('close-sos-success')?.addEventListener('click', () => hideModal('sos-success-modal'));
+
+    document.getElementById('navigate-to-btn')?.addEventListener('click', () => {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${appState.currentLocation.lat},${appState.currentLocation.lng}`, '_blank');
+    });
+
+    document.getElementById('close-emergency-notification')?.addEventListener('click', () => {
+        document.getElementById('emergency-notification').classList.remove('active');
+    });
+
+    db.collectionGroup('notifications').where('from', '==', appState.currentUser?.uid).onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+            if (change.type === 'added') {
+                const notification = change.doc.data();
+                document.getElementById('sos-notification-message').textContent = notification.message;
+                document.getElementById('emergency-notification').classList.add('active');
+                setTimeout(() => document.getElementById('emergency-notification').classList.remove('active'), 10000);
+            }
         });
     });
 }
 
-function listenForSosAlerts() {
-    db.collection('users').doc(currentUser.uid).collection('notifications')
-        .where('type', '==', 'sos')
-        .where('read', '==', false)
-        .onSnapshot(snapshot => {
-            snapshot.docChanges().forEach(change => {
-                if (change.type === 'added') {
-                    const data = change.doc.data();
-                    const loc = data.location;
-                    if (!firstSosReceived[data.from]) {
-                        firstSosReceived[data.from] = true;
-                        sosNotificationMessage.textContent = `${data.fullName} has sent an SOS alert from their location!`;
-                        emergencyNotification.classList.add('active');
-                        navigateToBtn.onclick = () => {
-                            originSearchInput.value = 'Current Location';
-                            destinationSearchInput.value = `${loc.latitude}, ${loc.longitude}`;
-                            originMarker?.setMap(null);
-                            originMarker = new google.maps.Marker({
-                                position: currentLocation,
-                                map,
-                                title: 'Origin',
-                                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }
-                            });
-                            destinationMarker?.setMap(null);
-                            destinationMarker = new google.maps.Marker({
-                                position: { lat: loc.latitude, lng: loc.longitude },
-                                map,
-                                title: 'SOS Location',
-                                icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
-                            });
-                            calculateRoute();
-                            showPage('home');
-                            emergencyNotification.classList.remove('active');
-                            change.doc.ref.update({ read: true });
-                        };
-                        closeEmergencyNotificationBtn.onclick = () => {
-                            emergencyNotification.classList.remove('active');
-                            change.doc.ref.update({ read: true });
-                        };
-                    }
-                }
-            });
-        });
-}
-
-auth.onAuthStateChanged(user => {
-    if (user) {
-        currentUser = user;
-        showPage('home');
-        loadUserProfile();
-    } else {
-        showPage('login');
-    }
+// Initialization
+document.addEventListener('DOMContentLoaded', async () => {
+    setupEventListeners();
+    await initFaceDetection();
 });
-</script>
     </script>
 </body>
 </html>
